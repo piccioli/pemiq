@@ -1,0 +1,95 @@
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: docker/php/Dockerfile
+    container_name: pemiq_prod_app
+    restart: unless-stopped
+    env_file: .env.production
+    volumes:
+      - ../../:/var/www/html
+    networks:
+      - pemiq_prod_network
+    depends_on:
+      - mariadb
+      - redis
+
+  nginx:
+    image: nginx:alpine
+    container_name: pemiq_prod_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../../:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - pemiq_prod_network
+    depends_on:
+      - app
+
+  mariadb:
+    image: mariadb:11
+    container_name: pemiq_prod_mariadb
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mariadb_prod_data:/var/lib/mysql
+    networks:
+      - pemiq_prod_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: pemiq_prod_redis
+    restart: unless-stopped
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - pemiq_prod_network
+
+  queue-worker:
+    build:
+      context: ../..
+      dockerfile: docker/php/Dockerfile
+    container_name: pemiq_prod_queue_worker
+    restart: unless-stopped
+    command: php artisan queue:work redis --sleep=3 --tries=3 --backoff=5
+    env_file: .env.production
+    volumes:
+      - ../../:/var/www/html
+    networks:
+      - pemiq_prod_network
+    depends_on:
+      - mariadb
+      - redis
+
+  scheduler:
+    build:
+      context: ../..
+      dockerfile: docker/php/Dockerfile
+    container_name: pemiq_prod_scheduler
+    restart: unless-stopped
+    command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    env_file: .env.production
+    volumes:
+      - ../../:/var/www/html
+    networks:
+      - pemiq_prod_network
+    depends_on:
+      - mariadb
+      - redis
+
+networks:
+  pemiq_prod_network:
+    driver: bridge
+
+volumes:
+  mariadb_prod_data:
+  redis_prod_data:
