@@ -5,6 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\AuditLog;
 use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -104,8 +108,8 @@ class UserResource extends Resource
                         ->when($data['until'] ?? null, fn ($q) => $q->whereDate('created_at', '<=', $data['until']))),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('impersonate')
+                EditAction::make(),
+                Action::make('impersonate')
                     ->label('Impersona')
                     ->icon('heroicon-o-user-group')
                     ->color('info')
@@ -124,7 +128,7 @@ class UserResource extends Resource
                         Auth::loginUsingId($record->id);
                         return redirect()->to(route('dashboard'));
                     }),
-                Tables\Actions\Action::make('promote_premium')
+                Action::make('promote_premium')
                     ->label('Promuovi a Premium')
                     ->icon('heroicon-o-star')
                     ->color('warning')
@@ -137,7 +141,7 @@ class UserResource extends Resource
                         'premium_started_at' => now(),
                         'premium_expires_at' => $data['premium_expires_at'] ?? null,
                     ])),
-                Tables\Actions\Action::make('revoke_premium')
+                Action::make('revoke_premium')
                     ->label('Revoca Premium')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
@@ -148,8 +152,8 @@ class UserResource extends Resource
                     ])),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('promote_selected')
+                BulkActionGroup::make([
+                    BulkAction::make('promote_selected')
                         ->label('Promuovi selezionati')
                         ->icon('heroicon-o-star')
                         ->action(fn ($records) => $records->each->update([
@@ -157,7 +161,7 @@ class UserResource extends Resource
                             'premium_started_at' => now(),
                         ]))
                         ->deselectRecordsAfterCompletion(),
-                    Tables\Actions\BulkAction::make('revoke_selected')
+                    BulkAction::make('revoke_selected')
                         ->label('Revoca Premium selezionati')
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')

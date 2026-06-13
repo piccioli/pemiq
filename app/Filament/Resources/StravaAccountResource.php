@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\StravaAccountResource\Pages;
 use App\Jobs\SyncStravaHistoricalActivities;
 use App\Models\StravaAccount;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -74,7 +75,7 @@ class StravaAccountResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\Action::make('force_sync')
+                Action::make('force_sync')
                     ->label('Forza sincronizzazione')
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
