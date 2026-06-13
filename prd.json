@@ -105,8 +105,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Migration create_sync_logs_table (user_id FK, strava_account_id FK, sync_type enum(historical/incremental), status enum(pending/running/completed/failed), started_at, completed_at nullable, activities_imported int default 0, error_message text nullable, timestamps). Migration create_audit_logs_table (admin_user_id FK users, target_user_id FK users, action varchar 255, metadata json nullable, created_at timestamp). SyncLog model with $fillable, string casts for sync_type/status, datetime casts for started_at/completed_at, belongsTo(User) and belongsTo(StravaAccount). AuditLog model with $fillable, array cast for metadata, belongsTo(User, 'admin_user_id') and belongsTo(User, 'target_user_id'), $timestamps=false."
     },
     {
       "id": "US-007",

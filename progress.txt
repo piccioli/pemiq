@@ -1,3 +1,14 @@
+## 2026-06-13 - US-006
+- Created migration `create_sync_logs_table`: id, user_id (FK cascadeOnDelete), strava_account_id (FK cascadeOnDelete), sync_type (enum: historical/incremental), status (enum: pending/running/completed/failed), started_at (timestamp), completed_at (timestamp nullable), activities_imported (int default 0), error_message (text nullable), timestamps
+- Created migration `create_audit_logs_table`: id, admin_user_id (FK users cascadeOnDelete), target_user_id (FK users cascadeOnDelete), action (varchar 255), metadata (json nullable), created_at (timestamp, useCurrent) — no updated_at, $timestamps=false on model
+- Created app/Models/SyncLog.php with $fillable, string casts for sync_type/status, datetime casts for started_at/completed_at, belongsTo(User) and belongsTo(StravaAccount)
+- Created app/Models/AuditLog.php with $fillable, array cast for metadata, datetime cast for created_at, $timestamps=false, belongsTo(User, 'admin_user_id') and belongsTo(User, 'target_user_id')
+- Both migrations ran successfully in container
+- **Learnings for future iterations:**
+  - AuditLog has only `created_at` (no `updated_at`) — set `$timestamps = false` on model and use `->useCurrent()` in migration for created_at
+  - For FK columns referencing a non-default table (e.g. admin_user_id → users), use `->constrained('users')` with explicit table name
+---
+
 ## Codebase Patterns
 - .env must use Docker service names as hostnames: DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit (not 127.0.0.1)
 - MariaDB Docker credentials: user=pemiq, password=pemiq, database=pemiq
