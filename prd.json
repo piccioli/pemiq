@@ -88,8 +88,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Migration create_activities_table con tutti i campi (user_id FK, strava_activity_id bigint unique, name/sport_type/started_at, metriche float/int nullable, polyline text nullable, raw_data json). 3 indici compositi: [user_id,started_at], [user_id,sport_type], [user_id,started_at,sport_type]. Activity model con $fillable completo, $casts started_at=>datetime raw_data=>array, belongsTo(User). User model aggiornato con hasMany(Activity)."
     },
     {
       "id": "US-006",

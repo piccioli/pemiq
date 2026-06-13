@@ -18,6 +18,17 @@
   - Migration runs successfully in container; all premium fields confirmed in DB
 ---
 
+## 2026-06-13 - US-005
+- Created migration `create_activities_table` with all fields: id, user_id (FK cascadeOnDelete), strava_activity_id (bigint unique), name (varchar 255), sport_type (varchar 100), started_at (timestamp), distance/elapsed_time/moving_time/elevation_gain/average_speed/max_speed/average_heartrate/max_heartrate/average_watts/calories all nullable, polyline (text nullable), raw_data (json), timestamps
+- Added 3 composite indexes: [user_id, started_at], [user_id, sport_type], [user_id, started_at, sport_type]
+- Created app/Models/Activity.php with full $fillable, $casts (started_at=>datetime, raw_data=>array), belongsTo(User) relation
+- Updated app/Models/User.php: added HasMany import and activities() relation
+- Migration ran successfully in container
+- **Learnings for future iterations:**
+  - Composite indexes in Laravel migrations: `$table->index(['col1', 'col2', 'col3'])` syntax
+  - `json` column type for raw_data cast to `array` in model $casts
+---
+
 ## 2026-06-13 - US-004
 - Created migration create_strava_accounts_table with: user_id (FK, cascadeOnDelete), strava_athlete_id (bigint unique), access_token (text), refresh_token (text), token_expires_at (timestamp), last_sync_at (timestamp nullable), connection_status (enum: connected/disconnected/error, default connected), timestamps
 - Created app/Models/StravaAccount.php with $fillable, encrypted casts for access_token/refresh_token, datetime casts for token_expires_at/last_sync_at, and belongsTo(User) relation
