@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StravaAccount;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Facades\Socialite;
 
 class StravaController extends Controller
@@ -39,5 +40,33 @@ class StravaController extends Controller
 
         return redirect()->route('dashboard')
             ->with('success', 'Account Strava collegato con successo!');
+    }
+
+    public function disconnect(): RedirectResponse
+    {
+        $user = auth()->user();
+        $stravaAccount = $user->stravaAccount;
+
+        if (!$stravaAccount || $stravaAccount->connection_status !== 'connected') {
+            return redirect()->route('dashboard')
+                ->with('error', 'Nessun account Strava collegato.');
+        }
+
+        try {
+            Http::post('https://www.strava.com/oauth/deauthorize', [
+                'access_token' => $stravaAccount->access_token,
+            ]);
+        } catch (\Exception $e) {
+            // Continue with local disconnect even if Strava API call fails
+        }
+
+        $stravaAccount->update([
+            'connection_status' => 'disconnected',
+            'access_token' => null,
+            'refresh_token' => null,
+        ]);
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Account Strava scollegato.');
     }
 }

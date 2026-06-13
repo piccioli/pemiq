@@ -91,3 +91,7 @@ Route::get('/strava/redirect', [StravaController::class, 'redirect'])
 Route::get('/strava/callback', [StravaController::class, 'callback'])
     ->middleware(['auth', 'verified'])
     ->name('strava.callback');
+
+Route::delete('/strava/disconnect', [StravaController::class, 'disconnect'])
+    ->middleware(['auth', 'verified'])
+    ->name('strava.disconnect');
