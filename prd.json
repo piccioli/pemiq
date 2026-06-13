@@ -325,8 +325,8 @@
         "Typecheck passes"
       ],
       "priority": 18,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ActivitySyncService in app/Services/Sync/ActivitySyncService.php. sync() iterates Collection, calls Activity::updateOrCreate(['strava_activity_id'=>$data['id']], mapActivityData()), updates SyncLog status='running' then activities_imported count. createSyncLog() creates SyncLog with status='pending', started_at=now(). completeSyncLog() sets status='completed', completed_at=now(), activities_imported. failSyncLog() sets status='failed', error_message. Field mapping: strava id→strava_activity_id, start_date→started_at (Carbon::parse), total_elevation_gain→elevation_gain, map.summary_polyline→polyline, kilojoules*0.239→calories (fallback to data['calories']), raw_data=full array."
     },
     {
       "id": "US-019",

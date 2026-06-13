@@ -1,3 +1,17 @@
+## 2026-06-13 - US-018
+- Created app/Services/Sync/ActivitySyncService.php with 4 public methods: sync(), createSyncLog(), completeSyncLog(), failSyncLog()
+- sync() sets SyncLog status='running', iterates Collection of Strava activity arrays, calls Activity::updateOrCreate(['strava_activity_id'=>id], mappedData()), updates activities_imported count
+- createSyncLog() creates SyncLog with status='pending', started_at=Carbon::now()
+- completeSyncLog() sets status='completed', completed_at=now(), activities_imported
+- failSyncLog() sets status='failed', error_message
+- Private mapActivityData() handles all field mappings: strava `id`→strava_activity_id, `start_date`→started_at (Carbon::parse), `total_elevation_gain`→elevation_gain, `map.summary_polyline`→polyline, `kilojoules*0.239`→calories (int, rounded; fallback to data['calories']), raw_data=full Strava array
+- Files changed: app/Services/Sync/ActivitySyncService.php (new)
+- **Learnings for future iterations:**
+  - ActivitySyncService is in App\Services\Sync namespace (separate from App\Services\Strava) — follow this directory structure for future sync-related services
+  - Strava calories conversion: `kilojoules * 0.239` gives kilocalories (food calories) — always prefer `kilojoules` field over `calories` field in Strava response
+  - Activity::updateOrCreate uses strava_activity_id as the unique key — safe to run multiple times on same data (idempotent)
+---
+
 ## 2026-06-13 - US-017
 - Created app/Services/Strava/StravaTokenService.php: ensureValidToken(StravaAccount) checks if token_expires_at <= now()+5min; if so, calls refreshToken() which POSTs to https://www.strava.com/oauth/token with client_id/client_secret/grant_type=refresh_token/refresh_token. Updates StravaAccount with new access_token, refresh_token, token_expires_at. On failure (network or HTTP error): sets connection_status='error', throws StravaTokenRefreshException.
 - Created app/Exceptions/Strava/StravaTokenRefreshException.php
