@@ -344,8 +344,8 @@
         "Typecheck passes"
       ],
       "priority": 19,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SyncStravaHistoricalActivities job in app/Jobs/SyncStravaHistoricalActivities.php: implements ShouldQueue, $tries=3, $backoff=[5,30,60]. handle() receives StravaApiService/ActivitySyncService/StravaTokenService via constructor injection. Creates SyncLog (pending→running→completed/failed), fetches all activities (no 'after' filter), upserts via ActivitySyncService::sync(), sets last_sync_at on success. StravaTokenExpiredException caught: forces ensureValidToken refresh then re-throws for Laravel retry. General exceptions caught: failSyncLog then re-throws. Route POST /strava/sync-historical → StravaController::syncHistorical() dispatches the job; button added to dashboard view."
     },
     {
       "id": "US-020",
@@ -362,8 +362,8 @@
         "Typecheck passes"
       ],
       "priority": 20,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SyncStravaIncrementalActivities job in app/Jobs/SyncStravaIncrementalActivities.php: implements ShouldQueue, $tries=3, $backoff=[5,30,60]. handle() checks last_sync_at — if set, passes it as Carbon 'after' to fetchActivities (incremental); if null, full historical sync. Creates SyncLog with sync_type='incremental' or 'historical', completes/fails log, sets last_sync_at on success. Same StravaTokenExpiredException/retry pattern as historical job. SyncAllStravaAccounts command in app/Console/Commands/SyncAllStravaAccounts.php: signature 'strava:sync-all', dispatches SyncStravaIncrementalActivities for every StravaAccount with connection_status='connected'. Schedule in routes/console.php: Schedule::command('strava:sync-all')->hourly() — verified via php artisan schedule:list showing '0 * * * *'."
     },
     {
       "id": "US-021",

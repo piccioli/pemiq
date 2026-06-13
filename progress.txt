@@ -1,3 +1,31 @@
+## 2026-06-13 - US-020
+- Created app/Jobs/SyncStravaIncrementalActivities.php: implements ShouldQueue, $tries=3, $backoff=[5,30,60]. handle() checks account->last_sync_at — if set, passes it as the 'after' Carbon to fetchActivities (incremental sync); if null, full historical sync (fallback). Creates SyncLog with type 'incremental'/'historical', completes/fails log, updates last_sync_at on success. Same token refresh/retry pattern as SyncStravaHistoricalActivities.
+- Created app/Console/Commands/SyncAllStravaAccounts.php: signature 'strava:sync-all', queries all StravaAccount with connection_status='connected', dispatches SyncStravaIncrementalActivities for each.
+- Updated routes/console.php: added Schedule::command('strava:sync-all')->hourly() — verified via php artisan schedule:list showing cron '0 * * * *'.
+- Files changed: app/Jobs/SyncStravaIncrementalActivities.php (new), app/Console/Commands/SyncAllStravaAccounts.php (new), routes/console.php
+- **Learnings for future iterations:**
+  - Laravel scheduler in routes/console.php uses `Schedule::command('artisan:command')->hourly()` pattern — no kernel bootstrap/app.php registration needed in Laravel 11
+  - Console commands are auto-discovered in app/Console/Commands/ — no manual registration in Kernel required (Laravel 11 convention)
+  - The scheduler cron expression `0 * * * *` = hourly — confirmed via `php artisan schedule:list`
+---
+
+## 2026-06-13 - US-019
+- Created app/Jobs/SyncStravaHistoricalActivities.php: implements ShouldQueue, $tries=3, $backoff=[5,30,60]
+- handle() injects StravaApiService/ActivitySyncService/StravaTokenService via Laravel container
+- Creates SyncLog (pending), fetches all activities via fetchActivities() (no 'after' filter), upserts via sync(), completeSyncLog() on success, sets last_sync_at on StravaAccount
+- StravaTokenExpiredException: forces ensureValidToken refresh then re-throws for Laravel retry mechanism (fetchActivities already calls ensureValidToken internally, so next retry refreshes automatically)
+- General exceptions: failSyncLog with error message then re-throws
+- Added syncHistorical() to StravaController: checks connected account, dispatches job, redirects with success flash
+- Added route POST /strava/sync-historical (auth+verified, named strava.sync-historical)
+- Updated dashboard.blade.php: 'Sincronizza attività storiche' orange button next to 'Scollega Strava' in connected state
+- Files changed: app/Jobs/SyncStravaHistoricalActivities.php (new), StravaController.php, routes/web.php, resources/views/dashboard.blade.php
+- **Learnings for future iterations:**
+  - Laravel jobs use `handle(Service $svc, ...)` method injection from the container — no constructor injection needed for services (constructor is for job payload data)
+  - `$tries` and `$backoff` are public properties on the job class (not constants) — `$backoff` is an array for staged delays
+  - `SerializesModels` trait serializes Eloquent models in job payload by ID and re-fetches on deserialization — model state is fresh on each retry
+  - Jobs directory app/Jobs/ is not created by default in Laravel 11 — must create manually when first job is added
+---
+
 ## 2026-06-13 - US-018
 - Created app/Services/Sync/ActivitySyncService.php with 4 public methods: sync(), createSyncLog(), completeSyncLog(), failSyncLog()
 - sync() sets SyncLog status='running', iterates Collection of Strava activity arrays, calls Activity::updateOrCreate(['strava_activity_id'=>id], mappedData()), updates activities_imported count
