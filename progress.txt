@@ -1,3 +1,16 @@
+## 2026-06-13 - US-022
+- Created app/Services/Dashboard/DashboardStatsService.php with 4 methods:
+  - getOverviewStats(): single selectRaw aggregation → total_activities (int), total_distance_km (÷1000, 1dp), total_elevation_m (1dp), total_elapsed_seconds (int), total_moving_seconds (int)
+  - getAnnualStats(): groupByRaw YEAR(started_at) ordered DESC → year, activities, distance_km, elevation_m, hours (elapsed/3600)
+  - getMonthlyStats(year): whereYear filter + groupByRaw MONTH(started_at), fills all 12 months with collect(range(1,12)) + keyBy('month') so empty months show zeros
+  - getSportDistribution(): groupBy sport_type ordered by COUNT(*) DESC → sport_type, activities, distance_km, hours
+- Files changed: app/Services/Dashboard/DashboardStatsService.php (new)
+- **Learnings for future iterations:**
+  - Monthly stats must fill all 12 months even when empty — use `collect(range(1,12))->map(fn($m) => ...)` with `$rows->keyBy('month')` for O(1) lookup
+  - selectRaw aggregations return string values from PDO — cast explicitly (int), (float), round() where needed
+  - getMonthlyStats returns hours (float) not seconds, consistent with annual/sport — overview returns raw seconds for flexible view formatting
+---
+
 ## 2026-06-13 - US-021
 - Created app/Livewire/Strava/ConnectionStatus.php: Livewire 3 component with #[Poll('5s')] attribute for 5-second auto-polling. startHistoricalSync() checks for connected account, no running sync, then dispatches SyncStravaHistoricalActivities and sets $syncMessage='Sincronizzazione avviata'. render() passes stravaAccount (or null) and syncRunning (bool from SyncLog WHERE status='running').
 - Created resources/views/livewire/strava/connection-status.blade.php: shows 'Collega Strava' link when no account; when connected shows badge, last sync date, disabled button with spinner when sync running, active 'Sincronizza attività storiche' button otherwise, disconnect button with Alpine.js confirm dialog.

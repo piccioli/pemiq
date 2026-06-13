@@ -399,8 +399,8 @@
         "Typecheck passes"
       ],
       "priority": 22,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "DashboardStatsService in app/Services/Dashboard/DashboardStatsService.php. getOverviewStats() uses a single selectRaw aggregation returning total_activities (int), total_distance_km (SUM(distance)/1000, rounded 1dp), total_elevation_m (rounded 1dp), total_elapsed_seconds (int), total_moving_seconds (int). getAnnualStats() groups by YEAR(started_at) ordered DESC, returns year/activities/distance_km/elevation_m/hours. getMonthlyStats() filters by whereYear + groups by MONTH(started_at), fills all 12 months (even empty ones with zeros) via collect(range(1,12)). getSportDistribution() groups by sport_type ordered by COUNT(*) DESC, returns sport_type/activities/distance_km/hours. All queries filter by user_id. Time returned as hours (float) for annual/monthly/sport queries; seconds (int) for overview."
     },
     {
       "id": "US-023",
