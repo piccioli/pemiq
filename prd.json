@@ -306,8 +306,8 @@
         "Typecheck passes"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaTokenService in app/Services/Strava/StravaTokenService.php with ensureValidToken(StravaAccount): StravaAccount. Checks token_expires_at <= now()+5min; if so, POSTs to https://www.strava.com/oauth/token with client_id/client_secret/grant_type=refresh_token/refresh_token. Updates StravaAccount with new access_token, refresh_token, token_expires_at. On network error or non-2xx response: sets connection_status='error', throws StravaTokenRefreshException. StravaApiService updated with injected StravaTokenService (constructor injection); calls ensureValidToken() at the start of fetchActivities(). StravaTokenRefreshException added in app/Exceptions/Strava/."
     },
     {
       "id": "US-018",

@@ -1,3 +1,15 @@
+## 2026-06-13 - US-017
+- Created app/Services/Strava/StravaTokenService.php: ensureValidToken(StravaAccount) checks if token_expires_at <= now()+5min; if so, calls refreshToken() which POSTs to https://www.strava.com/oauth/token with client_id/client_secret/grant_type=refresh_token/refresh_token. Updates StravaAccount with new access_token, refresh_token, token_expires_at. On failure (network or HTTP error): sets connection_status='error', throws StravaTokenRefreshException.
+- Created app/Exceptions/Strava/StravaTokenRefreshException.php
+- Updated app/Services/Strava/StravaApiService.php: added constructor injection of StravaTokenService; calls $this->tokenService->ensureValidToken($account) at start of fetchActivities()
+- Files changed: app/Services/Strava/StravaTokenService.php (new), app/Exceptions/Strava/StravaTokenRefreshException.php (new), app/Services/Strava/StravaApiService.php (updated)
+- **Learnings for future iterations:**
+  - StravaTokenService is auto-injected by Laravel container into StravaApiService constructor — no service provider binding needed
+  - `$account->refresh()` after update() is needed to reload encrypted casts (access_token/refresh_token) from DB after save
+  - Carbon::createFromTimestamp($data['expires_at']) converts Strava's Unix timestamp response to a Carbon datetime for token_expires_at
+  - config('services.strava.client_id') and config('services.strava.client_secret') are already set up from US-014
+---
+
 ## 2026-06-13 - US-016
 - Created app/Services/Strava/StravaApiService.php: fetchActivities(StravaAccount, ?Carbon) → Collection. Paginates GET /athlete/activities with per_page=100, increments page until empty response or <100 items. 1s sleep between pages for rate limiting. Private requestWithRetry() handles HTTP 429 with exponential backoff (1s/2s/4s, max 3 retries). Throws StravaTokenExpiredException on 401, StravaApiException on 5xx or network exceptions.
 - Created app/Exceptions/Strava/StravaTokenExpiredException.php
