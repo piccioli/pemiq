@@ -159,8 +159,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RegisterController (show/store) with validation (name required, email unique, password min:8 confirmed), fires Registered event (registered in AppServiceProvider) which sends verification email via Mailpit. EmailVerificationController (notice/verify/resend). Routes: GET/POST /register, GET /email/verify (auth), GET /email/verify/{id}/{hash} (auth+signed), POST /email/verification-notification (auth+throttle:1,1), GET /dashboard (auth+verified). Stub login route added. Auth layout with Tailwind CDN. Verification emails confirmed captured by Mailpit."
     },
     {
       "id": "US-010",
