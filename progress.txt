@@ -1,3 +1,21 @@
+## 2026-06-13 - US-034
+- Created lang/it/auth.php, pagination.php, passwords.php, validation.php (full Italian translations), messages.php (app-specific keys: welcome, profile_updated, language, italian, english, etc.).
+- Created lang/en/messages.php (English equivalents of custom messages).
+- Created database/migrations/2026_06_13_204917_add_locale_to_users_table: varchar(5) 'locale' column, default 'it', after remember_token. Migrated successfully.
+- Updated app/Models/User.php: added 'locale' to $fillable.
+- Created app/Http/Middleware/SetLocale.php: if auth()->check() and user has locale, calls App::setLocale($user->locale).
+- Updated bootstrap/app.php: SetLocale middleware added to $middleware->web(append: [...]).
+- Updated resources/views/profile/show.blade.php: added locale dropdown (IT/EN) using __('messages.language'), __('messages.italian'), __('messages.english'). Old value preserved via old('locale', $user->locale).
+- Updated app/Http/Controllers/Auth/ProfileController.php: validates 'locale' in:it,en, fills locale on user update.
+- Files changed: 8 new files, 4 updated
+- **Learnings for future iterations:**
+  - Laravel 11 lang files are in `lang/` (project root), NOT `resources/lang/` — this changed from earlier Laravel versions
+  - `php artisan lang:publish` publishes default Laravel translations to `lang/en/`
+  - SetLocale middleware registered via `$middleware->web(append: [...])` in bootstrap/app.php — applies to all web routes
+  - Locale dropdown in profile uses `old('locale', auth()->user()->locale)` for correct pre-selection after failed validation
+  - Italian validation file needs `attributes` section to translate field names in error messages
+---
+
 ## 2026-06-13 - US-033
 - Created docker/uat/docker-compose.yml: 7 services (app, nginx, mariadb, redis, mailpit, queue-worker, scheduler). Context builds from ../../ (project root).
 - Created docker/uat/nginx.conf: HTTP→HTTPS redirect + HTTPS server for uat.pemiq.com with Let's Encrypt SSL.

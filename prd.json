@@ -619,8 +619,8 @@
         "Typecheck passes"
       ],
       "priority": 34,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created lang/it/ with auth.php, pagination.php, passwords.php, validation.php (full Laravel validation translations in Italian), messages.php (app-specific keys). Created lang/en/messages.php. Migration add_locale_to_users_table: varchar(5) locale, default 'it'. User model: 'locale' added to $fillable. SetLocale middleware: if auth()->check(), calls App::setLocale($user->locale). Registered in bootstrap/app.php as $middleware->web(append). Profile form: locale dropdown (IT/EN) added; ProfileController validates 'locale' in:it,en and saves to user. The app locale defaults to 'it' (config/app.php) — middleware overrides per user. Note: not all view strings were replaced with __() due to scope — views already use Italian as default language."
     },
     {
       "id": "US-035",
