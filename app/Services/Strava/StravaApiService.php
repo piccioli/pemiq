@@ -14,14 +14,19 @@ class StravaApiService
     private const ACTIVITIES_URL = 'https://www.strava.com/api/v3/athlete/activities';
     private const PER_PAGE = 100;
 
+    public function __construct(private readonly StravaTokenService $tokenService) {}
+
     /**
      * Fetch all activities from Strava with pagination and rate-limit handling.
      *
+     * @throws \App\Exceptions\Strava\StravaTokenRefreshException on token refresh failure
      * @throws StravaTokenExpiredException on HTTP 401
      * @throws StravaApiException on HTTP 5xx or network errors
      */
     public function fetchActivities(StravaAccount $account, ?Carbon $after = null): Collection
     {
+        $account = $this->tokenService->ensureValidToken($account);
+
         $activities = collect();
         $page = 1;
 
