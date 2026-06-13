@@ -232,8 +232,8 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/layouts/app.blade.php with: HTML5 doctype, Tailwind CDN, Alpine.js CDN (defer), navbar with PEMIQ logo left + Dashboard link center + user dropdown right (Profilo/Logout), hamburger mobile menu (<768px), Alpine.js dismissable flash messages (session status/success/error + $errors), <main> tag with max-w-7xl padding, minimal footer. Updated dashboard.blade.php, profile/show.blade.php, profile/password.blade.php to extend layouts.app. All Blade views compiled successfully via view:cache."
     },
     {
       "id": "US-014",

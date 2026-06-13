@@ -1,3 +1,17 @@
+## 2026-06-13 - US-013
+- Created resources/views/layouts/app.blade.php: responsive authenticated layout with navbar (PEMIQ logo left, Dashboard link center, user dropdown right with Profilo/Logout), hamburger mobile menu (Alpine.js x-show toggle), Alpine.js dismissable flash messages (session status/success/error + $errors), <main class="flex-1"> with max-w-7xl padding, footer with app name and year
+- Updated resources/views/dashboard.blade.php to extend layouts.app (was standalone HTML)
+- Updated resources/views/profile/show.blade.php to extend layouts.app (was extending layouts.auth)
+- Updated resources/views/profile/password.blade.php to extend layouts.app (was extending layouts.auth)
+- All Blade views compiled without errors via php artisan view:cache
+- Files changed: resources/views/layouts/app.blade.php (new), dashboard.blade.php, profile/show.blade.php, profile/password.blade.php
+- **Learnings for future iterations:**
+  - Alpine.js CDN must use `defer` attribute to avoid blocking render: `<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">`
+  - `x-click.outside="userOpen = false"` (note: correct syntax is `@click.outside`) closes dropdown when clicking outside — Alpine.js 3.x magic directive
+  - Flash messages use session('status') OR session('success') — the auth layout used 'status', so both are supported in app layout
+  - Profile pages previously extended layouts.auth (centered card), now extend layouts.app for full navbar experience
+---
+
 ## 2026-06-13 - US-012
 - Created ProfileController (app/Http/Controllers/Auth/ProfileController.php): show() returns profile/show view, update() validates name (required) + email (unique except current user), detects email change → sets email_verified_at=null + calls sendEmailVerificationNotification(), redirects back with 'Profilo aggiornato.' status
 - Created resources/views/profile/show.blade.php: form with nome/email fields, old() input preservation, separate section with link to /profile/password
@@ -103,7 +117,10 @@
 - User model implements FilamentUser interface for panel access control; `canAccessPanel()` checks Spatie role
 - Laravel 11: `Registered → SendEmailVerificationNotification` must be explicitly registered in AppServiceProvider::boot()
 - Auth views use `resources/views/layouts/auth.blade.php` with Tailwind CDN (no compiled assets needed for auth pages)
+- Authenticated app views use `resources/views/layouts/app.blade.php` (navbar + Alpine.js + flash messages)
 - Named route 'login' must exist before any auth middleware is applied (redirect target for unauthenticated users)
+- Alpine.js CDN: `<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">` (defer is required)
+- Flash messages: app layout checks session('status'), session('success'), session('error') and $errors
 
 ---
 
