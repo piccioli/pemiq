@@ -121,8 +121,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "vendor:publish ran successfully (config/permission.php + migration 2026_06_13_195239_create_permission_tables). RolesAndPermissionsSeeder creates 'administrator' and 'user' roles with guard 'web'. AdminUserSeeder creates admin@pemiq.com (PEMIQ Admin, email verified, role administrator). DatabaseSeeder calls both in order. db:seed ran without errors."
     },
     {
       "id": "US-008",

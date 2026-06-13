@@ -1,3 +1,16 @@
+## 2026-06-13 - US-007
+- Published Spatie Permission migrations via `vendor:publish` — created config/permission.php and migration 2026_06_13_195239_create_permission_tables
+- Ran migration successfully in container (creates roles, permissions, model_has_roles, model_has_permissions, role_has_permissions tables)
+- Created database/seeders/RolesAndPermissionsSeeder.php: clears permission cache, creates 'administrator' and 'user' roles with guard 'web' using firstOrCreate
+- Created database/seeders/AdminUserSeeder.php: creates admin@pemiq.com (PEMIQ Admin, password hashed, email_verified_at=now()), assigns 'administrator' role
+- Updated DatabaseSeeder to call RolesAndPermissionsSeeder then AdminUserSeeder (removed default test user creation)
+- `php artisan db:seed` ran without errors
+- **Learnings for future iterations:**
+  - Always call `app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions()` at start of roles seeder to avoid stale cache issues
+  - Use `firstOrCreate` in seeders so they are idempotent (safe to run multiple times)
+  - RolesAndPermissionsSeeder must run before AdminUserSeeder (roles must exist before assigning)
+---
+
 ## 2026-06-13 - US-006
 - Created migration `create_sync_logs_table`: id, user_id (FK cascadeOnDelete), strava_account_id (FK cascadeOnDelete), sync_type (enum: historical/incremental), status (enum: pending/running/completed/failed), started_at (timestamp), completed_at (timestamp nullable), activities_imported (int default 0), error_message (text nullable), timestamps
 - Created migration `create_audit_logs_table`: id, admin_user_id (FK users cascadeOnDelete), target_user_id (FK users cascadeOnDelete), action (varchar 255), metadata (json nullable), created_at (timestamp, useCurrent) — no updated_at, $timestamps=false on model
