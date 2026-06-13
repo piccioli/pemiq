@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\ProfilePasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
@@ -49,6 +50,15 @@ Route::get('/reset-password/{token}', [PasswordResetController::class, 'showRese
 Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])
     ->middleware('guest')
     ->name('password.update');
+
+// Profile (authenticated)
+Route::get('/profile', [ProfileController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('profile.show');
+
+Route::put('/profile', [ProfileController::class, 'update'])
+    ->middleware(['auth', 'verified'])
+    ->name('profile.update');
 
 // Profile password change (authenticated)
 Route::get('/profile/password', [ProfilePasswordController::class, 'show'])
