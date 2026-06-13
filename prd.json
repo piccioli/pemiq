@@ -600,8 +600,8 @@
         "Typecheck passes"
       ],
       "priority": 33,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "docker/uat/docker-compose.yml: 7 services (app, nginx, mariadb, redis, mailpit, queue-worker, scheduler). docker/uat/nginx.conf: HTTP→HTTPS redirect + HTTPS server for uat.pemiq.com with Let's Encrypt certs at /etc/letsencrypt/live/uat.pemiq.com/. docker/production/docker-compose.yml: 6 services (no mailpit). docker/production/nginx.conf: HTTP→HTTPS redirect, www→apex redirect, HTTPS server for pemiq.com. .env.uat.example: APP_ENV=staging, MAIL_HOST=mailpit, MAIL_PORT=1025. .env.production.example: APP_ENV=production, MAIL_MAILER=postmark, no mailpit. Scheduler service runs 'php artisan schedule:run' in a 60s loop (no cron daemon needed). README.md rewritten with setup/update instructions for local/UAT/production."
     },
     {
       "id": "US-034",

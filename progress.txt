@@ -1,3 +1,19 @@
+## 2026-06-13 - US-033
+- Created docker/uat/docker-compose.yml: 7 services (app, nginx, mariadb, redis, mailpit, queue-worker, scheduler). Context builds from ../../ (project root).
+- Created docker/uat/nginx.conf: HTTP→HTTPS redirect + HTTPS server for uat.pemiq.com with Let's Encrypt SSL.
+- Created docker/uat/.env.uat.example: APP_ENV=staging, MAIL_HOST=mailpit, MAIL_PORT=1025.
+- Created docker/production/docker-compose.yml: 6 services (no mailpit). Production-safe.
+- Created docker/production/nginx.conf: HTTP→HTTPS + www→apex redirects + HTTPS server for pemiq.com.
+- Created docker/production/.env.production.example: APP_ENV=production, MAIL_MAILER=postmark, no mailpit.
+- Updated README.md: replaced default Laravel readme with PEMIQ-specific setup/update instructions for all 3 environments.
+- Files changed: 7 new files, README.md updated
+- **Learnings for future iterations:**
+  - Scheduler service uses `sh -c "while true; do php artisan schedule:run ...; sleep 60; done"` — simpler than a cron daemon
+  - Build context for UAT/production configs is `../..` (project root) since docker-compose.yml is in a subdirectory
+  - Use `env_file: .env.uat` in docker-compose to load environment from a file (NOT `--env-file` flag which sets Docker Compose vars, not container vars)
+  - Let's Encrypt cert paths: `/etc/letsencrypt/live/<domain>/fullchain.pem` and `privkey.pem`
+---
+
 ## 2026-06-13 - US-032
 - Created app/Filament/Widgets/AdminStatsOverview.php: extends StatsOverviewWidget. 5 stats: Utenti Totali, Utenti Premium, Account Strava Collegati, Sync Completate 24h, Sync Fallite 24h. Sync Fallite uses dynamic ->color('danger'/'success') based on count.
 - Updated AdminPanelProvider: replaced FilamentInfoWidget with AdminStatsOverview in widgets[].
