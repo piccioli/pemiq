@@ -1,3 +1,16 @@
+## 2026-06-13 - US-008
+- Ran `php artisan filament:install --panels` in container — generated app/Providers/Filament/AdminPanelProvider.php and published JS/CSS assets to public/
+- Updated AdminPanelProvider: path='/admin', Color::hex('#E85D04') brand color, navigationGroups for 'Utenti'/'Strava'/'Sistema'
+- Updated User model: implements FilamentUser interface with `canAccessPanel()` returning `$this->hasRole('administrator')` (Spatie)
+- bootstrap/providers.php auto-updated by Filament installer to include AdminPanelProvider
+- Verified: /admin returns 302 → /admin/login for unauthenticated users
+- **Learnings for future iterations:**
+  - Use `Color::hex('#rrggbb')` (not `Color::fromHex()`) for custom brand colors in Filament v4
+  - User model must implement `Filament\Models\Contracts\FilamentUser` with `canAccessPanel(Panel $panel): bool` to restrict panel access — without this, all authenticated users can access in non-local environments
+  - `filament:install --panels` publishes JS/CSS assets to public/ and adds `@php artisan filament:upgrade` to composer.json post-autoload-dump
+  - NavigationGroups defined in PanelProvider are just labels; each Resource sets its own `navigationGroup()` to one of these labels
+---
+
 ## 2026-06-13 - US-007
 - Published Spatie Permission migrations via `vendor:publish` — created config/permission.php and migration 2026_06_13_195239_create_permission_tables
 - Ran migration successfully in container (creates roles, permissions, model_has_roles, model_has_permissions, role_has_permissions tables)
@@ -28,6 +41,8 @@
 - User model uses traditional $fillable/$hidden/$casts properties (not PHP 8.4 #[Fillable] attribute syntax)
 - Run migrations via: docker compose exec app php artisan migrate
 - PHP version: 8.4.22, Laravel: 13.15.0, Filament: v4.11.7
+- Filament Color API: use `Color::hex('#rrggbb')` for custom hex colors (not `Color::fromHex()`)
+- User model implements FilamentUser interface for panel access control; `canAccessPanel()` checks Spatie role
 
 ---
 
