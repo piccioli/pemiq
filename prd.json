@@ -53,8 +53,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Migration add_premium_fields_to_users_table aggiunge is_premium/premium_started_at/premium_expires_at. User model usa HasRoles (Spatie) + MustVerifyEmail. .env aggiornato con DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit (necessario per Docker networking)."
     },
     {
       "id": "US-004",
