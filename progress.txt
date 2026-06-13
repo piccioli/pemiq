@@ -1,3 +1,19 @@
+## 2026-06-13 - US-011
+- Created PasswordResetController (app/Http/Controllers/Auth/PasswordResetController.php): showForgotForm() returns forgot-password view, sendResetLink() validates email + calls Password::sendResetLink(), showResetForm() passes token+email to reset-password view, resetPassword() calls Password::reset() with forceFill password + fires PasswordReset event, redirects to login with status
+- Created ProfilePasswordController (app/Http/Controllers/Auth/ProfilePasswordController.php): show() returns profile/password view, update() validates current_password (using built-in 'current_password' rule) + min:8 confirmed + updates hashed password, redirects back with 'Password aggiornata con successo.' status
+- Created views: auth/forgot-password.blade.php, auth/reset-password.blade.php, profile/password.blade.php (all extend layouts.auth)
+- Updated routes/web.php: 6 new routes (GET+POST /forgot-password with guest middleware, GET /reset-password/{token} + POST /reset-password with guest middleware, GET+PUT /profile/password with auth+verified middleware)
+- Updated auth/login.blade.php: added 'Password dimenticata?' link to /forgot-password
+- Reset email confirmed captured by Mailpit (Password::sendResetLink returned 'passwords.sent', Mailpit shows 'Reset your password' email)
+- Files changed: app/Http/Controllers/Auth/PasswordResetController.php (new), ProfilePasswordController.php (new), resources/views/auth/forgot-password.blade.php (new), auth/reset-password.blade.php (new), profile/password.blade.php (new), login.blade.php, routes/web.php
+- **Learnings for future iterations:**
+  - Laravel's built-in Password facade handles token creation, email sending, and validation — no manual token management needed
+  - `Password::RESET_LINK_SENT` and `Password::PASSWORD_RESET` are translation keys (e.g. 'passwords.sent', 'passwords.reset') — use `__($status)` to translate them in flash messages
+  - `current_password` validation rule verifies the user's current password against `Auth::user()` — no need to Hash::check() manually
+  - Password reset routes must use `guest` middleware (not `auth`) — the user is not logged in during reset flow
+  - The `PasswordReset` event should be fired after reset to trigger logout of other devices (handled by the framework's `resetUsingToken`)
+---
+
 ## 2026-06-13 - US-010
 - Created LoginController (app/Http/Controllers/Auth/LoginController.php): show() returns login form, store() validates email/password, checks RateLimiter (5 attempts per IP, 60s decay), attempts Auth::attempt(), on fail increments rate limiter + returns generic error, on success clears rate limiter + regenerates session + checks email verification
 - If email not verified: logs out user, redirects to /email/verify with error message

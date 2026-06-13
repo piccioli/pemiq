@@ -196,8 +196,8 @@
         "Typecheck passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "PasswordResetController (showForgotForm/sendResetLink/showResetForm/resetPassword) using Laravel Password facade. ProfilePasswordController (show/update) using current_password validation rule. Routes: GET+POST /forgot-password (guest), GET /reset-password/{token} (guest), POST /reset-password (guest), GET+PUT /profile/password (auth+verified). Views: auth/forgot-password.blade.php, auth/reset-password.blade.php, profile/password.blade.php. Login view updated with 'Password dimenticata?' link. Reset email confirmed captured by Mailpit."
     },
     {
       "id": "US-012",
