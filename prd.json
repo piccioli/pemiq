@@ -544,8 +544,8 @@
         "Typecheck passes"
       ],
       "priority": 30,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SyncLogResource: list-only in 'Sistema' group. Columns: user.name, sync_type (badge: historical=info/incremental=gray), status (badge: completed=success/running=warning/pending=gray/failed=danger), started_at (sorted desc), duration (diffForHumans between started_at and completed_at or '—'), activities_imported, error_message (limit 60 + tooltip for full text). Filters: status SelectFilter, sync_type SelectFilter, user relationship SelectFilter. AuditLogResource: list-only in 'Sistema' group. Columns: adminUser.name, targetUser.name, action (badge+searchable), created_at (sorted desc), metadata (JSON formatted, limit 60 + tooltip). Filters: admin_user_id SelectFilter, action dynamic SelectFilter. Both resources have empty form(), empty actions and bulkActions."
     },
     {
       "id": "US-031",

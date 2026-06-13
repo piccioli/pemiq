@@ -1,3 +1,17 @@
+## 2026-06-13 - US-030
+- Created app/Filament/Resources/SyncLogResource.php: list-only in 'Sistema' group. Columns: user.name, sync_type (badge), status (badge with match colors), started_at (defaultSort desc), duration (diffForHumans or '—'), activities_imported, error_message (limit+tooltip). Filters: status/sync_type SelectFilter, user relationship SelectFilter.
+- Created app/Filament/Resources/SyncLogResource/Pages/ListSyncLogs.php
+- Created app/Filament/Resources/AuditLogResource.php: list-only in 'Sistema' group. Columns: adminUser.name, targetUser.name, action (badge), created_at (defaultSort desc), metadata (JSON pretty-printed, limit+tooltip). Filters: admin_user_id SelectFilter, action dynamic SelectFilter.
+- Created app/Filament/Resources/AuditLogResource/Pages/ListAuditLogs.php
+- Files changed: 4 new files
+- **Learnings for future iterations:**
+  - `->getStateUsing(fn (SyncLog $record) => ...)` on a TextColumn computes custom state from the full record — useful for derived values like duration
+  - `->diffForHumans($record->completed_at, true)` gives relative duration string between two Carbon dates (true = absolute, no "ago")
+  - `->tooltip(fn ($record) => ...)` on TextColumn shows full content on hover — good for truncated fields like error_message and JSON metadata
+  - AuditLog has `$timestamps = false` — the `created_at` column is NOT managed by Eloquent automatically; use `useCurrent()` in migration
+  - For read-only resources: set `form()` to return `$form->schema([])`, no 'create'/'edit'/'view' in getPages(), empty actions() and bulkActions()
+---
+
 ## 2026-06-13 - US-029
 - Created app/Filament/Resources/StravaAccountResource.php: list-only resource in 'Strava' group. Columns: user.name, strava_athlete_id, connection_status (badge with match colors: connected=success, disconnected=gray, error=danger), last_sync_at. Filter: SelectFilter for connection_status. Action: 'Forza sincronizzazione' dispatches SyncStravaHistoricalActivities.
 - Created app/Filament/Resources/StravaAccountResource/Pages/ListStravaAccounts.php
