@@ -1,3 +1,14 @@
+## 2026-06-13 - US-012
+- Created ProfileController (app/Http/Controllers/Auth/ProfileController.php): show() returns profile/show view, update() validates name (required) + email (unique except current user), detects email change → sets email_verified_at=null + calls sendEmailVerificationNotification(), redirects back with 'Profilo aggiornato.' status
+- Created resources/views/profile/show.blade.php: form with nome/email fields, old() input preservation, separate section with link to /profile/password
+- Updated routes/web.php: GET+PUT /profile (auth+verified), named profile.show and profile.update
+- Files changed: app/Http/Controllers/Auth/ProfileController.php (new), resources/views/profile/show.blade.php (new), routes/web.php
+- **Learnings for future iterations:**
+  - Email uniqueness rule excluding current user: `'unique:users,email,' . $user->id` (3rd param is the ignored ID)
+  - On email change: set `email_verified_at = null` then call `$user->sendEmailVerificationNotification()` — the User model's MustVerifyEmail interface provides this method
+  - old() helper in views needs a default for authenticated pages: `old('name', auth()->user()->name)` to repopulate after failed validation
+---
+
 ## 2026-06-13 - US-011
 - Created PasswordResetController (app/Http/Controllers/Auth/PasswordResetController.php): showForgotForm() returns forgot-password view, sendResetLink() validates email + calls Password::sendResetLink(), showResetForm() passes token+email to reset-password view, resetPassword() calls Password::reset() with forceFill password + fires PasswordReset event, redirects to login with status
 - Created ProfilePasswordController (app/Http/Controllers/Auth/ProfilePasswordController.php): show() returns profile/password view, update() validates current_password (using built-in 'current_password' rule) + min:8 confirmed + updates hashed password, redirects back with 'Password aggiornata con successo.' status

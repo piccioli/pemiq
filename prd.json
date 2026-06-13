@@ -213,8 +213,8 @@
         "Typecheck passes"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ProfileController (show/update) with validation (name required, email unique except current user). On email change: email_verified_at=null + sendEmailVerificationNotification(). Flash 'Profilo aggiornato.' on success. Routes: GET+PUT /profile (auth+verified). View profile/show.blade.php with nome/email form and link to /profile/password for password change section."
     },
     {
       "id": "US-013",
