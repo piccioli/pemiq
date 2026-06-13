@@ -1,0 +1,644 @@
+{
+  "project": "PEMIQ",
+  "branchName": "ralph/pemiq-mvp",
+  "description": "PEMIQ MVP — piattaforma di analisi performance per atleti endurance: autenticazione, integrazione Strava, dashboard base, backoffice Filament, infrastruttura Docker.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Inizializzazione progetto Laravel e installazione pacchetti",
+      "description": "Come sviluppatore, ho bisogno di un progetto Laravel 11 configurato con tutti i pacchetti richiesti per iniziare lo sviluppo.",
+      "acceptanceCriteria": [
+        "Progetto Laravel 11 creato con PHP 8.4+ (composer create-project laravel/laravel .)",
+        "Pacchetti installati: spatie/laravel-permission, filament/filament, livewire/livewire, laravel/socialite, socialiteproviders/strava",
+        "Pacchetti npm installati: alpinejs, @tailwindcss/forms",
+        "File .env.example aggiornato con le variabili: APP_NAME=PEMIQ, DB_CONNECTION=mysql, QUEUE_CONNECTION=redis, variabili STRAVA_CLIENT_ID/SECRET/REDIRECT",
+        "config/app.php: locale impostato a 'it', timezone a 'Europe/Rome'",
+        "config/queue.php: driver di default impostato a 'redis'",
+        "php artisan key:generate eseguito con successo",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Docker Compose ambiente local",
+      "description": "Come sviluppatore, ho bisogno di un ambiente Docker locale completo per sviluppare e testare l'applicazione su http://pemiq.local.",
+      "acceptanceCriteria": [
+        "File docker-compose.yml nella root del progetto con servizi: app (PHP-FPM 8.4), nginx, mariadb, redis, mailpit, queue-worker",
+        "Dockerfile in docker/php/Dockerfile basato su php:8.4-fpm con estensioni: pdo_mysql, redis, bcmath, gd, zip",
+        "Configurazione nginx in docker/nginx/default.conf: server_name pemiq.local, root /var/www/html/public, gestione PHP-FPM",
+        "Volumi definiti: mariadb_data, redis_data, ./:/var/www/html per hot-reload",
+        "Servizio queue-worker esegue: php artisan queue:work redis --sleep=3 --tries=3 --backoff=5",
+        "Variabili .env aggiornate: DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit, MAIL_PORT=1025",
+        "File docker/.env.local.example creato con tutte le variabili necessarie",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Migration tabella users + User model",
+      "description": "Come sviluppatore, ho bisogno di estendere la tabella users con i campi Premium e di configurare il modello User.",
+      "acceptanceCriteria": [
+        "Migration add_premium_fields_to_users_table aggiunge: is_premium (boolean, default false), premium_started_at (timestamp nullable), premium_expires_at (timestamp nullable)",
+        "User model implementa MustVerifyEmail interface",
+        "User model usa HasRoles trait di Spatie Permission",
+        "User model ha $fillable con: name, email, password, is_premium, premium_started_at, premium_expires_at",
+        "User model ha $casts con: email_verified_at => datetime, is_premium => boolean, premium_started_at => datetime, premium_expires_at => datetime",
+        "Migration eseguita con successo (php artisan migrate)",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Migration strava_accounts + StravaAccount model",
+      "description": "Come sviluppatore, ho bisogno della tabella e del modello per memorizzare gli account Strava collegati, con token cifrati.",
+      "acceptanceCriteria": [
+        "Migration create_strava_accounts_table con campi: id, user_id (FK users), strava_athlete_id (bigint unique), access_token (text), refresh_token (text), token_expires_at (timestamp), last_sync_at (timestamp nullable), connection_status (enum: connected/disconnected/error, default connected), timestamps",
+        "StravaAccount model in app/Models/StravaAccount.php",
+        "StravaAccount model usa $casts con: access_token => encrypted, refresh_token => encrypted, token_expires_at => datetime, last_sync_at => datetime",
+        "StravaAccount model ha relazione belongsTo(User::class)",
+        "User model ha relazione hasOne(StravaAccount::class)",
+        "Migration eseguita con successo",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Migration activities + Activity model + indici compositi",
+      "description": "Come sviluppatore, ho bisogno della tabella activities con tutti i campi Strava e indici ottimizzati per le query della dashboard.",
+      "acceptanceCriteria": [
+        "Migration create_activities_table con tutti i campi: id, user_id (FK), strava_activity_id (bigint unique), name (varchar 255), sport_type (varchar 100), started_at (timestamp), distance (float nullable), elapsed_time (int nullable), moving_time (int nullable), elevation_gain (float nullable), average_speed (float nullable), max_speed (float nullable), average_heartrate (float nullable), max_heartrate (float nullable), average_watts (float nullable), calories (int nullable), polyline (text nullable), raw_data (json), timestamps",
+        "Indici definiti nella migration: index(['user_id', 'started_at']), index(['user_id', 'sport_type']), index(['user_id', 'started_at', 'sport_type'])",
+        "Activity model in app/Models/Activity.php con $fillable completo",
+        "Activity model ha $casts: started_at => datetime, raw_data => array",
+        "Activity model ha relazione belongsTo(User::class)",
+        "User model ha relazione hasMany(Activity::class)",
+        "Migration eseguita con successo",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Migration sync_logs + audit_logs + modelli",
+      "description": "Come sviluppatore, ho bisogno delle tabelle e dei modelli per tracciare le sincronizzazioni Strava e le azioni amministrative.",
+      "acceptanceCriteria": [
+        "Migration create_sync_logs_table con campi: id, user_id (FK), strava_account_id (FK), sync_type (enum: historical/incremental), status (enum: pending/running/completed/failed), started_at (timestamp), completed_at (timestamp nullable), activities_imported (int default 0), error_message (text nullable), timestamps",
+        "Migration create_audit_logs_table con campi: id, admin_user_id (FK users), target_user_id (FK users), action (varchar 255), metadata (json nullable), created_at (timestamp)",
+        "SyncLog model in app/Models/SyncLog.php con $fillable, relazioni belongsTo(User) e belongsTo(StravaAccount)",
+        "AuditLog model in app/Models/AuditLog.php con $fillable, relazioni belongsTo(User, 'admin_user_id') e belongsTo(User, 'target_user_id')",
+        "$casts in SyncLog: sync_type e status come string, started_at/completed_at come datetime",
+        "Entrambe le migration eseguite con successo",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Spatie Permission: configurazione ruoli e seeder",
+      "description": "Come sviluppatore, ho bisogno dei ruoli 'administrator' e 'user' creati e di un seeder per l'utente admin iniziale.",
+      "acceptanceCriteria": [
+        "php artisan vendor:publish --provider='Spatie\\Permission\\PermissionServiceProvider' eseguito, migration Spatie pubblicate e migrate",
+        "RolesAndPermissionsSeeder crea i ruoli: 'administrator' e 'user' con guard 'web'",
+        "AdminUserSeeder crea un utente admin: name='PEMIQ Admin', email='admin@pemiq.com', password='password', con email verificata, con ruolo 'administrator'",
+        "DatabaseSeeder richiama entrambi i seeder in ordine",
+        "php artisan db:seed eseguito senza errori",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Filament: configurazione panel provider e navigazione",
+      "description": "Come admin, ho bisogno di un pannello Filament accessibile a /admin, protetto dal ruolo administrator, con navigazione organizzata per gruppi.",
+      "acceptanceCriteria": [
+        "AdminPanelProvider configurato in app/Providers/Filament/AdminPanelProvider.php con path '/admin'",
+        "Metodo canAccess nel PanelProvider nega l'accesso a utenti senza ruolo 'administrator'",
+        "Colori brand Filament configurati (primary color personalizzato PEMIQ)",
+        "Navigazione organizzata in gruppi: 'Utenti', 'Strava', 'Sistema'",
+        "Login Filament funzionante: admin@pemiq.com / password reindirizza correttamente alla dashboard admin",
+        "URL /admin inaccessibile a utenti non admin (redirect a login Filament)",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Registrazione utente + verifica email",
+      "description": "Come visitatore, voglio registrarmi con email e password e ricevere un'email di verifica per attivare l'account.",
+      "acceptanceCriteria": [
+        "Route /register con form: nome, email, password, conferma password",
+        "Validazione server-side: nome required, email unique users, password min:8 confirmed",
+        "Invio email di verifica dopo registrazione tramite SendEmailVerificationNotification",
+        "Redirect a /email/verify con messaggio 'Controlla la tua casella email'",
+        "Route /email/verify/{id}/{hash} (signed) verifica l'account e reindirizza al login",
+        "Route /email/verification-notification per reinviare il link (rate limited: 1 al minuto)",
+        "Middleware verified applicato alle route protette (/dashboard)",
+        "In ambiente local email intercettata da Mailpit (visibile su localhost:8025)",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Login, logout e throttling",
+      "description": "Come utente registrato e verificato, voglio effettuare il login per accedere alla dashboard e il logout per proteggere il mio account.",
+      "acceptanceCriteria": [
+        "Route /login con form: email, password, remember_me",
+        "Errore generico 'Credenziali non valide' su login fallito (non distingue email/password)",
+        "Throttling: dopo 5 tentativi falliti dallo stesso IP, blocco di 60 secondi con messaggio di errore",
+        "Redirect a /dashboard dopo login riuscito",
+        "Utenti con email non verificata vengono reindirizzati a /email/verify con messaggio",
+        "Route /logout con metodo POST invalida la sessione e reindirizza alla home",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Reset password e cambio password",
+      "description": "Come utente, voglio poter reimpostare la password via email e cambiarla dal profilo quando sono autenticato.",
+      "acceptanceCriteria": [
+        "Route /forgot-password con form email, invia email di reset con link firmato (scadenza 60 min)",
+        "Route /reset-password/{token} con form: email, password, conferma password",
+        "Dopo reset: token invalidato, redirect al login con messaggio di successo",
+        "Route /profile/password (autenticato) con form: password_attuale, nuova_password, conferma",
+        "Validazione: password attuale corretta, nuova password min:8 confirmed",
+        "Messaggio flash di successo dopo cambio password",
+        "In locale email di reset intercettata da Mailpit",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Pagina profilo utente (modifica dati personali)",
+      "description": "Come utente autenticato, voglio aggiornare il mio nome e la mia email dalla pagina profilo.",
+      "acceptanceCriteria": [
+        "Route /profile con form: nome, email",
+        "Se email cambia: email_verified_at viene azzerato e viene inviata nuova email di verifica",
+        "Validazione: nome required, email unique (eccetto utente corrente)",
+        "Messaggio flash 'Profilo aggiornato' dopo salvataggio",
+        "Sezione separata nella pagina profilo per 'Cambia password' (link a /profile/password)",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Layout principale app (Blade + Tailwind + Alpine.js)",
+      "description": "Come sviluppatore, ho bisogno di un layout Blade responsivo Mobile First che faccia da contenitore per tutte le pagine autenticate.",
+      "acceptanceCriteria": [
+        "File resources/views/layouts/app.blade.php con: HTML5 doctype, meta viewport, Tailwind CSS CDN o compilato, Alpine.js",
+        "Navigation bar con: logo PEMIQ a sinistra, link 'Dashboard' al centro, menu utente a destra (nome utente + dropdown con 'Profilo' e 'Logout')",
+        "Mobile navigation: hamburger menu che mostra/nasconde i link su viewport < 768px",
+        "Flash messages: visualizzazione messaggi success/error dalla sessione con dismissione via Alpine.js",
+        "Contenuto principale in tag <main> con padding appropriato",
+        "Footer minimale con nome app e anno",
+        "Layout testato su viewport 375px (mobile) e 1280px (desktop)",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Strava OAuth: flusso di collegamento account",
+      "description": "Come utente, voglio collegare il mio account Strava tramite OAuth per poter importare le attività.",
+      "acceptanceCriteria": [
+        "StravaController con metodi redirect() e callback()",
+        "redirect() usa Laravel Socialite con provider 'strava', scope 'activity:read_all', reindirizza a Strava",
+        "callback() riceve il token OAuth, crea o aggiorna il record StravaAccount con: strava_athlete_id, access_token (cifrato), refresh_token (cifrato), token_expires_at, connection_status='connected'",
+        "Se l'utente nega i permessi su Strava: redirect a /dashboard con messaggio di errore",
+        "Route /strava/redirect e /strava/callback definite in routes/web.php con middleware auth e verified",
+        "Pulsante 'Collega Strava' visibile sulla dashboard quando nessun account è collegato",
+        "Dopo collegamento: redirect a /dashboard con messaggio 'Account Strava collegato con successo'",
+        "access_token e refresh_token salvati cifrati (verifica che in DB il valore non sia in chiaro)",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Strava OAuth: scollegamento account",
+      "description": "Come utente, voglio scollegare il mio account Strava, revocando i token su Strava.",
+      "acceptanceCriteria": [
+        "Route DELETE /strava/disconnect con middleware auth e verified",
+        "Controller chiama l'API Strava per revocare il token: POST https://www.strava.com/oauth/deauthorize con access_token",
+        "Record StravaAccount aggiornato: connection_status='disconnected', access_token=null, refresh_token=null",
+        "Pulsante 'Scollega Strava' visibile sulla dashboard/profilo quando account è collegato",
+        "Conferma via dialog Alpine.js prima di procedere: 'Sei sicuro? Le attività importate rimarranno.'",
+        "Redirect a /dashboard con messaggio 'Account Strava scollegato'",
+        "Le attività già importate non vengono cancellate",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "StravaApiService: fetch attività con paginazione e rate limit",
+      "description": "Come sviluppatore, ho bisogno di un service che recuperi le attività da Strava con gestione della paginazione e del rate limit.",
+      "acceptanceCriteria": [
+        "Classe app/Services/Strava/StravaApiService.php con metodo fetchActivities(StravaAccount $account, ?Carbon $after = null): Collection",
+        "Richiesta GET a https://www.strava.com/api/v3/athlete/activities con parametri: per_page=100, page, after (timestamp Unix se fornito)",
+        "Paginazione: ciclo fino a quando la risposta è vuota o ha meno di 100 elementi",
+        "Rate limit: delay di 1 secondo tra le pagine, retry con backoff esponenziale (1s, 2s, 4s) su HTTP 429",
+        "HTTP 401 (token scaduto): lancia eccezione StravaTokenExpiredException",
+        "HTTP 5xx o errore di rete: lancia eccezione StravaApiException con messaggio dell'errore",
+        "Restituisce una Collection di array con i dati grezzi delle attività",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "StravaTokenService: refresh automatico token",
+      "description": "Come sviluppatore, ho bisogno di un service che rinnovi automaticamente i token Strava scaduti prima di ogni chiamata API.",
+      "acceptanceCriteria": [
+        "Classe app/Services/Strava/StravaTokenService.php con metodo ensureValidToken(StravaAccount $account): StravaAccount",
+        "Se token_expires_at è nel passato o entro 5 minuti: esegue il refresh",
+        "Refresh via POST https://www.strava.com/oauth/token con: client_id, client_secret, grant_type=refresh_token, refresh_token",
+        "Aggiorna StravaAccount con: access_token, refresh_token, token_expires_at dalla risposta",
+        "Se refresh fallisce (token revocato o errore): aggiorna connection_status='error', lancia eccezione StravaTokenRefreshException",
+        "StravaApiService usa StravaTokenService prima di ogni chiamata API",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "ActivitySyncService: upsert attività e gestione SyncLog",
+      "description": "Come sviluppatore, ho bisogno di un service che mappi i dati Strava al modello Activity e li salvi con upsert, gestendo i SyncLog.",
+      "acceptanceCriteria": [
+        "Classe app/Services/Sync/ActivitySyncService.php con metodo sync(StravaAccount $account, Collection $stravaActivities, SyncLog $syncLog): int",
+        "Mappatura campo-per-campo da risposta Strava a Activity: strava_activity_id=id, name, sport_type=sport_type, started_at=start_date, distance, elapsed_time, moving_time, total_elevation_gain→elevation_gain, average_speed, max_speed, average_heartrate, max_heartrate, average_watts, kilojoules→calories (conversione), map.summary_polyline→polyline, raw_data=array completo",
+        "Upsert tramite Activity::updateOrCreate(['strava_activity_id' => ...], [...])",
+        "Ogni activity ha user_id preso da $account->user_id",
+        "SyncLog aggiornato a ogni batch: activities_imported incrementato, status='running'",
+        "Metodo createSyncLog(StravaAccount $account, string $type): SyncLog che crea il log con status='pending'",
+        "Metodo completeSyncLog(SyncLog $log, int $count): void che imposta status='completed', completed_at, activities_imported",
+        "Metodo failSyncLog(SyncLog $log, string $error): void che imposta status='failed', error_message",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Job SyncStravaHistoricalActivities",
+      "description": "Come utente con Strava collegato, voglio importare tutte le mie attività storiche tramite un job asincrono.",
+      "acceptanceCriteria": [
+        "Classe app/Jobs/SyncStravaHistoricalActivities.php che implementa ShouldQueue",
+        "Costruttore riceve StravaAccount $account",
+        "handle() usa StravaTokenService per validare il token, poi StravaApiService per fetchare tutte le attività (nessun filtro 'after'), poi ActivitySyncService per il salvataggio",
+        "$tries = 3, $backoff = [5, 30, 60] (secondi tra i retry)",
+        "In caso di StravaTokenExpiredException: chiama StravaTokenService per refresh e riprova",
+        "In caso di errore definitivo: chiama ActivitySyncService::failSyncLog() con il messaggio di errore",
+        "Aggiorna StravaAccount::last_sync_at dopo completamento con successo",
+        "Route o Livewire action per fare dispatch del job dalla dashboard",
+        "Typecheck passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Job SyncStravaIncrementalActivities + Laravel Scheduler",
+      "description": "Come sistema, le nuove attività Strava devono essere sincronizzate automaticamente ogni ora.",
+      "acceptanceCriteria": [
+        "Classe app/Jobs/SyncStravaIncrementalActivities.php che implementa ShouldQueue",
+        "handle() recupera solo le attività dopo StravaAccount::last_sync_at (parametro 'after' dell'API Strava)",
+        "Se last_sync_at è null: esegue sync completa (fallback storica)",
+        "Aggiorna StravaAccount::last_sync_at dopo sync completata",
+        "$tries = 3 con backoff esponenziale",
+        "Comando console app/Console/Commands/SyncAllStravaAccounts.php che fa dispatch di SyncStravaIncrementalActivities per ogni StravaAccount con connection_status='connected'",
+        "Scheduler in routes/console.php: Schedule::command('strava:sync-all')->hourly()",
+        "Typecheck passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Componente Livewire: stato connessione Strava e avvio sync",
+      "description": "Come utente, voglio vedere lo stato del mio account Strava e avviare la sincronizzazione storica dalla dashboard.",
+      "acceptanceCriteria": [
+        "Componente Livewire app/Livewire/Strava/ConnectionStatus.php",
+        "Se nessun account collegato: mostra pulsante 'Collega Strava' che punta a /strava/redirect",
+        "Se account collegato: mostra badge 'Connesso', data ultima sync, pulsante 'Sincronizza attività storiche'",
+        "Click su 'Sincronizza attività storiche': dispatch SyncStravaHistoricalActivities, mostra messaggio 'Sincronizzazione avviata'",
+        "Se sync in corso (SyncLog con status='running'): mostra indicatore 'Sincronizzazione in corso...' e disabilita il pulsante",
+        "Polling Livewire ogni 5 secondi per aggiornare lo stato della sync",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "DashboardStatsService: query di aggregazione ottimizzate",
+      "description": "Come sviluppatore, ho bisogno di un service che calcoli le statistiche per la dashboard usando query ottimizzate.",
+      "acceptanceCriteria": [
+        "Classe app/Services/Dashboard/DashboardStatsService.php con metodi:",
+        "getOverviewStats(User $user): array — restituisce: total_activities, total_distance_km, total_elevation_m, total_elapsed_seconds, total_moving_seconds",
+        "getAnnualStats(User $user): Collection — raggruppa per YEAR(started_at), restituisce: year, activities, distance_km, elevation_m, hours",
+        "getMonthlyStats(User $user, int $year): Collection — raggruppa per MONTH(started_at) nell'anno specificato",
+        "getSportDistribution(User $user): Collection — raggruppa per sport_type, restituisce: sport_type, activities, distance_km, hours",
+        "Tutte le query filtrano per user_id = $user->id",
+        "Distanza convertita da metri a km (divisione per 1000, arrotondamento 1 decimale)",
+        "Tempo in secondi (la view si occupa della formattazione h:mm:ss)",
+        "Typecheck passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Componente Livewire: OverviewStats (statistiche generali)",
+      "description": "Come utente, voglio vedere un riepilogo delle mie statistiche totali nella dashboard.",
+      "acceptanceCriteria": [
+        "Componente Livewire app/Livewire/Dashboard/OverviewStats.php che usa DashboardStatsService::getOverviewStats()",
+        "View con 5 card: Attività Totali, Distanza Totale (km), Dislivello Totale (m), Tempo Totale (h:mm), Tempo in Movimento (h:mm)",
+        "Ogni card ha icona, valore numerico grande, etichetta descrittiva",
+        "Se nessuna attività importata: messaggio 'Nessuna attività ancora. Collega Strava e avvia la sincronizzazione.'",
+        "Layout responsive: 1 colonna su mobile, 2 su tablet, 5 su desktop",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Componente Livewire: AnnualAnalysis (analisi per anno)",
+      "description": "Come utente, voglio vedere le statistiche aggregate per anno per capire la mia evoluzione.",
+      "acceptanceCriteria": [
+        "Componente Livewire app/Livewire/Dashboard/AnnualAnalysis.php che usa DashboardStatsService::getAnnualStats()",
+        "Tabella con colonne: Anno, Attività, Distanza (km), Dislivello (m), Ore",
+        "Righe ordinate per anno decrescente (anno più recente in cima)",
+        "Se nessuna attività: messaggio vuoto appropriato",
+        "Layout responsive: tabella scrollabile orizzontalmente su mobile",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Componente Livewire: MonthlyAnalysis (analisi per mese)",
+      "description": "Come utente, voglio vedere le statistiche per mese dell'anno selezionato.",
+      "acceptanceCriteria": [
+        "Componente Livewire app/Livewire/Dashboard/MonthlyAnalysis.php che usa DashboardStatsService::getMonthlyStats()",
+        "Selettore anno (select dropdown) con gli anni disponibili nei dati; default: anno corrente",
+        "Tabella o griglia con 12 mesi (anche quelli senza attività, con valori 0): Mese, Attività, Distanza (km), Dislivello (m), Ore",
+        "Cambio anno aggiorna la tabella via Livewire senza reload pagina",
+        "Nomi dei mesi in italiano (Gennaio, Febbraio, ...)",
+        "Layout responsive su mobile",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Componente Livewire: SportDistribution (distribuzione per sport)",
+      "description": "Come utente, voglio vedere come si distribuiscono le mie attività tra i diversi sport.",
+      "acceptanceCriteria": [
+        "Componente Livewire app/Livewire/Dashboard/SportDistribution.php che usa DashboardStatsService::getSportDistribution()",
+        "Tabella con colonne: Sport, Attività (#), Distanza (km), Ore",
+        "Ordinamento per numero di attività decrescente",
+        "Ogni riga ha un badge colorato con il nome dello sport (colori distinti per: Running, Trail Running, Cycling, Mountain Bike, Hiking, Walking)",
+        "Layout responsive su mobile",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Pagina dashboard: assemblaggio componenti e routing",
+      "description": "Come sviluppatore, ho bisogno di assemblare tutti i componenti Livewire nella pagina dashboard principale.",
+      "acceptanceCriteria": [
+        "Route /dashboard (middleware: auth, verified) punta a DashboardController::index()",
+        "View resources/views/dashboard/index.blade.php che include nell'ordine: @livewire('strava.connection-status'), @livewire('dashboard.overview-stats'), @livewire('dashboard.annual-analysis'), @livewire('dashboard.monthly-analysis'), @livewire('dashboard.sport-distribution')",
+        "Ogni sezione ha un titolo/intestazione visivo",
+        "Route / reindirizza a /dashboard se autenticato, altrimenti a /login",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Filament UserResource: gestione utenti e Premium",
+      "description": "Come admin, voglio gestire gli utenti dal backoffice con possibilità di promuovere e revocare il Premium.",
+      "acceptanceCriteria": [
+        "UserResource in app/Filament/Resources/UserResource.php nel navigation group 'Utenti'",
+        "Tabella lista con colonne: Nome, Email, Ruolo, Premium (badge Sì/No), Registrato il, Email verificata",
+        "Filtri: per ruolo, per stato Premium (is_premium), per data registrazione",
+        "Ricerca per: nome, email",
+        "Form di modifica con campi: nome, email, is_premium (toggle), premium_started_at, premium_expires_at",
+        "Azione singola 'Promuovi a Premium': imposta is_premium=true, premium_started_at=now(), richiede input premium_expires_at (nullable)",
+        "Azione singola 'Revoca Premium': imposta is_premium=false, premium_expires_at=null",
+        "Azioni di massa: 'Promuovi selezionati', 'Revoca Premium selezionati'",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Filament: StravaAccountResource e ActivityResource",
+      "description": "Come admin, voglio monitorare gli account Strava collegati e le attività importate.",
+      "acceptanceCriteria": [
+        "StravaAccountResource in app/Filament/Resources/StravaAccountResource.php nel navigation group 'Strava'",
+        "Tabella con colonne: Utente (link a UserResource), Strava Athlete ID, Stato (badge colorato: connected=green, disconnected=gray, error=red), Ultima sync",
+        "Filtro per connection_status",
+        "Azione 'Forza sincronizzazione' che fa dispatch di SyncStravaHistoricalActivities",
+        "ActivityResource in app/Filament/Resources/ActivityResource.php nel navigation group 'Strava'",
+        "Tabella con colonne: Utente, Nome attività, Sport (badge), Data, Distanza (km), Dislivello (m)",
+        "Filtri: per utente (select), per sport_type (select), per data (date range)",
+        "Ricerca per nome attività",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Filament: SyncLogResource e AuditLogResource",
+      "description": "Come admin, voglio monitorare le sincronizzazioni e le azioni amministrative.",
+      "acceptanceCriteria": [
+        "SyncLogResource in app/Filament/Resources/SyncLogResource.php nel navigation group 'Sistema'",
+        "Tabella con colonne: Utente, Tipo (historical/incremental), Stato (badge colorato), Data inizio, Durata (completata_at - started_at), Attività importate, Errore",
+        "Filtri: per status, per sync_type, per utente",
+        "Clic su riga mostra dettaglio con error_message completo",
+        "AuditLogResource in app/Filament/Resources/AuditLogResource.php nel navigation group 'Sistema'",
+        "Tabella con colonne: Admin, Utente target, Azione, Data, Metadata (JSON formattato)",
+        "Filtri: per admin_user_id, per action",
+        "Entrambe le resource sono read-only (nessuna azione di creazione/modifica/cancellazione)",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "Impersonificazione utente con banner e audit log",
+      "description": "Come admin, voglio assumere temporaneamente l'identità di un utente con evidenza visiva e tracciamento nel log di audit.",
+      "acceptanceCriteria": [
+        "Azione Filament 'Impersona' in UserResource: disponibile solo per utenti non-administrator",
+        "Click su 'Impersona': salva l'ID admin in sessione ('impersonating_admin_id'), autentica come utente target, reindirizza a /dashboard",
+        "Creazione record AuditLog con: admin_user_id, target_user_id, action='impersonate_start', metadata con user agent e IP",
+        "Banner persistente visibile in cima a tutte le pagine durante l'impersonificazione: 'Stai impersonando [nome utente] — Esci'",
+        "Il banner è visibile sia nel layout app che nel layout Filament",
+        "Click su 'Esci': ripristina la sessione admin, crea AuditLog action='impersonate_stop', reindirizza a /admin/users",
+        "Un admin non può impersonare un altro admin (azione non visibile per utenti con ruolo administrator)",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-032",
+      "title": "Filament: widget dashboard admin",
+      "description": "Come admin, voglio vedere le statistiche chiave della piattaforma nella dashboard del backoffice.",
+      "acceptanceCriteria": [
+        "5 widget StatsOverview nella dashboard Filament:",
+        "Widget 1: 'Utenti Totali' — count(users)",
+        "Widget 2: 'Utenti Premium' — count(users WHERE is_premium=true)",
+        "Widget 3: 'Account Strava Collegati' — count(strava_accounts WHERE connection_status='connected')",
+        "Widget 4: 'Sync Completate (24h)' — count(sync_logs WHERE status='completed' AND created_at > now()-24h)",
+        "Widget 5: 'Sync Fallite (24h)' — count(sync_logs WHERE status='failed' AND created_at > now()-24h)",
+        "Widget Sync Fallite con colore rosso se valore > 0",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-033",
+      "title": "Docker Compose ambienti UAT e Production",
+      "description": "Come DevOps, ho bisogno di configurazioni Docker separate per UAT (https://uat.pemiq.com) e Production (https://pemiq.com).",
+      "acceptanceCriteria": [
+        "File docker/uat/docker-compose.yml con servizi: app, nginx, mariadb, redis, mailpit, queue-worker, scheduler",
+        "Nginx UAT configurato per: server_name uat.pemiq.com, SSL (con riferimento a certificati Let's Encrypt o placeholders), redirect HTTP→HTTPS",
+        "File docker/production/docker-compose.yml con servizi: app, nginx, mariadb, redis, queue-worker, scheduler (senza mailpit)",
+        "Nginx Production configurato per: server_name pemiq.com www.pemiq.com, SSL, redirect HTTP→HTTPS, redirect www→apex",
+        "File docker/uat/.env.uat.example con: APP_ENV=staging, MAIL_HOST=mailpit, MAIL_PORT=1025",
+        "File docker/production/.env.production.example con: APP_ENV=production, MAIL_MAILER=postmark, senza MAIL_HOST/PORT Mailpit",
+        "File README.md aggiornato con istruzioni deploy per ogni ambiente",
+        "Typecheck passes"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-034",
+      "title": "Internazionalizzazione IT/EN + selettore lingua nel profilo",
+      "description": "Come utente, voglio usare l'applicazione in italiano o inglese e poter cambiare lingua dal profilo.",
+      "acceptanceCriteria": [
+        "File di traduzione resources/lang/it/auth.php, messages.php, validation.php, pagination.php con tutte le stringhe dell'app in italiano",
+        "File di traduzione resources/lang/en/ (copia delle stringhe Laravel default in inglese)",
+        "Tutte le stringhe hardcoded nelle view sostituite con __('messages.chiave') o @lang()",
+        "Campo 'locale' (varchar 5, default 'it') aggiunto alla tabella users tramite migration",
+        "Selettore lingua nel form profilo: dropdown IT/EN",
+        "Salvataggio lingua: App::setLocale($user->locale) in middleware SetLocale applicato a tutte le route web",
+        "SetLocale middleware registrato in bootstrap/app.php",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "EnsurePremium middleware + feature test autenticazione",
+      "description": "Come sviluppatore, ho bisogno del middleware Premium per proteggere funzionalità future e dei test automatici per il flusso di autenticazione.",
+      "acceptanceCriteria": [
+        "Middleware app/Http/Middleware/EnsurePremium.php: se utente non è premium (is_premium=false o premium_expires_at nel passato) reindirizza a /dashboard con messaggio 'Funzionalità riservata agli utenti Premium'",
+        "Middleware registrato in bootstrap/app.php con alias 'premium'",
+        "Feature test tests/Feature/Auth/RegistrationTest.php: verifica che la registrazione invia email di verifica e blocca l'accesso fino alla verifica",
+        "Feature test tests/Feature/Auth/LoginTest.php: verifica login corretto, credenziali errate, throttling, blocco senza email verificata",
+        "Feature test tests/Feature/Auth/PasswordResetTest.php: verifica flusso reset password end-to-end",
+        "Feature test tests/Feature/Strava/StravaOAuthTest.php: verifica collegamento OAuth (mock Socialite), scollegamento, cifratura token",
+        "Tutti i test passano con php artisan test",
+        "Typecheck passes"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
