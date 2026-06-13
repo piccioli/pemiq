@@ -36,8 +36,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "docker-compose.yml con 6 servizi; Dockerfile php:8.4-fpm con pdo_mysql/redis/bcmath/gd/zip; nginx pemiq.local su porta 80; mailpit su porta 8025/1025; queue-worker con redis --sleep=3 --tries=3 --backoff=5"
     },
     {
       "id": "US-003",
