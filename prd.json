@@ -380,8 +380,8 @@
         "Typecheck passes"
       ],
       "priority": 21,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Livewire 3 component App\\Livewire\\Strava\\ConnectionStatus with #[Poll('5s')] attribute for auto-refresh every 5 seconds. startHistoricalSync() action checks for connected account + no running sync, then dispatches SyncStravaHistoricalActivities job and sets $syncMessage. render() queries getConnectedAccount() (StravaAccount with connection_status='connected') and isSyncRunning() (SyncLog WHERE status='running'). View: no account → 'Collega Strava' link; connected → badge, last sync date, sync button (disabled+spinner when running), disconnect button with Alpine.js confirm dialog. Dashboard view updated to use @livewire('strava.connection-status'). DashboardController simplified (no longer passes $stravaAccount). Blade cache rebuilt successfully."
     },
     {
       "id": "US-022",

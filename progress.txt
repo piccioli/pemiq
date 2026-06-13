@@ -1,3 +1,17 @@
+## 2026-06-13 - US-021
+- Created app/Livewire/Strava/ConnectionStatus.php: Livewire 3 component with #[Poll('5s')] attribute for 5-second auto-polling. startHistoricalSync() checks for connected account, no running sync, then dispatches SyncStravaHistoricalActivities and sets $syncMessage='Sincronizzazione avviata'. render() passes stravaAccount (or null) and syncRunning (bool from SyncLog WHERE status='running').
+- Created resources/views/livewire/strava/connection-status.blade.php: shows 'Collega Strava' link when no account; when connected shows badge, last sync date, disabled button with spinner when sync running, active 'Sincronizza attività storiche' button otherwise, disconnect button with Alpine.js confirm dialog.
+- Updated resources/views/dashboard.blade.php: replaced inline Strava HTML section with @livewire('strava.connection-status').
+- Updated app/Http/Controllers/DashboardController.php: removed $stravaAccount variable (no longer needed, component handles it).
+- Files changed: app/Livewire/Strava/ConnectionStatus.php (new), resources/views/livewire/strava/connection-status.blade.php (new), resources/views/dashboard.blade.php, app/Http/Controllers/DashboardController.php
+- **Learnings for future iterations:**
+  - Livewire 3 polling uses #[Poll('5s')] attribute on the component class (not wire:poll in the view, though that also works)
+  - Livewire components in app/Livewire/ are auto-discovered — no registration needed
+  - Component alias for @livewire() follows directory structure: App\Livewire\Strava\ConnectionStatus → 'strava.connection-status'
+  - wire:loading.attr="disabled" on a button disables it during any Livewire request (prevents double-click)
+  - Alpine.js x-data works normally inside Livewire component views — they coexist without conflict
+---
+
 ## 2026-06-13 - US-020
 - Created app/Jobs/SyncStravaIncrementalActivities.php: implements ShouldQueue, $tries=3, $backoff=[5,30,60]. handle() checks account->last_sync_at — if set, passes it as the 'after' Carbon to fetchActivities (incremental sync); if null, full historical sync (fallback). Creates SyncLog with type 'incremental'/'historical', completes/fails log, updates last_sync_at on success. Same token refresh/retry pattern as SyncStravaHistoricalActivities.
 - Created app/Console/Commands/SyncAllStravaAccounts.php: signature 'strava:sync-all', queries all StravaAccount with connection_status='connected', dispatches SyncStravaIncrementalActivities for each.
