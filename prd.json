@@ -177,8 +177,8 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "LoginController (show/store) with RateLimiter throttle (5 attempts per IP, 60s lockout), generic 'Credenziali non valide' error, unverified email redirect to /email/verify, session regeneration on success, redirect to /dashboard. Logout already implemented via closure in routes/web.php (POST /logout invalidates session, redirects to /). Login form with email, password, remember checkbox."
     },
     {
       "id": "US-011",

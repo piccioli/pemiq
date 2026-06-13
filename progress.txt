@@ -1,3 +1,18 @@
+## 2026-06-13 - US-010
+- Created LoginController (app/Http/Controllers/Auth/LoginController.php): show() returns login form, store() validates email/password, checks RateLimiter (5 attempts per IP, 60s decay), attempts Auth::attempt(), on fail increments rate limiter + returns generic error, on success clears rate limiter + regenerates session + checks email verification
+- If email not verified: logs out user, redirects to /email/verify with error message
+- If email verified: redirects to intended route or /dashboard
+- Updated resources/views/auth/login.blade.php: full form with email, password, remember checkbox, styled with Tailwind
+- Updated routes/web.php: replaced stub GET /login closure with LoginController@show + added POST /login → LoginController@store
+- Logout already handled in routes/web.php as a closure (POST /logout, invalidates session, redirects to /)
+- Files changed: app/Http/Controllers/Auth/LoginController.php (new), resources/views/auth/login.blade.php, routes/web.php
+- **Learnings for future iterations:**
+  - Use `RateLimiter::tooManyAttempts($key, 5)` + `RateLimiter::hit($key, 60)` + `RateLimiter::clear($key)` pattern for manual throttling — no need for ThrottlesLogins trait (it's in laravel/ui which isn't installed)
+  - After successful Auth::attempt(), always call `$request->session()->regenerate()` to prevent session fixation
+  - For unverified email on login: must explicitly Auth::logout() + invalidate session before redirecting to verification.notice
+  - `Auth::attempt()` third param is remember-me boolean — cast with `(bool)` since checkbox sends '1' or null
+---
+
 ## 2026-06-13 - US-009
 - Created RegisterController (app/Http/Controllers/Auth/RegisterController.php): show() returns register form, store() validates (name required, email unique, password min:8 confirmed), creates User, fires Registered event, logs in user, redirects to /email/verify with flash message
 - Created EmailVerificationController: notice() returns verify-email view, verify() handles signed URL verification (redirects to /login after success), resend() resends verification email
