@@ -252,8 +252,8 @@
         "Typecheck passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaController with redirect() (Socialite driver 'strava', scope 'activity:read_all') and callback() (updateOrCreate StravaAccount with strava_athlete_id, encrypted access_token/refresh_token, token_expires_at). Strava Socialite provider registered via Event::listen(SocialiteWasCalled) in AppServiceProvider. config/services.php updated with strava key (client_id/secret/redirect from env). Routes GET /strava/redirect and GET /strava/callback with auth+verified middleware. Dashboard updated to show 'Collega Strava' button when no connected account, or 'Connesso' badge with last sync date when connected. access_token/refresh_token use Laravel encrypted cast (from StravaAccount model, US-004). Error handling: checks request 'error' parameter for denied permissions."
     },
     {
       "id": "US-015",
