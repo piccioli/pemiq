@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SyncStravaHistoricalActivities;
 use App\Models\StravaAccount;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Http;
@@ -40,6 +41,22 @@ class StravaController extends Controller
 
         return redirect()->route('dashboard')
             ->with('success', 'Account Strava collegato con successo!');
+    }
+
+    public function syncHistorical(): RedirectResponse
+    {
+        $user = auth()->user();
+        $stravaAccount = $user->stravaAccount;
+
+        if (! $stravaAccount || $stravaAccount->connection_status !== 'connected') {
+            return redirect()->route('dashboard')
+                ->with('error', 'Nessun account Strava collegato.');
+        }
+
+        SyncStravaHistoricalActivities::dispatch($stravaAccount);
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Sincronizzazione storica avviata. Le attività saranno importate a breve.');
     }
 
     public function disconnect(): RedirectResponse

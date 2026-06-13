@@ -12,7 +12,7 @@
         <h2 class="text-lg font-semibold text-gray-800 mb-4">Connessione Strava</h2>
 
         @if ($stravaAccount && $stravaAccount->connection_status === 'connected')
-            <div class="flex items-center justify-between" x-data="{ confirmDisconnect: false }">
+            <div class="flex items-center justify-between flex-wrap gap-3" x-data="{ confirmDisconnect: false }">
                 <div class="flex items-center gap-3">
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                         Connesso
@@ -25,7 +25,14 @@
                         <span class="text-sm text-gray-500">Nessuna sincronizzazione ancora</span>
                     @endif
                 </div>
-                <div>
+                <div class="flex items-center gap-3">
+                    <form action="{{ route('strava.sync-historical') }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition text-sm">
+                            Sincronizza attività storiche
+                        </button>
+                    </form>
                     <button @click="confirmDisconnect = true"
                             class="inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition text-sm">
                         Scollega Strava

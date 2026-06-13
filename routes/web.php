@@ -95,3 +95,7 @@ Route::get('/strava/callback', [StravaController::class, 'callback'])
 Route::delete('/strava/disconnect', [StravaController::class, 'disconnect'])
     ->middleware(['auth', 'verified'])
     ->name('strava.disconnect');
+
+Route::post('/strava/sync-historical', [StravaController::class, 'syncHistorical'])
+    ->middleware(['auth', 'verified'])
+    ->name('strava.sync-historical');
