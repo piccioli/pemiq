@@ -563,8 +563,8 @@
         "Typecheck passes"
       ],
       "priority": 31,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ImpersonateController::stop() reads session('impersonating_admin_id'), creates AuditLog (impersonate_stop), calls Auth::loginUsingId($adminId), forgets session key, redirects to /admin/users. Route POST /impersonate/stop (auth middleware, named impersonate.stop). Shared partial: resources/views/partials/impersonation-banner.blade.php — shown when session('impersonating_admin_id') is set, includes POST form to impersonate.stop. Banner included in layouts/app.blade.php via @include. Filament banner via AdminPanelProvider renderHook(PanelsRenderHook::BODY_START). UserResource: 'Impersona' action visible only for non-administrator records (->visible(fn => !$record->hasRole('administrator'))), requiresConfirmation, inline creates AuditLog (impersonate_start + IP + user_agent), sets session, Auth::loginUsingId, redirects to dashboard."
     },
     {
       "id": "US-032",

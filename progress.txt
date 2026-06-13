@@ -1,3 +1,19 @@
+## 2026-06-13 - US-031
+- Created app/Http/Controllers/ImpersonateController.php: stop() reads session('impersonating_admin_id'), creates AuditLog (impersonate_stop), Auth::loginUsingId($adminId), forgets session key, redirects to /admin/users.
+- Created resources/views/partials/impersonation-banner.blade.php: shown when session('impersonating_admin_id') is set — yellow banner showing impersonated user name + POST form to impersonate.stop route.
+- Updated resources/views/layouts/app.blade.php: @include('partials.impersonation-banner') before flash messages.
+- Updated app/Providers/Filament/AdminPanelProvider.php: added renderHook(PanelsRenderHook::BODY_START) that renders the impersonation banner view — visible on all Filament pages when impersonating.
+- Updated app/Filament/Resources/UserResource.php: added 'Impersona' table action — visible only for non-administrator users, requiresConfirmation, creates AuditLog (impersonate_start + IP + user_agent), sets session('impersonating_admin_id'), Auth::loginUsingId, redirects to dashboard.
+- Updated routes/web.php: POST /impersonate/stop (auth middleware, named impersonate.stop).
+- Files changed: ImpersonateController.php (new), impersonation-banner.blade.php (new), layouts/app.blade.php, AdminPanelProvider.php, UserResource.php, routes/web.php
+- **Learnings for future iterations:**
+  - Filament render hooks: `->renderHook(PanelsRenderHook::BODY_START, fn(): string => view('partials.x')->render())` injects HTML at the start of the body on ALL Filament pages
+  - Impersonation banner is a shared partial (@include) used in both app layout and Filament render hook
+  - UserResource table action can use `return redirect()->to(route('dashboard'))` inside `->action()` callback — Livewire 3 passes the redirect response through
+  - `->visible(fn (User $record) => !$record->hasRole('administrator'))` hides the action for admin-role users
+  - AuditLog requires explicit `created_at => now()` because `$timestamps = false` on the model
+---
+
 ## 2026-06-13 - US-030
 - Created app/Filament/Resources/SyncLogResource.php: list-only in 'Sistema' group. Columns: user.name, sync_type (badge), status (badge with match colors), started_at (defaultSort desc), duration (diffForHumans or '—'), activities_imported, error_message (limit+tooltip). Filters: status/sync_type SelectFilter, user relationship SelectFilter.
 - Created app/Filament/Resources/SyncLogResource/Pages/ListSyncLogs.php
