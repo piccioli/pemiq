@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -9,10 +10,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Login (stub — full implementation in US-010)
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// Login
+Route::get('/login', [LoginController::class, 'show'])->name('login');
+Route::post('/login', [LoginController::class, 'store']);
 
 // Registration
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
