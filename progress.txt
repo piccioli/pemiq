@@ -1,3 +1,16 @@
+## 2026-06-13 - US-029
+- Created app/Filament/Resources/StravaAccountResource.php: list-only resource in 'Strava' group. Columns: user.name, strava_athlete_id, connection_status (badge with match colors: connected=success, disconnected=gray, error=danger), last_sync_at. Filter: SelectFilter for connection_status. Action: 'Forza sincronizzazione' dispatches SyncStravaHistoricalActivities.
+- Created app/Filament/Resources/StravaAccountResource/Pages/ListStravaAccounts.php
+- Created app/Filament/Resources/ActivityResource.php: list-only resource in 'Strava' group. Columns: user.name (searchable+sortable), name (searchable, limit 40), sport_type (badge), started_at (defaultSort desc), distance (÷1000 km), elevation_gain. Filters: user (relationship), sport_type (dynamic options from distinct DB values), started_at date range.
+- Created app/Filament/Resources/ActivityResource/Pages/ListActivities.php
+- Files changed: 4 new files
+- **Learnings for future iterations:**
+  - For list-only resources (no create/edit), set `form()` to return `$form->schema([])` and `getPages()` to only include 'index'
+  - `TextColumn::make('connection_status')->badge()->color(fn (string $state) => match ($state) {...})` — the fn receives the raw string value
+  - Dynamic SelectFilter options: `->options(fn () => Activity::distinct()->pluck('sport_type', 'sport_type')->filter()->toArray())` — filter empty values
+  - `->defaultSort('started_at', 'desc')` on the table sets default ordering without user interaction
+---
+
 ## 2026-06-13 - US-028
 - Created app/Filament/Resources/UserResource.php: list+edit resource for User model in 'Utenti' navigation group. Columns: Nome/Email (searchable+sortable), Ruolo (roles.name badge), Premium (TextColumn badge Sì/No, success/gray color), Registrato il, Email verificata (IconColumn boolean). Filters: SelectFilter role (relationship), TernaryFilter is_premium, date-range Filter for created_at. Actions: EditAction, 'Promuovi a Premium' (form modal for premium_expires_at), 'Revoca Premium' (requiresConfirmation). BulkActions: 'Promuovi selezionati', 'Revoca Premium selezionati'.
 - Created app/Filament/Resources/UserResource/Pages/ListUsers.php and EditUser.php page classes.

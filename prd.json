@@ -524,8 +524,8 @@
         "Typecheck passes"
       ],
       "priority": 29,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaAccountResource: list-only (no edit), navigation group 'Strava', columns: user.name (searchable+sortable), strava_athlete_id, connection_status (badge: connected=success/disconnected=gray/error=danger), last_sync_at. SelectFilter for connection_status. Action 'Forza sincronizzazione' dispatches SyncStravaHistoricalActivities job (requiresConfirmation). ActivityResource: list-only, navigation group 'Strava', columns: user.name (searchable+sortable), name (searchable, limit 40), sport_type (badge), started_at (sorted desc by default), distance (÷1000 km), elevation_gain. Filters: user (relationship select), sport_type (dynamic options from distinct values), started_at date range. Both resources have empty form() and no bulk actions."
     },
     {
       "id": "US-030",
