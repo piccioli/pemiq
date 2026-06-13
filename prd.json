@@ -70,8 +70,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Migration create_strava_accounts_table con user_id FK, strava_athlete_id bigint unique, access_token/refresh_token text, token_expires_at, last_sync_at nullable, connection_status enum(connected/disconnected/error). StravaAccount model con encrypted casts per access_token/refresh_token. User model aggiornato con relazione hasOne(StravaAccount)."
     },
     {
       "id": "US-005",

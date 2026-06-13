@@ -17,3 +17,13 @@
   - .env was not updated with Docker hostnames in US-002 despite being in acceptance criteria — had to fix here
   - Migration runs successfully in container; all premium fields confirmed in DB
 ---
+
+## 2026-06-13 - US-004
+- Created migration create_strava_accounts_table with: user_id (FK, cascadeOnDelete), strava_athlete_id (bigint unique), access_token (text), refresh_token (text), token_expires_at (timestamp), last_sync_at (timestamp nullable), connection_status (enum: connected/disconnected/error, default connected), timestamps
+- Created app/Models/StravaAccount.php with $fillable, encrypted casts for access_token/refresh_token, datetime casts for token_expires_at/last_sync_at, and belongsTo(User) relation
+- Updated app/Models/User.php: added HasOne import and stravaAccount() relation
+- Migration ran successfully in container
+- **Learnings for future iterations:**
+  - Laravel `encrypted` cast works transparently via $casts — no extra config needed, APP_KEY is used for encryption
+  - For enum columns in migrations, use `$table->enum('col', ['a','b','c'])->default('a')` pattern
+---
