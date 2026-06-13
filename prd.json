@@ -271,8 +271,8 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaController::disconnect() added: reads access_token (decrypted via encrypted cast), calls POST https://www.strava.com/oauth/deauthorize, updates StravaAccount with connection_status='disconnected', access_token=null, refresh_token=null. Route DELETE /strava/disconnect with auth+verified middleware. Dashboard updated with 'Scollega Strava' button + Alpine.js confirmation dialog ('Sei sicuro? Le attività importate rimarranno.') using x-cloak/x-show pattern. Strava API revocation failure is swallowed (local disconnect always proceeds). Activities are not deleted."
     },
     {
       "id": "US-016",

@@ -1,3 +1,15 @@
+## 2026-06-13 - US-015
+- Added `disconnect()` method to StravaController: reads decrypted access_token, calls POST https://www.strava.com/oauth/deauthorize, swallows exceptions (always proceeds with local disconnect), updates StravaAccount (connection_status='disconnected', access_token=null, refresh_token=null), redirects to /dashboard with success flash
+- Added route DELETE /strava/disconnect (auth+verified middleware, named strava.disconnect) to routes/web.php
+- Updated resources/views/dashboard.blade.php: added 'Scollega Strava' button in the connected section, wrapped in `x-data="{ confirmDisconnect: false }"`, Alpine.js dialog (x-show/x-cloak) with cancel button + DELETE form confirmation
+- Files changed: app/Http/Controllers/StravaController.php, routes/web.php, resources/views/dashboard.blade.php
+- **Learnings for future iterations:**
+  - Alpine.js `x-cloak` requires a CSS rule `[x-cloak] { display: none; }` in the layout to prevent FOUC — the app.blade.php layout should include this in the `<style>` block if not already present
+  - DELETE forms in Laravel Blade use `@method('DELETE')` inside a POST form — browser only supports GET/POST natively
+  - StravaAccount encrypted cast handles null values correctly in Laravel 11 — setting access_token/refresh_token to null via update() works without removing the cast
+  - Strava deauthorize API call is best-effort; always proceed with local disconnect even on network/API failure
+---
+
 ## 2026-06-13 - US-014
 - Created app/Http/Controllers/StravaController.php: redirect() uses Socialite driver 'strava' with scope 'activity:read_all'; callback() checks request 'error' param (denied permissions → redirect dashboard with error), fetches Socialite user, calls StravaAccount::updateOrCreate with encrypted tokens and connection_status='connected'
 - Updated app/Providers/AppServiceProvider.php: registered SocialiteProviders\Strava\StravaExtendSocialite via Event::listen(SocialiteWasCalled) to activate the community Strava provider
