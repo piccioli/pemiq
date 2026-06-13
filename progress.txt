@@ -1,3 +1,13 @@
+## 2026-06-13 - US-024
+- Created app/Livewire/Dashboard/AnnualAnalysis.php: Livewire component with render(DashboardStatsService) method injection. getAnnualStats() is called with auth()->user() and passed to the view.
+- Created resources/views/livewire/dashboard/annual-analysis.blade.php: responsive table (overflow-x-auto) with columns Anno, Attività, Distanza (km), Dislivello (m), Ore. Rows ordered by year DESC (handled by DashboardStatsService). Empty state when collection isEmpty(). hover:bg-gray-50 on rows for UX.
+- Files changed: app/Livewire/Dashboard/AnnualAnalysis.php (new), resources/views/livewire/dashboard/annual-analysis.blade.php (new)
+- **Learnings for future iterations:**
+  - `overflow-x-auto` wrapper on the table div makes the table scroll horizontally on mobile without breaking layout
+  - Livewire render() DI with DashboardStatsService follows the same pattern as OverviewStats — no class-level property needed, just inject in render()
+  - Alias for AnnualAnalysis: `dashboard.annual-analysis` (follows directory dot-notation convention)
+---
+
 ## 2026-06-13 - US-023
 - Created app/Livewire/Dashboard/OverviewStats.php: Livewire component with render(DashboardStatsService) method injection. Private formatSeconds(int): string converts seconds to "h:mm" format for Tempo Totale and Tempo in Movimento display.
 - Created resources/views/livewire/dashboard/overview-stats.blade.php: 5 stat cards in responsive grid (grid-cols-1 sm:grid-cols-2 xl:grid-cols-5). Each card has SVG icon, large numeric value, descriptive label. Cards: Attività Totali (orange), Distanza km (blue), Dislivello m (green), Tempo Totale h:mm (purple), Tempo in Movimento h:mm (yellow). Empty state when total_activities===0.

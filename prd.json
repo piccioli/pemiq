@@ -433,8 +433,8 @@
         "Typecheck passes"
       ],
       "priority": 24,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Livewire component App\\Livewire\\Dashboard\\AnnualAnalysis with render(DashboardStatsService) method injection. View: responsive table (overflow-x-auto) with columns Anno, Attività, Distanza (km), Dislivello (m), Ore. Rows ordered by year DESC (service handles ordering). Empty state when collection is empty. Alias: 'dashboard.annual-analysis'."
     },
     {
       "id": "US-025",
