@@ -1,3 +1,14 @@
+## 2026-06-13 - US-032
+- Created app/Filament/Widgets/AdminStatsOverview.php: extends StatsOverviewWidget. 5 stats: Utenti Totali, Utenti Premium, Account Strava Collegati, Sync Completate 24h, Sync Fallite 24h. Sync Fallite uses dynamic ->color('danger'/'success') based on count.
+- Updated AdminPanelProvider: replaced FilamentInfoWidget with AdminStatsOverview in widgets[].
+- Files changed: app/Filament/Widgets/AdminStatsOverview.php (new), AdminPanelProvider.php
+- **Learnings for future iterations:**
+  - Filament v4 StatsOverviewWidget uses `Stat::make('Label', $value)` — NOT Card::make (Card doesn't exist in v4)
+  - `->color('danger')` / `->color('success')` on a Stat changes the stat's color — no separate method needed
+  - Widgets registered in AdminPanelProvider `->widgets([...])` are shown on the Filament dashboard page
+  - Filament auto-discovers widgets in app/Filament/Widgets/ (via discoverWidgets in PanelProvider) but you can also explicitly register them
+---
+
 ## 2026-06-13 - US-031
 - Created app/Http/Controllers/ImpersonateController.php: stop() reads session('impersonating_admin_id'), creates AuditLog (impersonate_stop), Auth::loginUsingId($adminId), forgets session key, redirects to /admin/users.
 - Created resources/views/partials/impersonation-banner.blade.php: shown when session('impersonating_admin_id') is set — yellow banner showing impersonated user name + POST form to impersonate.stop route.

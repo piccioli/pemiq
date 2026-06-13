@@ -582,8 +582,8 @@
         "Typecheck passes"
       ],
       "priority": 32,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "AdminStatsOverview widget in app/Filament/Widgets/AdminStatsOverview.php extends StatsOverviewWidget. 5 Stat::make() calls: Utenti Totali (User::count()), Utenti Premium (User::where('is_premium',true)->count()), Account Strava Collegati (StravaAccount::where('connected')->count()), Sync Completate 24h (SyncLog completed + created_at > now()-24h), Sync Fallite 24h (same for failed). Sync Fallite uses ->color($count > 0 ? 'danger' : 'success'). Registered in AdminPanelProvider widgets[] replacing FilamentInfoWidget."
     },
     {
       "id": "US-033",
