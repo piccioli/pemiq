@@ -637,8 +637,8 @@
         "Typecheck passes"
       ],
       "priority": 35,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "DashboardStatsService mocked in RegistrationTest (SQLite lacks YEAR/MONTH); Http::fake for Strava deauthorize; strava_accounts tokens made nullable for disconnect."
     }
   ]
 }

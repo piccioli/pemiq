@@ -1,3 +1,17 @@
+## 2026-06-13 - US-035
+- Created app/Http/Middleware/EnsurePremium.php: blocks non-premium users (is_premium=false or premium_expires_at in the past), redirects to /dashboard with error flash.
+- Registered EnsurePremium with alias 'premium' in bootstrap/app.php.
+- Migration 2026_06_13_205729_make_strava_tokens_nullable: made access_token, refresh_token, token_expires_at nullable in strava_accounts (needed for disconnect flow).
+- Feature tests (all 23 pass):
+  - tests/Feature/Auth/RegistrationTest.php: 6 tests covering registration, email verification middleware, dashboard block.
+  - tests/Feature/Auth/LoginTest.php: 7 tests covering login, invalid credentials, throttling, unverified redirect, logout.
+  - tests/Feature/Auth/PasswordResetTest.php: 5 tests covering forgot password, reset link, invalid token.
+  - tests/Feature/Strava/StravaOAuthTest.php: 5 tests covering OAuth redirect, callback, denied permissions, token encryption, disconnect.
+- **Learnings for future iterations:**
+  - SQLite (used in phpunit.xml for tests) doesn't support MySQL-specific date functions (YEAR, MONTH). Workaround: mock DashboardStatsService in tests that render the dashboard.
+  - Http::fake() must be set up before any HTTP calls; mocks Strava deauthorize endpoint cleanly.
+  - `$this->mock(ServiceClass::class, fn($m) => ...)` registers mocks in Laravel service container.
+
 ## 2026-06-13 - US-034
 - Created lang/it/auth.php, pagination.php, passwords.php, validation.php (full Italian translations), messages.php (app-specific keys: welcome, profile_updated, language, italian, english, etc.).
 - Created lang/en/messages.php (English equivalents of custom messages).
