@@ -112,6 +112,9 @@
         </div>
     </nav>
 
+    {{-- Impersonation banner --}}
+    @include('partials.impersonation-banner')
+
     {{-- Flash messages --}}
     @if(session('status') || session('success') || session('error') || $errors->any())
     <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4 space-y-2">

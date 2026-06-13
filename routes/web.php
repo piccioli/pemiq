@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\ProfilePasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ImpersonateController;
 use App\Http\Controllers\StravaController;
 use Illuminate\Support\Facades\Route;
 
@@ -101,3 +102,8 @@ Route::delete('/strava/disconnect', [StravaController::class, 'disconnect'])
 Route::post('/strava/sync-historical', [StravaController::class, 'syncHistorical'])
     ->middleware(['auth', 'verified'])
     ->name('strava.sync-historical');
+
+// Impersonation
+Route::post('/impersonate/stop', [ImpersonateController::class, 'stop'])
+    ->middleware('auth')
+    ->name('impersonate.stop');

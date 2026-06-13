@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Models\AuditLog;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -10,6 +11,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -103,6 +105,25 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('impersonate')
+                    ->label('Impersona')
+                    ->icon('heroicon-o-user-group')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record) => !$record->hasRole('administrator'))
+                    ->action(function (User $record) {
+                        $adminId = auth()->id();
+                        AuditLog::create([
+                            'admin_user_id'  => $adminId,
+                            'target_user_id' => $record->id,
+                            'action'         => 'impersonate_start',
+                            'metadata'       => ['ip' => request()->ip(), 'user_agent' => request()->userAgent()],
+                            'created_at'     => now(),
+                        ]);
+                        session(['impersonating_admin_id' => $adminId]);
+                        Auth::loginUsingId($record->id);
+                        return redirect()->to(route('dashboard'));
+                    }),
                 Tables\Actions\Action::make('promote_premium')
                     ->label('Promuovi a Premium')
                     ->icon('heroicon-o-star')
