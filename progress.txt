@@ -1,3 +1,16 @@
+## 2026-06-13 - US-028
+- Created app/Filament/Resources/UserResource.php: list+edit resource for User model in 'Utenti' navigation group. Columns: Nome/Email (searchable+sortable), Ruolo (roles.name badge), Premium (TextColumn badge Sì/No, success/gray color), Registrato il, Email verificata (IconColumn boolean). Filters: SelectFilter role (relationship), TernaryFilter is_premium, date-range Filter for created_at. Actions: EditAction, 'Promuovi a Premium' (form modal for premium_expires_at), 'Revoca Premium' (requiresConfirmation). BulkActions: 'Promuovi selezionati', 'Revoca Premium selezionati'.
+- Created app/Filament/Resources/UserResource/Pages/ListUsers.php and EditUser.php page classes.
+- Files changed: app/Filament/Resources/UserResource.php (new), UserResource/Pages/ListUsers.php (new), UserResource/Pages/EditUser.php (new)
+- **Learnings for future iterations:**
+  - **CRITICAL Filament v4**: `Filament\Forms\Form` does NOT exist. Use `Filament\Schemas\Schema` for the `form()` method signature: `public static function form(Schema $form): Schema`
+  - **CRITICAL Filament v4**: `$navigationGroup` property type in parent is `UnitEnum|string|null`, incompatible with child `?string` declaration — MUST use `getNavigationGroup(): ?string` method override instead
+  - **CRITICAL Filament v4**: `$navigationIcon` property type in parent is `BackedEnum|string|null` — MUST use `getNavigationIcon()` method override
+  - Filament v4 `optimize:clear` (not just `filament:clear-cached-components`) is needed to fully refresh resource discovery after adding new resources
+  - `Tables\Filters\TernaryFilter::make('is_premium')` works as-is for boolean columns — no additional config needed
+  - `Tables\Actions\BulkAction` with `->action(fn ($records) => $records->each->update([...]))` works on Eloquent collection
+---
+
 ## 2026-06-13 - US-027
 - Created resources/views/dashboard/index.blade.php: extends layouts.app, includes all 5 Livewire components in order: strava.connection-status, dashboard.overview-stats, dashboard.annual-analysis, dashboard.monthly-analysis, dashboard.sport-distribution. Page-level h1 'Dashboard' + welcome message at top.
 - Updated app/Http/Controllers/DashboardController.php: return view('dashboard.index') (was 'dashboard').
@@ -295,6 +308,10 @@
 - Named route 'login' must exist before any auth middleware is applied (redirect target for unauthenticated users)
 - Alpine.js CDN: `<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">` (defer is required)
 - Flash messages: app layout checks session('status'), session('success'), session('error') and $errors
+- **Filament v4 BREAKING**: `Filament\Forms\Form` does NOT exist — use `Filament\Schemas\Schema` for form() method
+- **Filament v4 BREAKING**: `$navigationGroup` is typed `UnitEnum|string|null` in parent — use `getNavigationGroup(): ?string` method instead of static property
+- **Filament v4 BREAKING**: `$navigationIcon` is typed `BackedEnum|string|null` in parent — use `getNavigationIcon()` method instead
+- Filament resource discovery needs `php artisan optimize:clear` to pick up newly created resources (not just filament:clear-cached-components)
 
 ---
 

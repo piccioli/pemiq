@@ -504,8 +504,8 @@
         "Typecheck passes"
       ],
       "priority": 28,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "UserResource in app/Filament/Resources/UserResource.php. Navigation group via getNavigationGroup() method (NOT static property — Filament v4 uses UnitEnum|string|null type which conflicts with ?string). Similarly getNavigationIcon() returns 'heroicon-o-users'. form() uses Filament\\Schemas\\Schema (NOT Filament\\Forms\\Form — that class doesn't exist in Filament v4). Table columns: Nome/Email (searchable+sortable), Ruolo (roles.name badge), Premium (TextColumn badge with Sì/No + success/gray color), Registrato il (dateTime), Email verificata (IconColumn boolean). Filters: SelectFilter for role (relationship), TernaryFilter for is_premium, Filter with date range for created_at. Actions: EditAction, 'Promuovi a Premium' (form modal for premium_expires_at), 'Revoca Premium' (requiresConfirmation). BulkActions in BulkActionGroup: 'Promuovi selezionati', 'Revoca Premium selezionati'. Routes: /admin/users (index) + /admin/users/{record}/edit."
     },
     {
       "id": "US-029",
