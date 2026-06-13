@@ -19,15 +19,17 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'name'  => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'name'   => ['required', 'string', 'max:255'],
+            'email'  => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'locale' => ['required', 'in:it,en'],
         ]);
 
         $emailChanged = $user->email !== $request->email;
 
         $user->fill([
-            'name'  => $request->name,
-            'email' => $request->email,
+            'name'   => $request->name,
+            'email'  => $request->email,
+            'locale' => $request->locale,
         ]);
 
         if ($emailChanged) {

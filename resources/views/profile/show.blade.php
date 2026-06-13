@@ -37,6 +37,18 @@
                 >
             </div>
 
+            <div>
+                <label for="locale" class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.language') }}</label>
+                <select
+                    id="locale"
+                    name="locale"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                >
+                    <option value="it" {{ old('locale', auth()->user()->locale) === 'it' ? 'selected' : '' }}>{{ __('messages.italian') }}</option>
+                    <option value="en" {{ old('locale', auth()->user()->locale) === 'en' ? 'selected' : '' }}>{{ __('messages.english') }}</option>
+                </select>
+            </div>
+
             <button
                 type="submit"
                 class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
