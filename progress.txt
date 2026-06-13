@@ -1,3 +1,15 @@
+## 2026-06-13 - US-027
+- Created resources/views/dashboard/index.blade.php: extends layouts.app, includes all 5 Livewire components in order: strava.connection-status, dashboard.overview-stats, dashboard.annual-analysis, dashboard.monthly-analysis, dashboard.sport-distribution. Page-level h1 'Dashboard' + welcome message at top.
+- Updated app/Http/Controllers/DashboardController.php: return view('dashboard.index') (was 'dashboard').
+- Deleted resources/views/dashboard.blade.php (superseded by dashboard/index.blade.php).
+- Updated routes/web.php: Route / now redirects to /dashboard (authenticated) or /login (unauthenticated) instead of returning the welcome view.
+- Files changed: resources/views/dashboard/index.blade.php (new), resources/views/dashboard.blade.php (deleted), app/Http/Controllers/DashboardController.php, routes/web.php
+- **Learnings for future iterations:**
+  - Dashboard view moved from `resources/views/dashboard.blade.php` → `resources/views/dashboard/index.blade.php` — DashboardController uses `view('dashboard.index')`
+  - Root route `/` redirects to /dashboard or /login based on `auth()->check()` — no welcome view needed for this MVP
+  - Each Livewire component already has its own h2 heading, so the dashboard page only needs a page-level h1 + space-y-6 wrapper
+---
+
 ## 2026-06-13 - US-026
 - Created app/Livewire/Dashboard/SportDistribution.php: Livewire component with render(DashboardStatsService) method injection. Calls getSportDistribution(auth()->user()) and passes the collection to the view.
 - Created resources/views/livewire/dashboard/sport-distribution.blade.php: responsive table (overflow-x-auto) with columns Sport (badge), Attività, Distanza (km), Ore. @php block defines $sportColors map keyed by Strava sport_type strings; unknown sport types fall back to 'bg-gray-100 text-gray-700'. Empty state when collection isEmpty().
