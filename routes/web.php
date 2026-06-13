@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\ProfilePasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\StravaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -81,3 +82,12 @@ Route::post('/logout', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+// Strava OAuth
+Route::get('/strava/redirect', [StravaController::class, 'redirect'])
+    ->middleware(['auth', 'verified'])
+    ->name('strava.redirect');
+
+Route::get('/strava/callback', [StravaController::class, 'callback'])
+    ->middleware(['auth', 'verified'])
+    ->name('strava.callback');

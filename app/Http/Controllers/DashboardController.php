@@ -8,6 +8,8 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        return view('dashboard');
+        $stravaAccount = auth()->user()->stravaAccount;
+
+        return view('dashboard', compact('stravaAccount'));
     }
 }
