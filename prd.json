@@ -451,8 +451,8 @@
         "Typecheck passes"
       ],
       "priority": 25,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Livewire component App\\Livewire\\Dashboard\\MonthlyAnalysis with public $year property (default: current year). render(DashboardStatsService) fetches getAnnualStats() to build $availableYears list, then getMonthlyStats($user, $year). If year not in available years, defaults to first available. View: year selector dropdown (wire:model.live for reactive update), responsive table (overflow-x-auto) with 12 rows always shown, Italian month names array, empty months show '—' instead of 0. hasData check shows empty state message when sum of activities = 0 for the year. Alias: 'dashboard.monthly-analysis'."
     },
     {
       "id": "US-026",
@@ -468,8 +468,8 @@
         "Typecheck passes"
       ],
       "priority": 26,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Livewire component App\\Livewire\\Dashboard\\SportDistribution with render(DashboardStatsService) method injection. View: responsive table (overflow-x-auto) with columns Sport, Attività, Distanza (km), Ore. Each sport row has a colored pill badge via @php $sportColors map keyed by Strava sport_type values (Run=orange, TrailRun=green, Ride=blue, GravelRide=teal, MountainBikeRide=yellow, VirtualRide=sky, VirtualRun=amber, Hike=lime, Walk=purple, Swim=cyan, Workout=gray, unknown=gray fallback). Ordering by COUNT(*) DESC handled by DashboardStatsService. Empty state when collection is empty. Alias: 'dashboard.sport-distribution'."
     },
     {
       "id": "US-027",

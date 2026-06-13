@@ -1,3 +1,25 @@
+## 2026-06-13 - US-026
+- Created app/Livewire/Dashboard/SportDistribution.php: Livewire component with render(DashboardStatsService) method injection. Calls getSportDistribution(auth()->user()) and passes the collection to the view.
+- Created resources/views/livewire/dashboard/sport-distribution.blade.php: responsive table (overflow-x-auto) with columns Sport (badge), Attività, Distanza (km), Ore. @php block defines $sportColors map keyed by Strava sport_type strings; unknown sport types fall back to 'bg-gray-100 text-gray-700'. Empty state when collection isEmpty().
+- Files changed: app/Livewire/Dashboard/SportDistribution.php (new), resources/views/livewire/dashboard/sport-distribution.blade.php (new)
+- **Learnings for future iterations:**
+  - Strava sport_type values in the DB are the API's CamelCase strings (e.g. 'Run', 'TrailRun', 'Ride', 'MountainBikeRide', 'Hike', 'Walk') — badge color mapping must use these exact strings as keys
+  - Since CDN Tailwind is used (no purging), dynamic Tailwind class lookups via PHP array are safe — no need for safelist config
+  - Alias for SportDistribution: `dashboard.sport-distribution` (directory dot-notation convention)
+---
+
+## 2026-06-13 - US-025
+- Created app/Livewire/Dashboard/MonthlyAnalysis.php: Livewire component with public $year (default current year). mount() sets initial year. render(DashboardStatsService) fetches getAnnualStats() to build $availableYears list, then getMonthlyStats($user, $year). Guards against year not in available list.
+- Created resources/views/livewire/dashboard/monthly-analysis.blade.php: year selector dropdown (wire:model.live for reactive update without page reload), responsive table (overflow-x-auto) with 12 rows, Italian month names array, empty months show '—' instead of 0, hasData check triggers empty state message.
+- Files changed: app/Livewire/Dashboard/MonthlyAnalysis.php (new), resources/views/livewire/dashboard/monthly-analysis.blade.php (new)
+- **Learnings for future iterations:**
+  - `wire:model.live="year"` on a select triggers an immediate Livewire request on change (no need for wire:change or JS)
+  - Italian month names are a PHP array `['Gennaio',...,'Dicembre']` indexed by `$row->month - 1` (0-based)
+  - `getAnnualStats()` doubles as the source for available years — reuse it to avoid a second query
+  - Empty months (activities=0) from getMonthlyStats() are better shown as '—' than '0' for readability
+  - Alias for MonthlyAnalysis: `dashboard.monthly-analysis` (directory dot-notation convention)
+---
+
 ## 2026-06-13 - US-024
 - Created app/Livewire/Dashboard/AnnualAnalysis.php: Livewire component with render(DashboardStatsService) method injection. getAnnualStats() is called with auth()->user() and passed to the view.
 - Created resources/views/livewire/dashboard/annual-analysis.blade.php: responsive table (overflow-x-auto) with columns Anno, Attività, Distanza (km), Dislivello (m), Ore. Rows ordered by year DESC (handled by DashboardStatsService). Empty state when collection isEmpty(). hover:bg-gray-50 on rows for UX.
