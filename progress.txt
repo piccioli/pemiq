@@ -1,3 +1,14 @@
+## 2026-06-13 - US-016
+- Created app/Services/Strava/StravaApiService.php: fetchActivities(StravaAccount, ?Carbon) → Collection. Paginates GET /athlete/activities with per_page=100, increments page until empty response or <100 items. 1s sleep between pages for rate limiting. Private requestWithRetry() handles HTTP 429 with exponential backoff (1s/2s/4s, max 3 retries). Throws StravaTokenExpiredException on 401, StravaApiException on 5xx or network exceptions.
+- Created app/Exceptions/Strava/StravaTokenExpiredException.php
+- Created app/Exceptions/Strava/StravaApiException.php
+- Files changed: app/Services/Strava/StravaApiService.php (new), app/Exceptions/Strava/StravaTokenExpiredException.php (new), app/Exceptions/Strava/StravaApiException.php (new)
+- **Learnings for future iterations:**
+  - Exception namespace: App\Exceptions\Strava — use consistent namespace for Strava-related exceptions
+  - Http::withToken($token)->get($url, $params) is the Laravel HTTP client pattern for bearer auth
+  - The `sleep()` between pages is intentional and required by Strava rate limits — do not remove
+---
+
 ## 2026-06-13 - US-015
 - Added `disconnect()` method to StravaController: reads decrypted access_token, calls POST https://www.strava.com/oauth/deauthorize, swallows exceptions (always proceeds with local disconnect), updates StravaAccount (connection_status='disconnected', access_token=null, refresh_token=null), redirects to /dashboard with success flash
 - Added route DELETE /strava/disconnect (auth+verified middleware, named strava.disconnect) to routes/web.php

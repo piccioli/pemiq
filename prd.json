@@ -289,8 +289,8 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaApiService in app/Services/Strava/StravaApiService.php with fetchActivities(StravaAccount, ?Carbon): Collection. GET https://www.strava.com/api/v3/athlete/activities with per_page=100, page, after (Unix timestamp). Pagination loop until empty or <100 items; 1s sleep between pages. Exponential backoff (1s/2s/4s) on HTTP 429. Throws StravaTokenExpiredException on 401, StravaApiException on 5xx or network errors. Exception classes in app/Exceptions/Strava/."
     },
     {
       "id": "US-017",
