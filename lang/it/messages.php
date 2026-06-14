@@ -60,4 +60,19 @@ return [
     'trend_to'            => 'Al',
     'trend_all_sports'    => 'Tutti gli sport',
     'trend_no_data'       => 'Nessuna attività nel periodo selezionato.',
+
+    // Premium confronto periodi
+    'compare_page_title'     => 'Confronto Periodi',
+    'compare_title'          => 'Confronto Periodi',
+    'compare_period_a'       => 'Periodo A',
+    'compare_period_b'       => 'Periodo B',
+    'compare_update'         => 'Aggiorna confronto',
+    'compare_updating'       => 'Aggiornamento...',
+    'compare_export'         => 'Esporta',
+    'compare_export_tooltip' => 'Disponibile a breve',
+    'compare_vs'             => 'vs',
+    'compare_kpi_distance'   => 'Distanza',
+    'compare_kpi_elevation'  => 'Dislivello',
+    'compare_kpi_time'       => 'Tempo',
+    'compare_kpi_activities' => 'Attività',
 ];

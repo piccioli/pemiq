@@ -56,6 +56,31 @@ class TrendAnalysisService
         return $query->get();
     }
 
+    public function periodStats(User $user, ?string $sportType, Carbon $from, Carbon $to): \stdClass
+    {
+        $query = Activity::where('user_id', $user->id)
+            ->where('started_at', '>=', $from)
+            ->where('started_at', '<=', $to);
+
+        if ($sportType !== null) {
+            $query->where('sport_type', $sportType);
+        }
+
+        $result = $query->selectRaw("
+            COUNT(*) as activities,
+            ROUND(SUM(distance) / 1000.0, 1) as distance_km,
+            ROUND(SUM(elevation_gain), 0) as elevation_m,
+            ROUND(SUM(elapsed_time) / 3600.0, 2) as hours
+        ")->first();
+
+        return (object) [
+            'activities'  => (int) ($result->activities ?? 0),
+            'distance_km' => (float) ($result->distance_km ?? 0),
+            'elevation_m' => (float) ($result->elevation_m ?? 0),
+            'hours'       => (float) ($result->hours ?? 0),
+        ];
+    }
+
     private function weekExpr(string $column): string
     {
         if (DB::connection()->getDriverName() === 'sqlite') {

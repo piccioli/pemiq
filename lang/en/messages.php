@@ -60,4 +60,19 @@ return [
     'trend_to'            => 'To',
     'trend_all_sports'    => 'All sports',
     'trend_no_data'       => 'No activities in the selected period.',
+
+    // Premium period comparison
+    'compare_page_title'     => 'Period Comparison',
+    'compare_title'          => 'Period Comparison',
+    'compare_period_a'       => 'Period A',
+    'compare_period_b'       => 'Period B',
+    'compare_update'         => 'Update comparison',
+    'compare_updating'       => 'Updating...',
+    'compare_export'         => 'Export',
+    'compare_export_tooltip' => 'Available soon',
+    'compare_vs'             => 'vs',
+    'compare_kpi_distance'   => 'Distance',
+    'compare_kpi_elevation'  => 'Elevation',
+    'compare_kpi_time'       => 'Time',
+    'compare_kpi_activities' => 'Activities',
 ];
