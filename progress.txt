@@ -1,3 +1,17 @@
+## 2026-06-14 - US-013
+- Created app/Http/Controllers/ActivityController.php: index() method uses auth()->user()->activities()->orderBy('started_at', 'desc')->paginate(20) — scoped via Eloquent relationship, no N+1 (no eager-loaded relationships needed for the list).
+- Added GET /activities route in routes/web.php with ['auth', 'verified'] middleware, named 'activities.index'.
+- Created resources/views/activities/index.blade.php: extends layouts.app, table with columns Data/Sport/Titolo/Distanza/Durata/Dislivello. Sport badges reuse same $sportColors map as sport-distribution view. Distance: metres ÷ 1000 formatted with number_format(1dp). Duration: floor(s/3600):str_pad(floor((s%3600)/60), 2) h:mm format. Elevation: number_format(0dp) m. Null fields shown as '—'. Pagination via $activities->links().
+- Updated resources/views/layouts/app.blade.php: added 'Attività' link in desktop nav and mobile menu, highlighted when routeIs('activities.*').
+- All 48 tests pass.
+- Files changed: app/Http/Controllers/ActivityController.php (new), routes/web.php, resources/views/activities/index.blade.php (new), resources/views/layouts/app.blade.php
+- **Learnings for future iterations:**
+  - `auth()->user()->activities()` Eloquent relationship already scopes by user_id — cleaner than `Activity::where('user_id', auth()->id())` and avoids N+1 if further eager-loading is needed later.
+  - Pagination links are rendered with `$activities->links()` — requires `$activities->hasPages()` check to hide the div when not needed.
+  - Activity list view does NOT need eager loading for any relationship since only activity columns are shown — no N+1 risk.
+  - `activities.index` route naming follows Laravel resource convention (`resource.method`) — use `request()->routeIs('activities.*')` for active-state matching in navbar.
+---
+
 ## 2026-06-14 - US-012
 - Added `getDailyStats(User $user, int $year, int $month): Collection` to DashboardStatsService: groups activities by day within the given month using a SQLite-compatible `dayExpr()` helper (strftime('%d') for SQLite, DAY() for MySQL). Fills all days 1..N (Carbon::create($year,$month)->daysInMonth) so missing days show 0.
 - Created app/Livewire/Dashboard/MonthlyAnalysisChart.php: public $year (default current year), $month (default current month), $metric = 'distance'. render() dispatches 'monthly-chart-data' event with daily categories/seriesData. Falls back to max available year if current year has no data.
