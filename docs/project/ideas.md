@@ -84,14 +84,59 @@ Le fasi seguenti sono ordinate per **valore utente**, **dipendenze tecniche** e 
 
 ```mermaid
 flowchart LR
-    NOW((v0.2.0)) --> F3[Fase 3\nPremium metriche]
+    NOW((v0.2.0)) --> F25[Fase 2.5\nDesign System]
     NOW --> F5[Fase 5\nGDPR]
     NOW --> F9[Fase 9\nOps]
+    F25 --> F3[Fase 3\nPremium metriche]
     F3 --> F4[Fase 4\nMonetizzazione]
     F3 --> F7[Fase 7\nDashboard custom]
     F3 --> F8[Fase 8\nAI coaching]
     F4 --> F6[Fase 6\nMulti-provider]
 ```
+
+---
+
+## Fase 2.5 — Design System
+
+**Obiettivo:** portare l'intera UI a un linguaggio visivo coerente definito nel design system, sostituendo le classi Tailwind hardcoded con token semantici e componenti Blade riutilizzabili.
+
+**Dipende da:** v0.2.0  
+**Design System:** [Claude Design — PEMIQ](https://claude.ai/design/p/e74541dc-e4b8-4382-ad6f-27ecb5aa1be1?via=share)
+
+### Deliverable
+
+- [ ] **Token design → Tailwind config**
+  - Mappare colori, tipografia, spaziatura, ombre, border-radius dal design system in `tailwind.config.js`
+  - Definire palette semantica (primary, secondary, danger, success, warning, neutral) come custom colors
+- [ ] **Componenti Blade riutilizzabili**
+  - `x-button` (varianti: primary, secondary, danger, ghost; dimensioni: sm, md, lg)
+  - `x-card` (con slot header, body, footer)
+  - `x-badge` (sport type, status, premium)
+  - `x-form-input`, `x-form-select`, `x-form-label`, `x-form-error`
+  - `x-alert` (info, success, warning, error)
+  - `x-page-header` (titolo + sottotitolo + slot azioni)
+- [ ] **Refactor view esistenti**
+  - Dashboard: `overview-stats`, grafici ApexCharts, connection-status
+  - Lista e dettaglio attività
+  - Pagine Premium: trends, compare, year-over-year, /premium
+  - Landing page pubblica
+  - Layout navbar e sidebar
+- [ ] **Tipografia e spaziatura**
+  - Applicare scale tipografica del design system (heading, body, caption, label)
+  - Spaziatura coerente tra sezioni e componenti
+- [ ] **Dark mode** (opzionale, se previsto nel design system)
+  - Classe `dark:` Tailwind su tutti i componenti principali
+- [ ] **Documentazione componenti**
+  - File `docs/design/components.md` con uso e varianti di ogni componente Blade
+- [ ] **Verifica cross-page**
+  - Passata su tutte le pagine in browser per coerenza visiva
+  - Test responsive su mobile (375px) e desktop (1280px)
+
+### Definition of Done
+
+Ogni pagina usa esclusivamente i componenti Blade del design system; nessuna classe Tailwind hardcoded per colori brand, dimensioni tipografiche o spaziatura strutturale al di fuori di `tailwind.config.js`.
+
+**Stima indicativa:** 3–4 settimane
 
 ---
 
@@ -280,7 +325,8 @@ Team ops riceve alert su sync fallite e errori 5xx; dashboard resta <2s p95 con 
 
 | Fase | Nome | Durata stimata | Dipende da |
 |------|------|----------------|------------|
-| 3 | Premium: PR e training load | 4–5 sett. | v0.2.0 |
+| 2.5 | Design System | 3–4 sett. | v0.2.0 |
+| 3 | Premium: PR e training load | 4–5 sett. | 2.5 |
 | 4 | Monetizzazione Stripe | 2–3 sett. | 3 |
 | 5 | GDPR | 2 sett. | v0.2.0 (parallelo) |
 | 6 | Multi-provider | 5–6 sett. | 4 |
