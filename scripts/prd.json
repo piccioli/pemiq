@@ -37,8 +37,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Body background var(--bg). Sticky topbar 60px height with frosted glass (color-mix + backdrop-filter). Logo PEMIQ in Space Grotesk 700 var(--brand). Sidebar 256px bg-elevated with .pq-nav-link CSS class (text-muted default, text-strong hover, accent+accent-soft active). Extracted sidebar nav to partials/sidebar-nav.blade.php. Mobile sidebar drawer via Alpine.js sidebarOpen. Premium badge: zone-4 amber for premium users, accent teal for free users. Added .pq-nav-link and .pq-dropdown-item utility classes to app.css."
     },
     {
       "id": "US-003",

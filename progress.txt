@@ -1,3 +1,18 @@
+## 2026-06-14 - US-002
+- Updated `resources/views/layouts/app.blade.php`: replaced old top-nav layout with dark cockpit shell. Body background set to `var(--bg)`. Sticky topbar (60px) with `color-mix(in srgb, var(--bg) 80%, transparent)` + `backdrop-filter: blur(16px)` + `border-bottom: 1px solid var(--border)`. Logo "PEMIQ" in Space Grotesk 700 with `var(--brand)` color. Right area: Premium badge using `--zone-4` amber for premium users, teal `var(--accent)` "Passa a Premium" link for free users, user dropdown with DS styling.
+- Created `resources/views/partials/sidebar-nav.blade.php`: extracted reusable sidebar navigation with `pq-nav-link` class (text-muted default, text-strong hover, accent/accent-soft active). Includes Dashboard, Attività links; conditionally shows Premium section (Trend, Confronta, Anno su Anno) for premium users. Uses Lucide icons (`layout-dashboard`, `activity`, `trending-up`, `git-compare-arrows`, `calendar-range`).
+- Updated `resources/css/app.css`: added `body` base styles (bg + color + font-family), `[x-cloak]` hide rule, `.pq-nav-link` with hover/active states, `.pq-dropdown-item` for topbar dropdown items.
+- Mobile: sidebar hidden on md+ breakpoint; mobile hamburger toggle in topbar opens a fixed-position sidebar drawer via Alpine.js `sidebarOpen` on `<body>` scope.
+- All 80 tests pass. Build succeeds.
+- Files changed: resources/views/layouts/app.blade.php, resources/views/partials/sidebar-nav.blade.php (new), resources/css/app.css
+- **Learnings for future iterations:**
+  - `body x-data="{ sidebarOpen: false }"` + nested `header x-data="{ userOpen: false }"`: Alpine nested x-data MERGES with parent — inner scope can access `sidebarOpen` from body, no conflict. Only sibling scopes with same-named keys would shadow.
+  - Sidebar nav extracted to `resources/views/partials/sidebar-nav.blade.php` and `@include`d in both the desktop `aside` and mobile drawer `aside` — reuse without duplication. `$isPremiumActive` is passed in from the layout via `@php` block before the include.
+  - `color-mix(in srgb, var(--bg) 80%, transparent)` is the standard CSS frosted-glass background (no extra polyfill needed for modern browsers).
+  - `.pq-nav-link.active` pattern: avoids JS-driven hover on server-rendered active states — PHP conditionally adds the `active` class based on `request()->routeIs()`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-031
 - Created `app/Http/Controllers/PremiumController.php`: `index()` method checks if user is premium (same logic as EnsurePremium: `is_premium && (!premium_expires_at || premium_expires_at->isFuture())`). Premium users → redirect to `/dashboard` with `success` flash "Il tuo account è già Premium.". Free users → return `premium.index` view.
 - Added route `GET /premium` to `routes/web.php` with `['auth', 'verified']` middleware only (NOT inside the EnsurePremium group), named `premium.index`. Uses `PremiumController@index`.
