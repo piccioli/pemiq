@@ -1,3 +1,22 @@
+## 2026-06-14 - US-018
+- Created `app/Exceptions/Strava/StravaAuthException.php`: new exception for critical (non-recoverable) auth failures (user deauthorized app, refresh token permanently invalid).
+- Updated `app/Services/Strava/StravaTokenService.php`: `refreshToken()` now throws `StravaAuthException` when Strava returns HTTP 400 or 401 (permanent rejection), and keeps `StravaTokenRefreshException` for transient failures (network errors, 5xx).
+- Created `database/migrations/2026_06_14_100000_add_notified_at_to_strava_accounts.php`: adds `notified_at` nullable timestamp column to `strava_accounts`.
+- Updated `app/Models/StravaAccount.php`: added `notified_at` to `$fillable` and `'notified_at' => 'datetime'` cast.
+- Created `app/Mail/SyncFailedNotification.php`: Mailable with subject 'Sincronizzazione Strava fallita — ricollegamento necessario'.
+- Created `resources/views/emails/sync-failed-notification.blade.php`: Italian-language email explaining the failure and linking to /dashboard.
+- Updated `app/Jobs/SyncStravaHistoricalActivities.php`: catches `StravaAuthException` (critical), calls `sendCriticalFailureNotification()` (sends mail only if `notified_at` is null, then sets it); resets `notified_at = null` on successful sync.
+- Updated `app/Jobs/SyncStravaIncrementalActivities.php`: same pattern as historical job.
+- Created `tests/Feature/Strava/SyncFailedNotificationTest.php`: 6 tests covering critical failure → email sent + notified_at set; no duplicate email when notified_at already set; transitory failure → no email; successful sync → notified_at reset; same for incremental job.
+- All 54 tests pass.
+- Files changed: app/Exceptions/Strava/StravaAuthException.php (new), app/Mail/SyncFailedNotification.php (new), database/migrations/2026_06_14_100000_add_notified_at_to_strava_accounts.php (new), resources/views/emails/sync-failed-notification.blade.php (new), tests/Feature/Strava/SyncFailedNotificationTest.php (new), app/Services/Strava/StravaTokenService.php, app/Models/StravaAccount.php, app/Jobs/SyncStravaHistoricalActivities.php, app/Jobs/SyncStravaIncrementalActivities.php
+- **Learnings for future iterations:**
+  - Critical vs transitory distinction: StravaAuthException (400/401 on refresh → permanent, user must re-connect) vs StravaTokenRefreshException (network/5xx → transient, will retry). This distinction lives in StravaTokenService.
+  - `notified_at` pattern: set to now() on first notification, reset to null on successful sync — prevents duplicate emails across multiple failed syncs.
+  - Mail::fake() in tests: use `Mail::assertSent(ClassName::class, fn($mail) => $mail->hasTo(...))` and `Mail::assertNothingSent()`.
+  - Mailable with SerializesModels: pass StravaAccount as public readonly property; the model is serialized by ID and re-fetched on queue processing.
+---
+
 ## 2026-06-14 - US-017
 - Removed `#[Poll('5s')]` class attribute from `app/Livewire/Strava/ConnectionStatus.php` — polling is now driven by the view only when needed.
 - Updated `render()`: fetches latest SyncLog via `getLatestSync(StravaAccount)` and passes `syncStatus`, `syncActivitiesImported`, `syncErrorMessage` to view (removed `syncRunning` bool).
