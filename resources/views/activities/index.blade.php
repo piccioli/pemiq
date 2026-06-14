@@ -121,7 +121,9 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
-                                    {{ $activity->name }}
+                                    <a href="{{ route('activities.show', $activity) }}" class="hover:text-blue-600 hover:underline">
+                                        {{ $activity->name }}
+                                    </a>
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700 text-right whitespace-nowrap">{{ $distanceKm }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700 text-right whitespace-nowrap">{{ $duration }}</td>

@@ -92,6 +92,10 @@ Route::get('/activities', [ActivityController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('activities.index');
 
+Route::get('/activities/{activity}', [ActivityController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('activities.show');
+
 // Strava OAuth
 Route::get('/strava/redirect', [StravaController::class, 'redirect'])
     ->middleware(['auth', 'verified'])

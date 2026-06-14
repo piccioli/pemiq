@@ -9,6 +9,13 @@ use Illuminate\View\View;
 
 class ActivityController extends Controller
 {
+    public function show(Activity $activity): View
+    {
+        abort_if($activity->user_id !== auth()->id(), 403);
+
+        return view('activities.show', compact('activity'));
+    }
+
     public function index(Request $request): View
     {
         $user  = auth()->user();
