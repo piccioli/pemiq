@@ -80,4 +80,34 @@ class PremiumRoutesTest extends TestCase
 
         $response->assertRedirect('/dashboard');
     }
+
+    public function test_free_user_can_access_premium_landing_page(): void
+    {
+        $user = User::factory()->create(['is_premium' => false]);
+
+        $response = $this->actingAs($user)->get('/premium');
+
+        $response->assertStatus(200);
+        $response->assertSee('PEMIQ Premium');
+    }
+
+    public function test_unauthenticated_user_is_redirected_from_premium_landing(): void
+    {
+        $response = $this->get('/premium');
+
+        $response->assertRedirect('/login');
+    }
+
+    public function test_premium_user_visiting_premium_landing_is_redirected_to_dashboard(): void
+    {
+        $user = User::factory()->create([
+            'is_premium'         => true,
+            'premium_expires_at' => now()->addYear(),
+        ]);
+
+        $response = $this->actingAs($user)->get('/premium');
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHas('success', 'Il tuo account è già Premium.');
+    }
 }

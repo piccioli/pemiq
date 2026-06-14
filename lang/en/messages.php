@@ -88,6 +88,23 @@ return [
     'compare_col_delta_abs'     => 'Absolute Delta',
     'compare_col_delta_pct'     => 'Delta (%)',
 
+    // Premium landing page
+    'premium_already_premium'  => 'Your account is already Premium.',
+    'premium_title'            => 'PEMIQ Premium',
+    'premium_subtitle'         => 'Unlock advanced training analysis with Premium features.',
+    'premium_free_sync'        => 'Automatic Strava sync',
+    'premium_free_dashboard'   => 'Dashboard with overview stats',
+    'premium_free_activities'  => 'Activity list and detail with map',
+    'premium_free_charts'      => 'Annual and monthly charts',
+    'premium_feat_trends'      => 'Trend analysis over time',
+    'premium_feat_compare'     => 'Period comparison',
+    'premium_feat_yoy'         => 'Year-over-year comparison',
+    'premium_cta_title'        => 'How to request Premium access',
+    'premium_cta_body'         => 'PEMIQ Premium is activated manually by the administrator. Write to us to request your upgrade.',
+    'premium_cta_button'       => 'Contact the administrator',
+    'premium_email_subject'    => 'PEMIQ Premium access request',
+    'premium_self_service_note'=> 'Self-service payment available soon.',
+
     // Premium year over year
     'yoy_page_title'  => 'Year Over Year',
     'yoy_chart_title' => 'Monthly Volume by Year (km)',

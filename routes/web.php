@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImpersonateController;
+use App\Http\Controllers\PremiumController;
 use App\Http\Controllers\StravaController;
 use Illuminate\Support\Facades\Route;
 
@@ -113,6 +114,11 @@ Route::delete('/strava/disconnect', [StravaController::class, 'disconnect'])
 Route::post('/strava/sync-historical', [StravaController::class, 'syncHistorical'])
     ->middleware(['auth', 'verified'])
     ->name('strava.sync-historical');
+
+// Premium landing page (accessible to all authenticated users)
+Route::get('/premium', [PremiumController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('premium.index');
 
 // Premium features (EnsurePremium middleware)
 Route::middleware(['auth', 'verified', 'premium'])->prefix('premium')->name('premium.')->group(function () {
