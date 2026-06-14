@@ -123,8 +123,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/tag.blade.php with props: selected (bool), removable (bool), interactive (bool, default: true), icon slot, removeHref (string optional). Renders as <span> with pq-tag CSS classes; removable=true adds an <a href> or <button> × element (pq-tag-remove) that links to removeHref or fires onclick. Added .pq-tag, .pq-tag-selected, .pq-tag-static, .pq-tag-label, .pq-tag-remove CSS classes to app.css. Refactored activities/index.blade.php: replaced the single Reset button with an active-filters chip strip that renders each active filter (sport/year/month) as <x-tag selected removable :remove-href='...'> chips — each chip links to the URL with only that filter removed. Added remove_filter and active_filters translation keys to both lang files. All 80 tests pass. Vite build succeeds."
     },
     {
       "id": "US-007",

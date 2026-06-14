@@ -1,3 +1,17 @@
+## 2026-06-14 - US-006
+- Created `resources/views/components/tag.blade.php`: Blade component with `@props` for `selected` (bool), `removable` (bool), `interactive` (bool, default: true), `removeHref` (string optional). Renders as `<span>` using `$attributes->class($classes)`. Named `$icon` slot. When `removable=true`, renders a `<a href>` (if removeHref set) or `<button>` × element with class `pq-tag-remove`.
+- Added `.pq-tag`, `.pq-tag-selected`, `.pq-tag-static`, `.pq-tag-label`, `.pq-tag-remove` CSS classes to `resources/css/app.css`. Default state: `var(--surface-2)` bg + `var(--border)` border + `var(--text-muted)` text. Selected: `var(--accent-soft)` bg + `var(--brand)` border + `var(--accent)` text. Remove button: inherits color, hover → `var(--danger)`.
+- Refactored `resources/views/activities/index.blade.php`: replaced single "Reset" button with an active-filter chip strip. When sport/year/month filters are active, each is rendered as `<x-tag selected removable :remove-href="...">` where the href removes only that filter while preserving the others.
+- Added `remove_filter` and `active_filters` translation keys to `lang/it/messages.php` and `lang/en/messages.php`.
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/tag.blade.php (new), resources/css/app.css, resources/views/activities/index.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - `<a>` inside another `<a>` is invalid HTML — when a tag needs both a main link and a removable × link, use `<span>` as the container and pass the × href separately via `removeHref` prop.
+  - `array_filter(['year' => $year, 'month' => $month])` removes empty string/null/0 values — safe for URL param building when filters can be empty strings from unfilled selects.
+  - Tag component uses `$attributes->class($classes)` for full Blade attribute pass-through (same pattern as Button/Badge/Card).
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-005
 - Created `resources/views/components/badge.blade.php`: Blade component with `@props` for `variant` (success|warning|danger|info|brand|outline|zone1-5, default: outline), `size` (sm|md, default: sm), `dot` (bool). Uses `$attributes->class($classes)` for pass-through. Dot indicator rendered as a `<span class="pq-badge-dot-indicator">` (8px circle, `background: currentColor`).
 - Added `.pq-badge`, `.pq-badge-{variant}`, `.pq-badge-{size}`, `.pq-badge-dot-indicator` CSS classes to `resources/css/app.css`. Zone variants use `var(--zone-N-soft)` bg + `var(--zone-N)` text; status variants use `var(--{variant}-soft)` bg + `var(--{variant})` text.
