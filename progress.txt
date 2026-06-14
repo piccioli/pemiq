@@ -1,3 +1,16 @@
+## 2026-06-14 - US-022
+- Changed `routes/web.php`: route `/` now returns `view('landing')` for guests; redirects to `dashboard` for authenticated users. Named the route `home`.
+- Created `resources/views/landing.blade.php`: standalone HTML page (no layout extension) with Tailwind CDN + Alpine.js CDN. Sections: public navbar (logo, Accedi link, Registrati CTA), hero (headline, subheadline, dual CTA buttons), stats bar, 6-feature grid, Free vs Premium plan cards, CTA banner, footer.
+- Updated `tests/Feature/ExampleTest.php`: changed `assertRedirect()` to `assertStatus(200)` for the guest `/` case; added new test `authenticated_user_visiting_root_is_redirected_to_dashboard` with `RefreshDatabase` trait; added `use RefreshDatabase;`.
+- All 60 tests pass.
+- Files changed: routes/web.php, resources/views/landing.blade.php (new), tests/Feature/ExampleTest.php
+- **Learnings for future iterations:**
+  - The `/` route previously redirected guests to `/login` — now it returns the landing view. Any test asserting `assertRedirect()` on `/` for a guest user must be updated to `assertStatus(200)`.
+  - Landing page is standalone (no layout extension) to avoid auth()->user() calls in app.blade.php that would fail for unauthenticated users.
+  - Adding a test that creates a User model requires `use RefreshDatabase` on the test class; the ExampleTest previously had this commented out since it didn't touch the DB.
+  - Route named `home` for `/` — use `route('home')` if needed in other places (logout redirects to `/` via literal string, not `route('home')`, which is fine).
+---
+
 ## 2026-06-14 - US-020
 - Audited all 7 view files in `resources/views/livewire/dashboard/` — found hardcoded Italian strings in headings, empty states, table column headers, toggle button labels, month name arrays, and JavaScript tooltip/chart config.
 - Added 25 new keys to `lang/it/messages.php` and `lang/en/messages.php`: section titles, empty-state messages, stat labels, column headers, metric toggles, chart config labels, full month names array (`months`), and short month abbreviations array (`months_short`).
