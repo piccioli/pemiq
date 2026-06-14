@@ -6,10 +6,8 @@ use App\Jobs\SyncStravaHistoricalActivities;
 use App\Models\StravaAccount;
 use App\Models\SyncLog;
 use Illuminate\View\View;
-use Livewire\Attributes\Poll;
 use Livewire\Component;
 
-#[Poll('5s')]
 class ConnectionStatus extends Component
 {
     public ?string $syncMessage = null;
@@ -22,7 +20,8 @@ class ConnectionStatus extends Component
             return;
         }
 
-        if ($this->isSyncRunning($account)) {
+        $latestSync = $this->getLatestSync($account);
+        if ($latestSync?->status === 'running') {
             return;
         }
 
@@ -34,11 +33,16 @@ class ConnectionStatus extends Component
     public function render(): View
     {
         $account = $this->getConnectedAccount();
-        $syncRunning = $account ? $this->isSyncRunning($account) : false;
+        $latestSync = $account ? $this->getLatestSync($account) : null;
+        $syncStatus = $latestSync?->status;
+        $syncActivitiesImported = (int) ($latestSync?->activities_imported ?? 0);
+        $syncErrorMessage = $latestSync?->error_message;
 
         return view('livewire.strava.connection-status', [
             'stravaAccount' => $account,
-            'syncRunning' => $syncRunning,
+            'syncStatus' => $syncStatus,
+            'syncActivitiesImported' => $syncActivitiesImported,
+            'syncErrorMessage' => $syncErrorMessage,
         ]);
     }
 
@@ -49,10 +53,10 @@ class ConnectionStatus extends Component
             : null;
     }
 
-    private function isSyncRunning(StravaAccount $account): bool
+    private function getLatestSync(StravaAccount $account): ?SyncLog
     {
         return SyncLog::where('strava_account_id', $account->id)
-            ->where('status', 'running')
-            ->exists();
+            ->latest('started_at')
+            ->first();
     }
 }
