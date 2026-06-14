@@ -35,7 +35,7 @@ class YearOverYearChart extends Component
 
         $currentYear = (int) Carbon::now()->format('Y');
         $availableYears = [];
-        for ($y = $currentYear; $y >= $currentYear - 5; $y--) {
+        for ($y = $currentYear; $y >= 2010; $y--) {
             $availableYears[] = $y;
         }
 
