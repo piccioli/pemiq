@@ -7,7 +7,55 @@
 
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900">Attività</h1>
-        <span class="text-sm text-gray-500">{{ $activities->total() }} attività totali</span>
+        <span class="text-sm text-gray-500">{{ $activities->total() }} attività trovate</span>
+    </div>
+
+    {{-- Filtri --}}
+    <div class="bg-white rounded-lg shadow p-4">
+        <form method="GET" action="{{ route('activities.index') }}" class="flex flex-wrap gap-3 items-end">
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Sport</label>
+                <select name="sport" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Tutti gli sport</option>
+                    @foreach ($sportTypes as $type)
+                        <option value="{{ $type }}" @selected($sport === $type)>{{ $type }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Anno</label>
+                <select name="year" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Tutti gli anni</option>
+                    @foreach ($availableYears as $y)
+                        <option value="{{ $y }}" @selected((string) $year === (string) $y)>{{ $y }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex flex-col gap-1">
+                @php
+                    $monthNames = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+                @endphp
+                <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Mese</label>
+                <select name="month" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Tutti i mesi</option>
+                    @foreach ($monthNames as $idx => $name)
+                        <option value="{{ $idx + 1 }}" @selected((string) $month === (string) ($idx + 1))>{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Filtra
+            </button>
+
+            @if ($sport || $year || $month)
+                <a href="{{ route('activities.index') }}" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200">
+                    Reset
+                </a>
+            @endif
+        </form>
     </div>
 
     @php
@@ -29,7 +77,11 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         @if ($activities->isEmpty())
             <div class="p-8 text-center text-gray-500 text-sm">
-                Nessuna attività ancora. Collega Strava e avvia la sincronizzazione.
+                @if ($sport || $year || $month)
+                    Nessuna attività trovata.
+                @else
+                    Nessuna attività ancora. Collega Strava e avvia la sincronizzazione.
+                @endif
             </div>
         @else
             <div class="overflow-x-auto">
