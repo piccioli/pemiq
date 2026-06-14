@@ -1,3 +1,16 @@
+## 2026-06-14 - US-024
+- Updated `resources/views/layouts/app.blade.php`: added `@php $isPremiumActive = ...` block in desktop nav; shows amber "★ Premium" badge for premium users, "Passa a Premium" link to `/premium` for free users. Same conditional in mobile menu (reuses `$isPremiumActive` set in desktop section — Blade shares PHP scope within the same template).
+- Updated `resources/views/profile/show.blade.php`: added "Account" section below the Password section. Premium users see amber "★ Premium" badge with optional expiry date (`fmt_date`). Free users see a "Passa a Premium" amber CTA button linking to `/premium`.
+- Premium check: `is_premium === true` AND (`premium_expires_at === null` OR `premium_expires_at->isFuture()`) — consistent with EnsurePremium middleware.
+- All 67 tests pass.
+- Files changed: resources/views/layouts/app.blade.php, resources/views/profile/show.blade.php
+- **Learnings for future iterations:**
+  - Blade PHP scope is shared within a single template: a `@php` variable set in one section (desktop nav) is accessible in later sections (mobile menu) — no need to repeat the computation.
+  - `/premium` route does not yet exist (US-031 pending) — use literal path `/premium` not `route('premium')` to avoid RouteNotFoundException.
+  - Premium check in views mirrors EnsurePremium middleware logic: `is_premium && (!premium_expires_at || premium_expires_at->isFuture())`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-023
 - Added premium route group in `routes/web.php`: `Route::middleware(['auth', 'verified', 'premium'])->prefix('premium')->name('premium.')->group(...)` with routes for `/premium/trends`, `/premium/compare`, `/premium/year-over-year`.
 - Created 3 placeholder Blade views: `resources/views/premium/trends.blade.php`, `compare.blade.php`, `year-over-year.blade.php` — each extends `layouts.app` and shows a "Prossimamente" placeholder.
