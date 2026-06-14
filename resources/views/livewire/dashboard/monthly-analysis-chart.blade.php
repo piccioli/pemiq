@@ -1,7 +1,5 @@
-<x-card padding="lg">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.dashboard_monthly_chart_title') }}</h2>
-
+<x-card padding="lg" :eyebrow="__('messages.dashboard_monthly_chart_title')">
+    <x-slot:action>
         @if ($hasData)
         <div class="flex items-center gap-3 flex-wrap">
             <x-form.select size="sm" wire:model.live="year">
@@ -27,7 +25,7 @@
             />
         </div>
         @endif
-    </div>
+    </x-slot:action>
 
     @if ($hasData)
         <script>window.__monthlyChartInitData = @json($chartData);</script>
@@ -41,7 +39,7 @@
                         series: [{ name: data.seriesName, data: data.seriesData }],
                         xaxis: { categories: data.categories, labels: { rotate: -45, style: { fontSize: '11px' } } },
                         yaxis: { title: { text: data.yAxisTitle }, labels: { formatter: function(val) { return val.toFixed(1); } } },
-                        colors: ['#3B82F6'],
+                        colors: ['#16D4B4'],
                         plotOptions: { bar: { borderRadius: 3, columnWidth: '70%' } },
                         dataLabels: { enabled: false },
                         grid: { borderColor: '#f1f5f9' }

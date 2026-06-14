@@ -1,5 +1,4 @@
-<x-card padding="lg">
-    <h2 class="text-lg font-semibold text-gray-800 mb-4">{{ __('messages.dashboard_sport_dist_chart_title') }}</h2>
+<x-card padding="lg" :eyebrow="__('messages.dashboard_sport_dist_chart_title')">
 
     @if ($hasData)
         <script>window.__sportDistChartInitData = @json($chartData);</script>
