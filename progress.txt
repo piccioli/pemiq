@@ -1,3 +1,20 @@
+## 2026-06-14 - US-017
+- Removed `#[Poll('5s')]` class attribute from `app/Livewire/Strava/ConnectionStatus.php` — polling is now driven by the view only when needed.
+- Updated `render()`: fetches latest SyncLog via `getLatestSync(StravaAccount)` and passes `syncStatus`, `syncActivitiesImported`, `syncErrorMessage` to view (removed `syncRunning` bool).
+- Added private `getLatestSync(StravaAccount): ?SyncLog` method (replaces `isSyncRunning()`).
+- Updated `startHistoricalSync()`: guards on `$latestSync?->status === 'running'` instead of the old `isSyncRunning()`.
+- Updated `resources/views/livewire/strava/connection-status.blade.php`:
+  - Root `<div>` gains `wire:poll.5000ms` only when `$stravaAccount && $syncStatus === 'running'` — zero polling when no account or no active sync.
+  - Status notification area: 'running' → "Sincronizzazione in corso (N attività importate)" with spinner; 'completed' → "Sincronizzazione completata"; 'failed' → "Sincronizzazione fallita — [error truncated to 100 chars]"; fallback → `$syncMessage` (e.g. 'Sincronizzazione avviata').
+  - Button area: `$syncStatus === 'running'` replaces old `$syncRunning` bool to conditionally show spinner vs active button.
+- All 48 tests pass.
+- Files changed: app/Livewire/Strava/ConnectionStatus.php, resources/views/livewire/strava/connection-status.blade.php
+- **Learnings for future iterations:**
+  - Conditional `wire:poll` in Livewire 3: use `@if($condition) wire:poll.5000ms @endif` on the root `<div>`. Livewire morphdom will add/remove the attribute on re-render, correctly starting/stopping the client-side interval.
+  - `\Illuminate\Support\Str::limit($text, 100)` is the Blade-safe way to truncate error messages — use the fully qualified class name in Blade to avoid `use` imports in views.
+  - Getting the latest SyncLog: `SyncLog::where('strava_account_id', $id)->latest('started_at')->first()` — `latest()` defaults to `created_at`, specify `started_at` explicitly.
+---
+
 ## 2026-06-14 - US-016
 - Installed `leaflet@^1.9.4` and `@mapbox/polyline@^1.2.1` via npm on host (npm is NOT in Docker container — always run npm on host).
 - Updated resources/js/app.js: imports `L` from `leaflet`, imports `leaflet/dist/leaflet.css`, imports `* as polyline` from `@mapbox/polyline`. Exposes `window.L` and `window.PolylineDecoder` globally.
