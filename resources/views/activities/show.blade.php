@@ -20,7 +20,34 @@
             'Swim'               => 'zone1',
             'Workout'            => 'outline',
         ];
+
+        $distanceVal  = $activity->distance !== null ? fmt_number($activity->distance / 1000, 2) : '—';
+        $distanceUnit = $activity->distance !== null ? 'km' : null;
+
+        $elapsedSec   = $activity->elapsed_time;
+        $durationVal  = $elapsedSec !== null
+            ? floor($elapsedSec / 3600) . ':' . str_pad(floor(($elapsedSec % 3600) / 60), 2, '0', STR_PAD_LEFT)
+            : '—';
+
+        $movingSec      = $activity->moving_time;
+        $movingDuration = $movingSec !== null
+            ? floor($movingSec / 3600) . ':' . str_pad(floor(($movingSec % 3600) / 60), 2, '0', STR_PAD_LEFT)
+            : '—';
+
+        $elevationVal  = $activity->elevation_gain !== null ? fmt_number($activity->elevation_gain, 0) : '—';
+        $elevationUnit = $activity->elevation_gain !== null ? 'm' : null;
+
+        $avgSpeedVal  = $activity->average_speed !== null ? fmt_number($activity->average_speed * 3.6, 1) : '—';
+        $avgSpeedUnit = $activity->average_speed !== null ? 'km/h' : null;
+
+        $avgHrVal  = $activity->average_heartrate !== null ? fmt_number($activity->average_heartrate, 0) : null;
+        $avgHrUnit = 'bpm';
+
+        $maxHr    = $activity->max_heartrate !== null ? fmt_number($activity->max_heartrate, 0) . ' bpm' : null;
+        $avgWatts = $activity->average_watts !== null ? fmt_number($activity->average_watts, 0) . ' W' : null;
+        $calories = $activity->calories !== null ? fmt_number($activity->calories, 0) . ' kcal' : null;
     @endphp
+
     <a href="{{ route('activities.index') }}" style="font-size: var(--fs-sm); color: var(--accent); display: block; margin-bottom: 8px;">&larr; Indietro alla lista</a>
     <x-page-header
         :title="$activity->name ?? 'Attività senza titolo'"
@@ -50,44 +77,6 @@
             ['id' => 'panoramica', 'label' => __('messages.tab_overview'), 'icon' => 'layout-dashboard'],
             ['id' => 'mappa',      'label' => __('messages.tab_map'),      'icon' => 'map'],
         ];
-
-        $distanceKm = $activity->distance !== null
-            ? fmt_number($activity->distance / 1000, 2) . ' km'
-            : '—';
-
-        $elapsedSec = $activity->elapsed_time;
-        $duration = $elapsedSec !== null
-            ? floor($elapsedSec / 3600) . ':' . str_pad(floor(($elapsedSec % 3600) / 60), 2, '0', STR_PAD_LEFT)
-            : '—';
-
-        $movingSec = $activity->moving_time;
-        $movingDuration = $movingSec !== null
-            ? floor($movingSec / 3600) . ':' . str_pad(floor(($movingSec % 3600) / 60), 2, '0', STR_PAD_LEFT)
-            : '—';
-
-        $elevation = $activity->elevation_gain !== null
-            ? fmt_number($activity->elevation_gain, 0) . ' m'
-            : '—';
-
-        $avgSpeedKmh = $activity->average_speed !== null
-            ? fmt_number($activity->average_speed * 3.6, 1) . ' km/h'
-            : '—';
-
-        $avgHr = $activity->average_heartrate !== null
-            ? fmt_number($activity->average_heartrate, 0) . ' bpm'
-            : null;
-
-        $maxHr = $activity->max_heartrate !== null
-            ? fmt_number($activity->max_heartrate, 0) . ' bpm'
-            : null;
-
-        $avgWatts = $activity->average_watts !== null
-            ? fmt_number($activity->average_watts, 0) . ' W'
-            : null;
-
-        $calories = $activity->calories !== null
-            ? fmt_number($activity->calories, 0) . ' kcal'
-            : null;
     @endphp
 
     <x-tabs :items="$tabItems" active="panoramica">
@@ -95,63 +84,94 @@
         {{-- Panoramica panel --}}
         <div x-show="activeTab === 'panoramica'" class="space-y-6">
 
-            {{-- Metriche principali --}}
+            {{-- KPI metriche principali --}}
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                <x-card padding="sm">
-                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.metric_distance') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $distanceKm }}</p>
-                </x-card>
 
-                <x-card padding="sm">
-                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.col_duration') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $duration }}</p>
-                </x-card>
+                <x-metric-tile
+                    :label="__('messages.metric_distance')"
+                    :value="$distanceVal"
+                    :unit="$distanceUnit"
+                    accent="zone-2"
+                >
+                    <x-slot:icon>
+                        <i data-lucide="route" style="width: 20px; height: 20px;"></i>
+                    </x-slot:icon>
+                </x-metric-tile>
 
-                <x-card padding="sm">
-                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.compare_kpi_elevation') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $elevation }}</p>
-                </x-card>
+                <x-metric-tile
+                    :label="__('messages.col_duration')"
+                    :value="$durationVal"
+                    accent="brand"
+                >
+                    <x-slot:icon>
+                        <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
+                    </x-slot:icon>
+                </x-metric-tile>
 
-                <x-card padding="sm">
-                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.col_avg_speed') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $avgSpeedKmh }}</p>
-                </x-card>
+                <x-metric-tile
+                    :label="__('messages.compare_kpi_elevation')"
+                    :value="$elevationVal"
+                    :unit="$elevationUnit"
+                    accent="zone-3"
+                >
+                    <x-slot:icon>
+                        <i data-lucide="mountain-snow" style="width: 20px; height: 20px;"></i>
+                    </x-slot:icon>
+                </x-metric-tile>
 
-                @if ($avgHr !== null)
-                <x-card padding="sm">
-                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.col_avg_hr') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $avgHr }}</p>
-                </x-card>
+                <x-metric-tile
+                    :label="__('messages.col_avg_speed')"
+                    :value="$avgSpeedVal"
+                    :unit="$avgSpeedUnit"
+                    accent="zone-2"
+                >
+                    <x-slot:icon>
+                        <i data-lucide="gauge" style="width: 20px; height: 20px;"></i>
+                    </x-slot:icon>
+                </x-metric-tile>
+
+                @if ($avgHrVal !== null)
+                <x-metric-tile
+                    :label="__('messages.col_avg_hr')"
+                    :value="$avgHrVal"
+                    :unit="$avgHrUnit"
+                    accent="zone-5"
+                >
+                    <x-slot:icon>
+                        <i data-lucide="heart-pulse" style="width: 20px; height: 20px;"></i>
+                    </x-slot:icon>
+                </x-metric-tile>
                 @endif
+
             </div>
 
             {{-- Metriche secondarie --}}
             @if ($movingDuration !== '—' || $maxHr !== null || $avgWatts !== null || $calories !== null)
             <x-card padding="sm">
-                <h2 class="text-sm font-semibold text-gray-700 mb-3">{{ __('messages.activity_additional_details') }}</h2>
+                <h2 style="font-size: var(--fs-sm); font-weight: 600; color: var(--text); margin-bottom: 12px;">{{ __('messages.activity_additional_details') }}</h2>
                 <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     @if ($movingDuration !== '—')
                     <div>
-                        <dt class="text-xs text-gray-500">{{ __('messages.col_moving_time') }}</dt>
-                        <dd class="text-sm font-medium text-gray-900 mt-0.5">{{ $movingDuration }}</dd>
+                        <dt style="font-size: var(--fs-xs); color: var(--text-muted)">{{ __('messages.col_moving_time') }}</dt>
+                        <dd style="font-size: var(--fs-sm); font-weight: 500; color: var(--text-strong); margin-top: 2px">{{ $movingDuration }}</dd>
                     </div>
                     @endif
                     @if ($maxHr !== null)
                     <div>
-                        <dt class="text-xs text-gray-500">{{ __('messages.col_max_hr') }}</dt>
-                        <dd class="text-sm font-medium text-gray-900 mt-0.5">{{ $maxHr }}</dd>
+                        <dt style="font-size: var(--fs-xs); color: var(--text-muted)">{{ __('messages.col_max_hr') }}</dt>
+                        <dd style="font-size: var(--fs-sm); font-weight: 500; color: var(--text-strong); margin-top: 2px">{{ $maxHr }}</dd>
                     </div>
                     @endif
                     @if ($avgWatts !== null)
                     <div>
-                        <dt class="text-xs text-gray-500">{{ __('messages.col_avg_watts') }}</dt>
-                        <dd class="text-sm font-medium text-gray-900 mt-0.5">{{ $avgWatts }}</dd>
+                        <dt style="font-size: var(--fs-xs); color: var(--text-muted)">{{ __('messages.col_avg_watts') }}</dt>
+                        <dd style="font-size: var(--fs-sm); font-weight: 500; color: var(--text-strong); margin-top: 2px">{{ $avgWatts }}</dd>
                     </div>
                     @endif
                     @if ($calories !== null)
                     <div>
-                        <dt class="text-xs text-gray-500">{{ __('messages.col_calories') }}</dt>
-                        <dd class="text-sm font-medium text-gray-900 mt-0.5">{{ $calories }}</dd>
+                        <dt style="font-size: var(--fs-xs); color: var(--text-muted)">{{ __('messages.col_calories') }}</dt>
+                        <dd style="font-size: var(--fs-sm); font-weight: 500; color: var(--text-strong); margin-top: 2px">{{ $calories }}</dd>
                     </div>
                     @endif
                 </dl>
@@ -177,7 +197,7 @@
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                         maxZoom: 19
                     }).addTo(map);
-                    var track = window.L.polyline(latlngs, { color: '#E85D04', weight: 3 }).addTo(map);
+                    var track = window.L.polyline(latlngs, { color: '#16D4B4', weight: 3 }).addTo(map);
                     map.fitBounds(track.getBounds(), { padding: [20, 20] });
                 });
                 // Invalidate map size when tab becomes visible so Leaflet re-renders correctly
@@ -194,7 +214,7 @@
             </script>
             @else
             <x-card>
-                <p class="text-gray-500 text-sm text-center py-8">{{ __('messages.map_not_available') }}</p>
+                <p style="color: var(--text-muted); font-size: var(--fs-sm); text-align: center; padding: 32px 0">{{ __('messages.map_not_available') }}</p>
             </x-card>
             @endif
 

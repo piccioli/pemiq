@@ -966,6 +966,53 @@ body {
     flex-shrink: 0;
 }
 
+/* ─── Table ───────────────────────────────────────────────────── */
+.pq-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pq-table thead tr {
+    border-bottom: 1px solid var(--border);
+}
+
+.pq-table thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.pq-table thead th.col-right { text-align: right; }
+
+.pq-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background var(--dur-fast) var(--ease-out);
+}
+
+.pq-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.pq-table tbody tr:hover {
+    background: var(--surface-hover);
+}
+
+.pq-table tbody td {
+    padding: 12px 16px;
+    font-size: var(--fs-sm);
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.pq-table tbody td.col-right   { text-align: right; }
+.pq-table tbody td.col-muted   { color: var(--text-muted); }
+.pq-table tbody td.col-truncate { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* ─── Tailwind v4 theme extension ─────────────────────────────── */
 @theme inline {
     --font-sans: var(--font-body);

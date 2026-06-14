@@ -12,7 +12,7 @@
     </x-page-header>
 
     {{-- Filtri --}}
-    <div class="bg-white rounded-lg shadow p-4">
+    <x-card>
         <form method="GET" action="{{ route('activities.index') }}" class="flex flex-wrap gap-3 items-end">
             <x-form.select :label="__('messages.col_sport')" name="sport">
                 <option value="">Tutti gli sport</option>
@@ -42,7 +42,7 @@
         </form>
 
         @if ($sport || $year || $month)
-            <div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t" style="border-color: var(--border)">
+            <div class="flex flex-wrap items-center gap-2 mt-3 pt-3" style="border-top: 1px solid var(--border)">
                 <span style="font-size: var(--fs-xs); color: var(--text-faint)">{{ __('messages.active_filters') }}</span>
                 @if ($sport)
                     <x-tag selected removable
@@ -64,7 +64,7 @@
                 @endif
             </div>
         @endif
-    </div>
+    </x-card>
 
     @php
         $sportVariants = [
@@ -82,9 +82,9 @@
         ];
     @endphp
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <x-card padding="none" style="overflow: hidden;">
         @if ($activities->isEmpty())
-            <div class="p-8 text-center text-gray-500 text-sm">
+            <div style="padding: 32px; text-align: center; font-size: var(--fs-sm); color: var(--text-muted)">
                 @if ($sport || $year || $month)
                     Nessuna attività trovata.
                 @else
@@ -93,18 +93,18 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="pq-table">
+                    <thead>
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sport</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titolo</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Distanza</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Durata</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Dislivello</th>
+                            <th>Data</th>
+                            <th>Sport</th>
+                            <th>Titolo</th>
+                            <th class="col-right">Distanza</th>
+                            <th class="col-right">Durata</th>
+                            <th class="col-right">Dislivello</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody>
                         @foreach ($activities as $activity)
                             @php
                                 $distanceKm = $activity->distance !== null
@@ -118,21 +118,19 @@
                                     ? fmt_number($activity->elevation_gain, 0) . ' m'
                                     : '—';
                             @endphp
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
-                                    {{ fmt_date($activity->started_at, 'd M Y') }}
-                                </td>
-                                <td class="px-4 py-3 text-sm">
+                            <tr>
+                                <td class="col-muted">{{ fmt_date($activity->started_at, 'd M Y') }}</td>
+                                <td>
                                     <x-badge :variant="$sportVariants[$activity->sport_type] ?? 'outline'">{{ $activity->sport_type }}</x-badge>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
-                                    <a href="{{ route('activities.show', $activity) }}" class="hover:text-blue-600 hover:underline">
+                                <td class="col-truncate">
+                                    <a href="{{ route('activities.show', $activity) }}" style="color: var(--accent); text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                                         {{ $activity->name }}
                                     </a>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-700 text-right whitespace-nowrap">{{ $distanceKm }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700 text-right whitespace-nowrap">{{ $duration }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700 text-right whitespace-nowrap">{{ $elevation }}</td>
+                                <td class="col-right">{{ $distanceKm }}</td>
+                                <td class="col-right">{{ $duration }}</td>
+                                <td class="col-right">{{ $elevation }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -140,12 +138,12 @@
             </div>
 
             @if ($activities->hasPages())
-                <div class="px-4 py-3 border-t border-gray-200">
+                <div style="padding: 12px 16px; border-top: 1px solid var(--border)">
                     {{ $activities->links() }}
                 </div>
             @endif
         @endif
-    </div>
+    </x-card>
 
 </div>
 @endsection
