@@ -1,0 +1,28 @@
+# Ralph Progress Log
+Started: Dom 14 Giu 2026 18:06:14 CEST
+---
+
+## Codebase Patterns
+- Tailwind v4 uses `@theme inline { --color-X: var(--X); }` in app.css — no tailwind.config.js
+- Vite build via `@tailwindcss/vite` plugin; entry: resources/css/app.css + resources/js/app.js
+- Blade layouts: resources/views/layouts/app.blade.php (authenticated), auth.blade.php (auth pages)
+- Alpine.js and ApexCharts loaded via resources/js/app.js
+- Lucide Icons loaded via CDN script in app.blade.php; call lucide.createIcons() on DOMContentLoaded AND livewire:navigated
+- DS token brand color: #16D4B4 (teal-500); secondary chart color: #4F8DF5 (zone-2)
+- Zone sport mapping: Run=zone3 (green), Ride=zone2 (blue), Swim=zone1 (gray)
+
+---
+
+## 2026-06-14 - US-001
+- Creato public/css/pemiq-ds.css con token completi: colori (ink-*, teal-*, ember-*, zone-1..5 + soft, status), tipografia (font vars, fs-*, text-* shorthand), spacing (space-1..32), effetti (radius, shadow, edge-top, glow-brand, ring-focus, dur-*, ease-*)
+- Dark theme default in :root + [data-theme=dark]; light theme override in [data-theme=light]
+- Utility classes .pq-eyebrow e .pq-metric aggiunte
+- resources/css/app.css aggiornato: token inline + @theme inline per Tailwind v4 (colori brand, zone-1..5, status, surface, bg, border, accent)
+- resources/views/layouts/app.blade.php aggiornato: data-theme=dark su <html>, Google Fonts link (Space Grotesk/Inter/DM Mono), @vite include resources/css/app.css, Lucide CDN script + createIcons()
+- Files changed: public/css/pemiq-ds.css (new), resources/css/app.css, resources/views/layouts/app.blade.php
+- **Learnings for future iterations:**
+  - Tailwind v4 non usa tailwind.config.js — tutta la configurazione va in app.css via @theme
+  - `@theme inline` permette di usare CSS custom properties come valori dei token Tailwind
+  - In Vite/Tailwind v4, le @font-face e font CDN vanno nel blade layout, non in app.css
+  - Lucide createIcons() va chiamato anche su livewire:navigated per i componenti livewire
+---
