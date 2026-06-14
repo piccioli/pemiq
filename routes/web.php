@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\ProfilePasswordController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImpersonateController;
 use App\Http\Controllers\StravaController;
@@ -85,6 +86,11 @@ Route::post('/logout', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+// Activities
+Route::get('/activities', [ActivityController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('activities.index');
 
 // Strava OAuth
 Route::get('/strava/redirect', [StravaController::class, 'redirect'])

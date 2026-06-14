@@ -26,6 +26,10 @@
                        class="text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-orange-600' : 'text-gray-600 hover:text-gray-900' }} transition-colors">
                         Dashboard
                     </a>
+                    <a href="{{ route('activities.index') }}"
+                       class="text-sm font-medium {{ request()->routeIs('activities.*') ? 'text-orange-600' : 'text-gray-600 hover:text-gray-900' }} transition-colors">
+                        Attività
+                    </a>
                 </div>
 
                 {{-- Desktop user menu --}}
@@ -94,6 +98,10 @@
                 <a href="{{ route('dashboard') }}"
                    class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-orange-600 bg-orange-50' : 'text-gray-700 hover:bg-gray-50' }}">
                     Dashboard
+                </a>
+                <a href="{{ route('activities.index') }}"
+                   class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('activities.*') ? 'text-orange-600 bg-orange-50' : 'text-gray-700 hover:bg-gray-50' }}">
+                    Attività
                 </a>
                 <a href="{{ route('profile.show') }}"
                    class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
