@@ -122,4 +122,19 @@ return [
     // ZoneBar
     'zone_distribution_title' => 'Tempo in Zona',
     'zone_distribution_mock'  => 'Dati di esempio',
+
+    // Tabs componente — activity detail
+    'tab_overview'            => 'Panoramica',
+    'tab_map'                 => 'Mappa',
+
+    // Activity show — metric labels
+    'col_duration'            => 'Durata',
+    'col_avg_speed'           => 'Velocità media',
+    'col_avg_hr'              => 'FC media',
+    'col_moving_time'         => 'Tempo in movimento',
+    'col_max_hr'              => 'FC massima',
+    'col_avg_watts'           => 'Potenza media',
+    'col_calories'            => 'Calorie',
+    'activity_additional_details' => 'Dettagli aggiuntivi',
+    'map_not_available'       => 'Mappa non disponibile',
 ];

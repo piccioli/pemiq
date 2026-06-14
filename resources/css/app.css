@@ -796,6 +796,55 @@ body {
     color: var(--text-faint);
 }
 
+/* ─── Tabs ─────────────────────────────────────────────────────── */
+.pq-tabs-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.pq-tabs-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.pq-tabs-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.pq-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+
+.pq-tab:hover {
+    color: var(--text-strong);
+}
+
+.pq-tab-active {
+    color: var(--text-strong);
+    border-bottom-color: var(--accent);
+}
+
+.pq-tabs-panels {
+    flex: 1;
+}
+
 /* ─── Tailwind v4 theme extension ─────────────────────────────── */
 @theme inline {
     --font-sans: var(--font-body);
