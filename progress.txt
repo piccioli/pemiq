@@ -1,3 +1,19 @@
+## 2026-06-14 - US-020
+- Audited all 7 view files in `resources/views/livewire/dashboard/` — found hardcoded Italian strings in headings, empty states, table column headers, toggle button labels, month name arrays, and JavaScript tooltip/chart config.
+- Added 25 new keys to `lang/it/messages.php` and `lang/en/messages.php`: section titles, empty-state messages, stat labels, column headers, metric toggles, chart config labels, full month names array (`months`), and short month abbreviations array (`months_short`).
+- Updated all 7 Blade view files: replaced every Italian string with `__('messages.key')` or `trans('messages.key')` calls. JS-embedded strings in `sport-distribution-chart.blade.php` tooltip (`attività`, `Totale`) use inline `{{ __() }}` within the Blade/JS template.
+- Updated `app/Livewire/Dashboard/AnnualAnalysisChart.php`: replaced hardcoded short month abbreviations array and `seriesName` strings with `trans('messages.months_short')` and `trans('messages.stat_distance_km')`/`trans('messages.col_hours')`.
+- Updated `app/Livewire/Dashboard/MonthlyAnalysisChart.php`: replaced hardcoded full month names array with `collect(trans('messages.months'))->mapWithKeys(fn($name, $i) => [$i + 1 => $name])->toArray()` to preserve 1-indexed format needed by the month selector.
+- All 59 tests pass.
+- Files changed: lang/it/messages.php, lang/en/messages.php, resources/views/livewire/dashboard/overview-stats.blade.php, annual-analysis.blade.php, monthly-analysis.blade.php, sport-distribution.blade.php, annual-analysis-chart.blade.php, monthly-analysis-chart.blade.php, sport-distribution-chart.blade.php, app/Livewire/Dashboard/AnnualAnalysisChart.php, app/Livewire/Dashboard/MonthlyAnalysisChart.php
+- **Learnings for future iterations:**
+  - `trans('messages.months')` returns a 0-indexed array when the lang file uses a numeric array. Use `collect()->mapWithKeys()` to convert to 1-indexed when needed by month selectors.
+  - Inline `{{ __('messages.key') }}` works inside Alpine.js x-data JS strings in Blade templates — Blade processes it before the browser sees any JS.
+  - JS tooltip closures in ApexCharts (inside `x-data`) can contain Blade expressions — the entire Blade template is server-rendered before delivery.
+  - `dashboard_no_activities_year` uses a `:year` placeholder — pass as `__('messages.dashboard_no_activities_year', ['year' => $year])`.
+  - All new translation keys follow the existing flat naming convention with underscores (not nested dot-notation arrays).
+---
+
 ## 2026-06-14 - US-018
 - Created `app/Exceptions/Strava/StravaAuthException.php`: new exception for critical (non-recoverable) auth failures (user deauthorized app, refresh token permanently invalid).
 - Updated `app/Services/Strava/StravaTokenService.php`: `refreshToken()` now throws `StravaAuthException` when Strava returns HTTP 400 or 401 (permanent rejection), and keeps `StravaTokenRefreshException` for transient failures (network errors, 5xx).
@@ -672,6 +688,8 @@
 - npm runs on HOST (not inside Docker container) — use `npm install` and `npm run build` on the host.
 - Leaflet CSS in Vite: import in app.js (`import 'leaflet/dist/leaflet.css'`), Vite extracts it and @vite() auto-injects the link tag.
 - Non-Livewire pages: init JS using `document.addEventListener('DOMContentLoaded', ...)` to safely access globals set by Vite module scripts (modules execute before DOMContentLoaded).
+- i18n in Blade/JS: inline `{{ __('messages.key') }}` inside Alpine.js x-data JS strings is valid — Blade renders server-side before JS is parsed by browser.
+- Month names in lang files: `trans('messages.months')` returns 0-indexed array. Use `collect(...)->mapWithKeys(fn($name, $i) => [$i + 1 => $name])` to convert to 1-indexed for month selectors.
 
 ---
 
