@@ -115,4 +115,7 @@ return [
 
     'remove_filter'   => 'Rimuovi filtro',
     'active_filters'  => 'Filtri attivi:',
+
+    // Switch preferenze
+    'email_notifications_label' => 'Notifiche email per errori di sincronizzazione',
 ];

@@ -27,9 +27,10 @@ class ProfileController extends Controller
         $emailChanged = $user->email !== $request->email;
 
         $user->fill([
-            'name'   => $request->name,
-            'email'  => $request->email,
-            'locale' => $request->locale,
+            'name'                => $request->name,
+            'email'               => $request->email,
+            'locale'              => $request->locale,
+            'email_notifications' => (bool) $request->input('email_notifications', false),
         ]);
 
         if ($emailChanged) {

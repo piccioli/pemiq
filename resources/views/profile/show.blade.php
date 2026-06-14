@@ -38,6 +38,12 @@
                 <option value="en" {{ old('locale', auth()->user()->locale) === 'en' ? 'selected' : '' }}>{{ __('messages.english') }}</option>
             </x-form.select>
 
+            <x-switch
+                name="email_notifications"
+                :label="__('messages.email_notifications_label')"
+                :checked="(bool) old('email_notifications', auth()->user()->email_notifications)"
+            />
+
             <x-button type="submit" fullWidth>Salva modifiche</x-button>
         </form>
 
