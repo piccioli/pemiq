@@ -83,4 +83,8 @@ return [
     'compare_chart_type_bar'    => 'Barre',
     'compare_week_short'        => 'Sett.',
     'compare_no_chart_data'     => 'Nessun dato per i periodi selezionati.',
+    'compare_detail_title'      => 'Dettaglio confronto',
+    'compare_col_metric'        => 'Metrica',
+    'compare_col_delta_abs'     => 'Delta assoluto',
+    'compare_col_delta_pct'     => 'Delta (%)',
 ];

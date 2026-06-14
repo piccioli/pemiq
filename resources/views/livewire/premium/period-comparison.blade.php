@@ -216,4 +216,96 @@
             <div wire:ignore x-ref="chartEl" style="min-height: 280px;"></div>
         </div>
     </div>
+
+    {{-- Detail comparison table --}}
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-700">{{ __('messages.compare_detail_title') }}</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('messages.compare_col_metric') }}</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                            {{ __('messages.compare_period_a') }}<br>
+                            <span class="font-normal normal-case text-gray-400">{{ $periodALabel }}</span>
+                        </th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-violet-600 uppercase tracking-wide">
+                            {{ __('messages.compare_period_b') }}<br>
+                            <span class="font-normal normal-case text-gray-400">{{ $periodBLabel }}</span>
+                        </th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('messages.compare_col_delta_abs') }}</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('messages.compare_col_delta_pct') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach ($kpis as $kpi)
+                        @php
+                            $valA     = $kpi['valueA'];
+                            $valB     = $kpi['valueB'];
+                            $unit     = $kpi['unit'];
+                            $dec      = $kpi['decimals'];
+                            $fmtA     = $dec > 0 ? fmt_number($valA, $dec) : (string)(int)$valA;
+                            $fmtB     = $dec > 0 ? fmt_number($valB, $dec) : (string)(int)$valB;
+
+                            $deltaAbs = $valB - $valA;
+                            $fmtDeltaAbs = ($deltaAbs >= 0 ? '+' : '') . ($dec > 0 ? fmt_number($deltaAbs, $dec) : (string)(int)$deltaAbs);
+
+                            $deltaRaw = $valA != 0 ? (($valB - $valA) / $valA) * 100 : null;
+                            $fmtDeltaPct = match(true) {
+                                $deltaRaw === null => '—',
+                                $deltaRaw > 0      => '↑ ' . fmt_number(abs($deltaRaw), 1) . '%',
+                                $deltaRaw < 0      => '↓ ' . fmt_number(abs($deltaRaw), 1) . '%',
+                                default            => '0%',
+                            };
+                            $deltaClass = match(true) {
+                                $deltaRaw === null => 'text-gray-400',
+                                $deltaRaw > 0      => 'text-green-600',
+                                $deltaRaw < 0      => 'text-red-600',
+                                default            => 'text-gray-400',
+                            };
+                            $absClass = match(true) {
+                                $deltaAbs > 0 => 'text-green-600',
+                                $deltaAbs < 0 => 'text-red-600',
+                                default       => 'text-gray-400',
+                            };
+
+                            $icons = [
+                                __('messages.compare_kpi_activities') => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
+                                __('messages.compare_kpi_distance')   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>',
+                                __('messages.compare_kpi_elevation')  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l7 14 7-14"/>',
+                                __('messages.compare_kpi_time')       => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                            ];
+                            $iconPath = $icons[$kpi['label']] ?? '';
+                        @endphp
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-5 py-3 font-medium text-gray-700">
+                                <span class="inline-flex items-center gap-2">
+                                    @if ($iconPath)
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            {!! $iconPath !!}
+                                        </svg>
+                                    @endif
+                                    {{ $kpi['label'] }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-3 text-right text-gray-700 tabular-nums">
+                                {{ $fmtA }}{{ $unit ? ' ' . $unit : '' }}
+                            </td>
+                            <td class="px-5 py-3 text-right font-semibold text-gray-900 tabular-nums">
+                                {{ $fmtB }}{{ $unit ? ' ' . $unit : '' }}
+                            </td>
+                            <td class="px-5 py-3 text-right font-medium tabular-nums {{ $absClass }}">
+                                {{ $fmtDeltaAbs }}{{ $unit ? ' ' . $unit : '' }}
+                            </td>
+                            <td class="px-5 py-3 text-right font-medium tabular-nums {{ $deltaClass }}">
+                                {{ $fmtDeltaPct }}
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
