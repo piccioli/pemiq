@@ -333,6 +333,45 @@ body {
     color: #fff;
 }
 
+/* ─── Badge component ────────────────────────────────────────── */
+.pq-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: var(--radius-pill);
+    font-weight: 500;
+    white-space: nowrap;
+    line-height: 1.3;
+    vertical-align: middle;
+}
+
+.pq-badge-dot-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.pq-badge-sm { padding: 2px 8px;  font-size: var(--fs-xs); }
+.pq-badge-md { padding: 4px 10px; font-size: var(--fs-sm); }
+
+.pq-badge-success { background: var(--success-soft); color: var(--success); }
+.pq-badge-warning { background: var(--warning-soft); color: var(--warning); }
+.pq-badge-danger  { background: var(--danger-soft);  color: var(--danger);  }
+.pq-badge-info    { background: var(--info-soft);    color: var(--info);    }
+.pq-badge-brand   { background: var(--brand-soft);   color: var(--brand);   }
+.pq-badge-outline {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+}
+.pq-badge-zone1 { background: var(--zone-1-soft); color: var(--zone-1); }
+.pq-badge-zone2 { background: var(--zone-2-soft); color: var(--zone-2); }
+.pq-badge-zone3 { background: var(--zone-3-soft); color: var(--zone-3); }
+.pq-badge-zone4 { background: var(--zone-4-soft); color: var(--zone-4); }
+.pq-badge-zone5 { background: var(--zone-5-soft); color: var(--zone-5); }
+
 /* ─── Card component ─────────────────────────────────────────── */
 .pq-card {
     background: var(--surface);

@@ -74,9 +74,7 @@
             <h2 class="text-base font-semibold text-gray-700 mb-3">Account</h2>
             @if($isPremiumProfile)
                 <div class="flex items-center space-x-2">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-amber-100 text-amber-800 border border-amber-300">
-                        ★ Premium
-                    </span>
+                    <x-badge variant="zone4" size="md">★ Premium</x-badge>
                     @if(auth()->user()->premium_expires_at)
                         <span class="text-sm text-gray-500">scade il {{ fmt_date(auth()->user()->premium_expires_at, 'd M Y') }}</span>
                     @endif

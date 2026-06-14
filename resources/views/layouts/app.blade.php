@@ -75,18 +75,7 @@
 
                 {{-- Premium badge (zone-4 amber) or upgrade link (accent teal) --}}
                 @if($isPremiumActive)
-                    <span style="
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 4px;
-                        padding: 3px 10px;
-                        border-radius: var(--radius-pill);
-                        background: color-mix(in srgb, var(--zone-4) 15%, transparent);
-                        color: var(--zone-4);
-                        font-size: var(--fs-xs);
-                        font-weight: 600;
-                        line-height: 1.4;
-                    ">★ Premium</span>
+                    <x-badge variant="zone4">★ Premium</x-badge>
                 @else
                     <a
                         href="/premium"

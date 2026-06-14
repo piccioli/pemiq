@@ -29,9 +29,7 @@
     @if ($stravaAccount)
         <div class="flex items-center justify-between flex-wrap gap-3" x-data="{ confirmDisconnect: false }">
             <div class="flex items-center gap-3">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                    Connesso
-                </span>
+                <x-badge variant="success" size="md" :dot="true">Connesso</x-badge>
                 @if ($stravaAccount->last_sync_at)
                     <span class="text-sm text-gray-500">
                         Ultima sync: {{ fmt_date($stravaAccount->last_sync_at, 'd M Y H:i') }}
@@ -43,13 +41,13 @@
 
             <div class="flex items-center gap-3">
                 @if ($syncStatus === 'running')
-                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-500 font-medium rounded-lg text-sm cursor-not-allowed">
-                        <svg class="animate-spin h-4 w-4 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <x-badge variant="info" size="md">
+                        <svg class="animate-spin h-3 w-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
                         Sincronizzazione in corso...
-                    </span>
+                    </x-badge>
                 @else
                     <x-button wire:click="startHistoricalSync" wire:loading.attr="disabled">
                         Sincronizza attività storiche

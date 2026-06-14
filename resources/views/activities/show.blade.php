@@ -13,25 +13,21 @@
             <p class="text-sm text-gray-500 mt-0.5">
                 {{ fmt_date($activity->started_at, 'd M Y H:i') }}
                 @php
-                    $sportColors = [
-                        'Run'                => 'bg-orange-100 text-orange-800',
-                        'TrailRun'           => 'bg-green-100 text-green-800',
-                        'Ride'               => 'bg-blue-100 text-blue-800',
-                        'GravelRide'         => 'bg-teal-100 text-teal-800',
-                        'MountainBikeRide'   => 'bg-yellow-100 text-yellow-800',
-                        'VirtualRide'        => 'bg-sky-100 text-sky-800',
-                        'VirtualRun'         => 'bg-amber-100 text-amber-800',
-                        'Hike'               => 'bg-lime-100 text-lime-800',
-                        'Walk'               => 'bg-purple-100 text-purple-800',
-                        'Swim'               => 'bg-cyan-100 text-cyan-800',
-                        'Workout'            => 'bg-gray-100 text-gray-800',
+                    $sportVariants = [
+                        'Run'                => 'zone3',
+                        'TrailRun'           => 'zone3',
+                        'VirtualRun'         => 'zone3',
+                        'Hike'               => 'zone3',
+                        'Walk'               => 'zone3',
+                        'Ride'               => 'zone2',
+                        'GravelRide'         => 'zone2',
+                        'MountainBikeRide'   => 'zone2',
+                        'VirtualRide'        => 'zone2',
+                        'Swim'               => 'zone1',
+                        'Workout'            => 'outline',
                     ];
-                    $badgeClass = $sportColors[$activity->sport_type] ?? 'bg-gray-100 text-gray-700';
                 @endphp
-                &nbsp;
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}">
-                    {{ $activity->sport_type }}
-                </span>
+                &nbsp;<x-badge :variant="$sportVariants[$activity->sport_type] ?? 'outline'">{{ $activity->sport_type }}</x-badge>
             </p>
         </div>
 
