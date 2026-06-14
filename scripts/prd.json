@@ -322,8 +322,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/page-header.blade.php with props: eyebrow (string optional), title (string), subtitle (string optional), and named slot 'actions' for header buttons. Added .pq-page-header, .pq-page-header-left, .pq-page-header-title, .pq-page-header-subtitle, .pq-page-header-actions CSS classes to app.css. Refactored: activities/index.blade.php (header div → x-page-header, count span in actions slot), activities/show.blade.php (back link before component, title/subtitle from activity, badge+Strava button in actions slot), premium/index.blade.php (centered header → x-page-header eyebrow=Premium), premium/trends.blade.php, premium/compare.blade.php, premium/year-over-year.blade.php (h1 tags → x-page-header with translated title). All 80 tests pass. Vite build succeeds."
     },
     {
       "id": "US-017",
@@ -341,8 +341,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "overview-stats: already using <x-metric-tile> (done in US-010). annual-analysis-chart: updated to use <x-card :eyebrow=...> prop (replacing h2), controls moved to <x-slot:action>, chart color updated #E85D04 → #16D4B4. monthly-analysis-chart: same pattern, color updated #3B82F6 → #16D4B4. sport-distribution-chart: updated to use <x-card :eyebrow=...> prop (removing h2). connection-status: already using <x-badge variant=success dot>, <x-button>, <x-alert>, <x-alert variant=warning> (done in US-003/005/015). All 80 tests pass."
     },
     {
       "id": "US-018",

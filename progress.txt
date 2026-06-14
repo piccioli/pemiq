@@ -1,3 +1,33 @@
+## 2026-06-14 - US-017
+- Refactored `resources/views/livewire/dashboard/annual-analysis-chart.blade.php`: moved title from inline `<h2>` to `<x-card :eyebrow="...">` prop; moved year select + segmented-control into `<x-slot:action>` (renders in card header flex row via `.pq-card-header` justify-content: space-between); removed the `<div class="flex justify-between">` wrapper; updated ApexCharts color from `#E85D04` (orange) to `#16D4B4` (DS brand teal).
+- Refactored `resources/views/livewire/dashboard/monthly-analysis-chart.blade.php`: same pattern as annual chart; updated ApexCharts color from `#3B82F6` (blue) to `#16D4B4` (DS brand teal).
+- Refactored `resources/views/livewire/dashboard/sport-distribution-chart.blade.php`: moved title from inline `<h2>` to `<x-card :eyebrow="...">` prop; removed the `<h2>` tag. Colors remain dynamic (`d.colors` from PHP) as each sport has its own hex color.
+- All other US-017 criteria were already met by prior stories: overview-stats KPIs (US-010 x-metric-tile), annual/monthly chart selects and toggles (US-008/US-014 x-form.select + x-segmented-control), sport-distribution-chart x-card wrap (existing), connection-status badge/button/alert/warning (US-005/003/015).
+- All 80 tests pass. Vite build not needed (no JS changes). Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/livewire/dashboard/annual-analysis-chart.blade.php, resources/views/livewire/dashboard/monthly-analysis-chart.blade.php, resources/views/livewire/dashboard/sport-distribution-chart.blade.php
+- **Learnings for future iterations:**
+  - `<x-slot:action>` inside `<x-card>` maps to the `$action` named slot — the card header `.pq-card-header` renders as flex justify-content: space-between, so eyebrow/title go left and the action slot content goes right. Perfect for chart title + filter controls layout.
+  - If `<x-slot:action>` is provided but conditionally empty (`@if ($hasData) ... @endif`), `isset($action)` in the card component is still true — the action div renders but is empty. This is harmless and keeps the eyebrow always visible.
+  - DS brand teal hex: `#16D4B4` (primary series). DS zone-2 hex: `#4F8DF5` (secondary series). Use these in ApexCharts `colors` array for all primary/secondary time-series charts.
+  - Sport distribution donut chart uses `d.colors` from PHP (sport-specific hex values) — do NOT override with DS brand colors here; sport colors map to their visual identity, not to primary/secondary series semantics.
+---
+
+## 2026-06-14 - US-016
+- Created `resources/views/components/page-header.blade.php`: Blade component with `@props` for `eyebrow` (string optional), `title` (string, default ''), `subtitle` (string optional), and named `$actions` slot for header buttons. Title rendered with `.pq-page-header-title` (font-display 700, fs-2xl, text-strong). Eyebrow rendered with `.pq-eyebrow`. Subtitle rendered with `.pq-page-header-subtitle` (fs-sm, text-muted). `$attributes->class('pq-page-header')` pass-through.
+- Added `.pq-page-header`, `.pq-page-header-left`, `.pq-page-header-title`, `.pq-page-header-subtitle`, `.pq-page-header-actions` CSS classes to `resources/css/app.css`. Container: flex, align-items flex-start, justify-content space-between, gap 16px, margin-bottom 24px. Left: flex 1, min-width 0. Actions: flex items-center gap 8px flex-shrink 0.
+- Refactored `resources/views/activities/index.blade.php`: replaced `<div class="flex items-center justify-between">` header with `<x-page-header title="Attività">`. Activities count span moved to `actions` slot.
+- Refactored `resources/views/activities/show.blade.php`: replaced complex header div with back link (standalone `<a>` above component, styled with var(--accent)), `<x-page-header :title="..." :subtitle="fmt_date(...)">`. Moved `$sportVariants` @php block before the component. Sport badge and "Vedi su Strava" button moved to `actions` slot.
+- Refactored `resources/views/premium/index.blade.php`: replaced centered `<div>` header (amber badge span + h1 + p) with `<x-page-header eyebrow="Premium" :title="..." :subtitle="..."/>`.
+- Refactored `resources/views/premium/trends.blade.php`, `compare.blade.php`, `year-over-year.blade.php`: replaced `<h1 class="text-2xl font-bold text-gray-900 mb-6">` with `<x-page-header :title="__('messages.xxx_page_title')" />`.
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/components/page-header.blade.php (new), resources/css/app.css, resources/views/activities/index.blade.php, resources/views/activities/show.blade.php, resources/views/premium/index.blade.php, resources/views/premium/trends.blade.php, resources/views/premium/compare.blade.php, resources/views/premium/year-over-year.blade.php
+- **Learnings for future iterations:**
+  - `x-page-header` subtitle is a string prop only — for complex subtitle content (badges, inline components), put that content in the `actions` slot alongside action buttons.
+  - Back links (← navigation) on detail pages should be rendered as standalone `<a>` elements above the `<x-page-header>` component, not inside it — keeps the component layout clean and consistent.
+  - `@isset($actions)` correctly detects whether the named slot was provided — renders the `.pq-page-header-actions` div only when needed, avoiding empty flex containers.
+  - Named slot syntax in Blade: `<x-slot:actions>...</x-slot:actions>` inside the component tag is the correct Blade v3/Laravel 9+ syntax.
+---
+
 ## 2026-06-14 - US-015
 - Created `resources/views/components/alert.blade.php`: Blade component with `@props` for `variant` (info|success|warning|danger, default: info), `dismissible` (bool, default: false), `icon` (bool, default: true). Uses inline SVG paths for icons (info=circle-i, success=check-circle, warning=alert-triangle, danger=x-circle) to avoid Lucide re-initialization issues in Livewire re-renders. Alpine `x-data="{ show: true }"` + `x-show="show"` + `x-transition:leave` for dismissible animation. `$attributes->class(['pq-alert', "pq-alert-{$variant}"])` pass-through for custom classes/styles from callers. Dismiss button: `@click="show = false"` within the component's own Alpine scope.
 - Added `.pq-alert`, `.pq-alert-{info,success,warning,danger}`, `.pq-alert-icon`, `.pq-alert-content`, `.pq-alert-dismiss` CSS classes to `resources/css/app.css`. Base: flex display, 12px/16px padding, radius-md, transparent border. Variant: `--{variant}-soft` bg + `color-mix(in srgb, var(--{variant}) 30%, transparent)` border + `var(--{variant})` text color. Dismiss button: opacity 0.7, hover 1.0, no background/border.
