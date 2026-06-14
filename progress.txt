@@ -633,6 +633,20 @@
   - Sessions stored in Redis are signed with APP_KEY but do NOT contain encrypted-cast data — a key rotation will log all users out (acceptable and expected behavior).
 ---
 
+## 2026-06-14 - US-019
+- Created `app/Mail/StravaTokenExpiredNotification.php`: Mailable with subject 'Token Strava scaduto — ricollegamento necessario'.
+- Created `resources/views/emails/strava-token-expired-notification.blade.php`: Italian email explaining token expiry with link to /dashboard.
+- Updated `app/Jobs/SyncStravaHistoricalActivities.php`: in the `StravaTokenExpiredException` catch block, now catches `StravaAuthException` specifically from the refresh attempt and calls `sendTokenExpiredNotification()` (new private method). Transient refresh failures (`StravaTokenRefreshException`/`\Exception`) still fall through silently for retry. Added `sendTokenExpiredNotification()` private method using same `notified_at` gate as `sendCriticalFailureNotification()`.
+- Updated `app/Jobs/SyncStravaIncrementalActivities.php`: same pattern as historical job.
+- Created `tests/Feature/Strava/StravaTokenExpiredNotificationTest.php`: 5 tests covering: permanent refresh failure → email sent + notified_at set; no duplicate when notified_at set; transient failure → no email; incremental sync same behavior; successful sync → no notification.
+- All 59 tests pass.
+- Files changed: app/Mail/StravaTokenExpiredNotification.php (new), resources/views/emails/strava-token-expired-notification.blade.php (new), tests/Feature/Strava/StravaTokenExpiredNotificationTest.php (new), app/Jobs/SyncStravaHistoricalActivities.php, app/Jobs/SyncStravaIncrementalActivities.php
+- **Learnings for future iterations:**
+  - `StravaTokenExpiredNotification` vs `SyncFailedNotification`: the former is triggered when StravaAuthException is thrown during the token refresh attempt (inside the StravaTokenExpiredException handler); the latter is triggered when StravaAuthException comes directly from fetchActivities(). Both use `notified_at` as a dedup gate — only one notification is ever sent per broken session.
+  - To mock both StravaApiService AND StravaTokenService in the same test: use `$this->mock(StravaApiService::class, ...)` to throw StravaTokenExpiredException, then `$this->mock(StravaTokenService::class, ...)` to throw StravaAuthException on ensureValidToken(). The job's inner try/catch calls ensureValidToken() on the fresh account — the mock intercepts that call.
+  - Inner catch ordering matters: `catch (StravaAuthException)` must come before `catch (\Exception)` so permanent failures are distinguished from transient ones.
+---
+
 ## Codebase Patterns
 - SQLite test compatibility: YEAR()/MONTH()/DAY() are MySQL-only; use driver-aware helpers in services (see DashboardStatsService::yearExpr/monthExpr/dayExpr). Also replace `->whereYear()` with `->whereRaw()`.
 - ActivityFactory is at database/factories/ActivityFactory.php — use for tests and seeders.
