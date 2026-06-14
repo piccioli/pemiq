@@ -1,3 +1,16 @@
+## 2026-06-14 - US-014
+- Updated app/Http/Controllers/ActivityController.php: accepts `sport`, `year`, `month` query params. Driver-aware yearExpr/monthExpr private helpers (CAST(strftime) for SQLite, YEAR()/MONTH() for MariaDB). Filters applied via `->where('sport_type', $sport)` and `->whereRaw()` for year/month. `->withQueryString()` on paginator ensures filters persist in pagination links.
+- Computed `$sportTypes` (distinct from user's activities, alphabetical) and `$availableYears` (distinct years from user's activities, desc) and passed to view for populating selects.
+- Updated resources/views/activities/index.blade.php: filter form (GET, 3 selects: sport/year/month with correct `@selected` attribute). Italian month names array (Gennaio..Dicembre). Reset link visible only when a filter is active. Empty state shows 'Nessuna attività trovata' when filter active, original message otherwise.
+- All 48 tests pass.
+- Files changed: app/Http/Controllers/ActivityController.php, resources/views/activities/index.blade.php
+- **Learnings for future iterations:**
+  - `->paginate(20)->withQueryString()` preserves all current query string params in pagination links — always use this for filtered/sorted lists.
+  - `@selected($expr)` Blade directive (Laravel 9+) renders `selected="selected"` when expression is truthy — cleaner than ternary in option tags.
+  - Empty state differentiation: check if any filter is active to show 'Nessuna attività trovata' vs. 'Nessuna attività ancora' for genuinely empty user.
+  - Driver-aware year/month helpers follow the exact same pattern as DashboardStatsService — reuse this pattern in any new controller that filters by date parts.
+---
+
 ## 2026-06-14 - US-013
 - Created app/Http/Controllers/ActivityController.php: index() method uses auth()->user()->activities()->orderBy('started_at', 'desc')->paginate(20) — scoped via Eloquent relationship, no N+1 (no eager-loaded relationships needed for the list).
 - Added GET /activities route in routes/web.php with ['auth', 'verified'] middleware, named 'activities.index'.
