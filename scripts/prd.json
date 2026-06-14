@@ -224,8 +224,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/zone-bar.blade.php with props: data (array of {zone:1-5, pct:float, seconds:int}), showLegend (bool, default: true). Stacked bar track (12px height, radius-pill, overflow hidden) with 5 segments colored by data-zone CSS attribute selectors (var(--zone-1..5)). Width animation via Alpine.js x-data { animated: false } x-init → $nextTick sets animated=true; each segment uses CSS custom property --pct (PHP-rendered) with :style binding { width: animated ? 'var(--pct)' : '0%' } for smooth transition. Legend shows colored dot (inline style background), Z1-Z5 label, percentage (fmt_number), formatted time (1h 12m). showLegend=false hides the legend. Created app/Livewire/Dashboard/ZoneDistribution.php with mock data (5 zones, realistic percentages). Created resources/views/livewire/dashboard/zone-distribution.blade.php using <x-card> + <x-badge variant=outline> 'Dati di esempio' label + <x-zone-bar>. Added @livewire('dashboard.zone-distribution') to dashboard/index.blade.php. Added zone_distribution_title and zone_distribution_mock translation keys to both lang files. All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available)."
     },
     {
       "id": "US-012",
@@ -243,8 +243,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/progress-bar.blade.php with props: label (optional), value (0-100), color (brand|success|warning|danger|zone-1..5, default: brand), height (px, default: 8), showValue (bool, default: false), valueText (string optional). Track: var(--surface-3) bg + radius-pill + overflow hidden. Fill: color resolved via PHP match on color prop → CSS var string inline style; width animated via Alpine.js x-data { animated: false } x-init → $nextTick + CSS transition var(--dur-slow). showValue+valueText: right-side span with text-caption/text-muted styles. Added .pq-progress-bar, .pq-progress-bar-label, .pq-progress-bar-row, .pq-progress-bar-track, .pq-progress-bar-fill, .pq-progress-bar-value CSS to app.css. Refactored livewire/dashboard/monthly-analysis.blade.php: distance/elevation/hours table cells now show <x-progress-bar> with relative value (col value / max col value * 100) as visual volume indicators. All 80 tests pass. Vite build succeeds."
     },
     {
       "id": "US-013",
