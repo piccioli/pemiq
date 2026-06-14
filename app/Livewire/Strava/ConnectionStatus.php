@@ -33,16 +33,18 @@ class ConnectionStatus extends Component
     public function render(): View
     {
         $account = $this->getConnectedAccount();
+        $rawAccount = auth()->user()->stravaAccount;
         $latestSync = $account ? $this->getLatestSync($account) : null;
         $syncStatus = $latestSync?->status;
         $syncActivitiesImported = (int) ($latestSync?->activities_imported ?? 0);
         $syncErrorMessage = $latestSync?->error_message;
 
         return view('livewire.strava.connection-status', [
-            'stravaAccount' => $account,
-            'syncStatus' => $syncStatus,
+            'stravaAccount'         => $account,
+            'connectionStatus'      => $rawAccount?->connection_status,
+            'syncStatus'            => $syncStatus,
             'syncActivitiesImported' => $syncActivitiesImported,
-            'syncErrorMessage' => $syncErrorMessage,
+            'syncErrorMessage'      => $syncErrorMessage,
         ]);
     }
 

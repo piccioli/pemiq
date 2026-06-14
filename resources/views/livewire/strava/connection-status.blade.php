@@ -88,10 +88,19 @@
         </div>
     @else
         <div class="flex items-center gap-4">
-            <p class="text-gray-600">Collega il tuo account Strava per importare le attività.</p>
+            @if ($connectionStatus === 'error')
+                <div class="flex items-center gap-2 text-amber-700">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                    </svg>
+                    <p>Il token Strava è scaduto — riconnetti il tuo account per riprendere la sincronizzazione.</p>
+                </div>
+            @else
+                <p class="text-gray-600">Collega il tuo account Strava per importare le attività.</p>
+            @endif
             <a href="{{ route('strava.redirect') }}"
-               class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition">
-                Collega Strava
+               class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition whitespace-nowrap">
+                {{ $connectionStatus === 'error' ? 'Riconnetti Strava' : 'Collega Strava' }}
             </a>
         </div>
     @endif
