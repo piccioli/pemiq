@@ -372,6 +372,64 @@ body {
 .pq-badge-zone4 { background: var(--zone-4-soft); color: var(--zone-4); }
 .pq-badge-zone5 { background: var(--zone-5-soft); color: var(--zone-5); }
 
+/* ─── Tag component ──────────────────────────────────────────── */
+.pq-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: var(--radius-pill);
+    padding: 4px 12px;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+
+.pq-tag-selected {
+    background: var(--accent-soft);
+    border-color: var(--brand);
+    color: var(--accent);
+}
+
+.pq-tag-static {
+    cursor: default;
+}
+
+.pq-tag:not(.pq-tag-static) {
+    cursor: default;
+}
+
+.pq-tag-label {
+    line-height: 1;
+}
+
+.pq-tag-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    transition: color var(--dur-fast);
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.pq-tag-remove:hover {
+    color: var(--danger);
+}
+
 /* ─── Card component ─────────────────────────────────────────── */
 .pq-card {
     background: var(--surface);

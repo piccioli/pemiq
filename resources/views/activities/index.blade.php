@@ -47,11 +47,31 @@
             </div>
 
             <x-button type="submit">Filtra</x-button>
-
-            @if ($sport || $year || $month)
-                <x-button href="{{ route('activities.index') }}" variant="secondary">Reset</x-button>
-            @endif
         </form>
+
+        @if ($sport || $year || $month)
+            <div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t" style="border-color: var(--border)">
+                <span style="font-size: var(--fs-xs); color: var(--text-faint)">{{ __('messages.active_filters') }}</span>
+                @if ($sport)
+                    <x-tag selected removable
+                           :remove-href="route('activities.index', array_filter(['year' => $year, 'month' => $month]))">
+                        {{ $sport }}
+                    </x-tag>
+                @endif
+                @if ($year)
+                    <x-tag selected removable
+                           :remove-href="route('activities.index', array_filter(['sport' => $sport, 'month' => $month]))">
+                        {{ $year }}
+                    </x-tag>
+                @endif
+                @if ($month)
+                    <x-tag selected removable
+                           :remove-href="route('activities.index', array_filter(['sport' => $sport, 'year' => $year]))">
+                        {{ $monthNames[$month - 1] ?? '' }}
+                    </x-tag>
+                @endif
+            </div>
+        @endif
     </div>
 
     @php

@@ -112,4 +112,7 @@ return [
     'yoy_year_b'      => 'Anno B',
     'yoy_all_sports'  => 'Tutti gli sport',
     'yoy_no_data'     => 'Nessuna attività per i periodi selezionati.',
+
+    'remove_filter'   => 'Rimuovi filtro',
+    'active_filters'  => 'Filtri attivi:',
 ];
