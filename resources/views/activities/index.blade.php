@@ -35,7 +35,7 @@
 
             <div class="flex flex-col gap-1">
                 @php
-                    $monthNames = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+                    $monthNames = trans('messages.months');
                 @endphp
                 <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Mese</label>
                 <select name="month" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
@@ -101,19 +101,19 @@
                             @php
                                 $badgeClass = $sportColors[$activity->sport_type] ?? 'bg-gray-100 text-gray-700';
                                 $distanceKm = $activity->distance !== null
-                                    ? number_format($activity->distance / 1000, 1) . ' km'
+                                    ? fmt_number($activity->distance / 1000, 1) . ' km'
                                     : '—';
                                 $elapsedSec = $activity->elapsed_time;
                                 $duration = $elapsedSec !== null
                                     ? floor($elapsedSec / 3600) . ':' . str_pad(floor(($elapsedSec % 3600) / 60), 2, '0', STR_PAD_LEFT)
                                     : '—';
                                 $elevation = $activity->elevation_gain !== null
-                                    ? number_format($activity->elevation_gain, 0) . ' m'
+                                    ? fmt_number($activity->elevation_gain, 0) . ' m'
                                     : '—';
                             @endphp
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
-                                    {{ $activity->started_at->format('d/m/Y') }}
+                                    {{ fmt_date($activity->started_at, 'd M Y') }}
                                 </td>
                                 <td class="px-4 py-3 text-sm">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}">

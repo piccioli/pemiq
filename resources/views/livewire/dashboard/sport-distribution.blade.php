@@ -43,9 +43,9 @@
                                     {{ $row->sport_type }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->activities) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->distance_km, 1) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->hours, 1) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->activities) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->distance_km, 1) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->hours, 1) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

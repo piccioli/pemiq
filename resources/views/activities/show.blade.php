@@ -11,7 +11,7 @@
             <a href="{{ route('activities.index') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium">&larr; Indietro alla lista</a>
             <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $activity->name ?? 'Attività senza titolo' }}</h1>
             <p class="text-sm text-gray-500 mt-0.5">
-                {{ $activity->started_at->format('d/m/Y H:i') }}
+                {{ fmt_date($activity->started_at, 'd M Y H:i') }}
                 @php
                     $sportColors = [
                         'Run'                => 'bg-orange-100 text-orange-800',
@@ -51,7 +51,7 @@
     {{-- Metriche principali --}}
     @php
         $distanceKm = $activity->distance !== null
-            ? number_format($activity->distance / 1000, 2) . ' km'
+            ? fmt_number($activity->distance / 1000, 2) . ' km'
             : '—';
 
         $elapsedSec = $activity->elapsed_time;
@@ -65,27 +65,27 @@
             : '—';
 
         $elevation = $activity->elevation_gain !== null
-            ? number_format($activity->elevation_gain, 0) . ' m'
+            ? fmt_number($activity->elevation_gain, 0) . ' m'
             : '—';
 
         $avgSpeedKmh = $activity->average_speed !== null
-            ? number_format($activity->average_speed * 3.6, 1) . ' km/h'
+            ? fmt_number($activity->average_speed * 3.6, 1) . ' km/h'
             : '—';
 
         $avgHr = $activity->average_heartrate !== null
-            ? number_format($activity->average_heartrate, 0) . ' bpm'
+            ? fmt_number($activity->average_heartrate, 0) . ' bpm'
             : null;
 
         $maxHr = $activity->max_heartrate !== null
-            ? number_format($activity->max_heartrate, 0) . ' bpm'
+            ? fmt_number($activity->max_heartrate, 0) . ' bpm'
             : null;
 
         $avgWatts = $activity->average_watts !== null
-            ? number_format($activity->average_watts, 0) . ' W'
+            ? fmt_number($activity->average_watts, 0) . ' W'
             : null;
 
         $calories = $activity->calories !== null
-            ? number_format($activity->calories, 0) . ' kcal'
+            ? fmt_number($activity->calories, 0) . ' kcal'
             : null;
     @endphp
 

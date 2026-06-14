@@ -14,7 +14,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <span class="text-3xl font-bold text-gray-900">{{ number_format($stats['total_activities']) }}</span>
+                <span class="text-3xl font-bold text-gray-900">{{ fmt_number($stats['total_activities']) }}</span>
                 <span class="text-sm text-gray-500 mt-1">{{ __('messages.stat_total_activities') }}</span>
             </div>
 
@@ -26,7 +26,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span class="text-3xl font-bold text-gray-900">{{ number_format($stats['total_distance_km'], 1) }}</span>
+                <span class="text-3xl font-bold text-gray-900">{{ fmt_number($stats['total_distance_km'], 1) }}</span>
                 <span class="text-sm text-gray-500 mt-1">{{ __('messages.stat_distance_km') }}</span>
             </div>
 
@@ -36,7 +36,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M5 3l14 9-14 9V3z" />
                 </svg>
-                <span class="text-3xl font-bold text-gray-900">{{ number_format($stats['total_elevation_m'], 0) }}</span>
+                <span class="text-3xl font-bold text-gray-900">{{ fmt_number($stats['total_elevation_m'], 0) }}</span>
                 <span class="text-sm text-gray-500 mt-1">{{ __('messages.stat_elevation_m') }}</span>
             </div>
 

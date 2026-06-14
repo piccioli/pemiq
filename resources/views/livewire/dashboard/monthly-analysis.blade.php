@@ -41,10 +41,10 @@
                     @foreach ($monthlyStats as $row)
                         <tr class="{{ $row->activities > 0 ? 'hover:bg-gray-50' : 'text-gray-400' }}">
                             <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $monthNames[$row->month - 1] }}</td>
-                            <td class="px-4 py-3 text-sm text-right">{{ $row->activities > 0 ? number_format($row->activities) : '—' }}</td>
-                            <td class="px-4 py-3 text-sm text-right">{{ $row->activities > 0 ? number_format($row->distance_km, 1) : '—' }}</td>
-                            <td class="px-4 py-3 text-sm text-right">{{ $row->activities > 0 ? number_format($row->elevation_m, 0) : '—' }}</td>
-                            <td class="px-4 py-3 text-sm text-right">{{ $row->activities > 0 ? number_format($row->hours, 1) : '—' }}</td>
+                            <td class="px-4 py-3 text-sm text-right">{{ $row->activities > 0 ? fmt_number($row->activities) : '—' }}</td>
+                            <td class="px-4 py-3 text-sm text-right">{{ $row->activities > 0 ? fmt_number($row->distance_km, 1) : '—' }}</td>
+                            <td class="px-4 py-3 text-sm text-right">{{ $row->activities > 0 ? fmt_number($row->elevation_m, 0) : '—' }}</td>
+                            <td class="px-4 py-3 text-sm text-right">{{ $row->activities > 0 ? fmt_number($row->hours, 1) : '—' }}</td>
                         </tr>
                     @endforeach
                 </tbody>

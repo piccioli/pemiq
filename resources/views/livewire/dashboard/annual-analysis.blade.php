@@ -21,10 +21,10 @@
                     @foreach ($annualStats as $row)
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ $row->year }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->activities) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->distance_km, 1) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->elevation_m, 0) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->hours, 1) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->activities) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->distance_km, 1) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->elevation_m, 0) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->hours, 1) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

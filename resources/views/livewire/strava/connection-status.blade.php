@@ -32,7 +32,7 @@
                 </span>
                 @if ($stravaAccount->last_sync_at)
                     <span class="text-sm text-gray-500">
-                        Ultima sync: {{ $stravaAccount->last_sync_at->format('d/m/Y H:i') }}
+                        Ultima sync: {{ fmt_date($stravaAccount->last_sync_at, 'd M Y H:i') }}
                     </span>
                 @else
                     <span class="text-sm text-gray-500">Nessuna sincronizzazione ancora</span>
