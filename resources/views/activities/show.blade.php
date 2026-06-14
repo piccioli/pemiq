@@ -6,45 +6,43 @@
 <div class="space-y-6">
 
     {{-- Header --}}
-    <div class="flex items-center justify-between">
-        <div>
-            <a href="{{ route('activities.index') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium">&larr; Indietro alla lista</a>
-            <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $activity->name ?? 'Attività senza titolo' }}</h1>
-            <p class="text-sm text-gray-500 mt-0.5">
-                {{ fmt_date($activity->started_at, 'd M Y H:i') }}
-                @php
-                    $sportVariants = [
-                        'Run'                => 'zone3',
-                        'TrailRun'           => 'zone3',
-                        'VirtualRun'         => 'zone3',
-                        'Hike'               => 'zone3',
-                        'Walk'               => 'zone3',
-                        'Ride'               => 'zone2',
-                        'GravelRide'         => 'zone2',
-                        'MountainBikeRide'   => 'zone2',
-                        'VirtualRide'        => 'zone2',
-                        'Swim'               => 'zone1',
-                        'Workout'            => 'outline',
-                    ];
-                @endphp
-                &nbsp;<x-badge :variant="$sportVariants[$activity->sport_type] ?? 'outline'">{{ $activity->sport_type }}</x-badge>
-            </p>
-        </div>
-
-        @if ($activity->strava_activity_id)
-            <x-button
-                href="https://www.strava.com/activities/{{ $activity->strava_activity_id }}"
-                variant="ghost"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                Vedi su Strava
-                <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                </svg>
-            </x-button>
-        @endif
-    </div>
+    @php
+        $sportVariants = [
+            'Run'                => 'zone3',
+            'TrailRun'           => 'zone3',
+            'VirtualRun'         => 'zone3',
+            'Hike'               => 'zone3',
+            'Walk'               => 'zone3',
+            'Ride'               => 'zone2',
+            'GravelRide'         => 'zone2',
+            'MountainBikeRide'   => 'zone2',
+            'VirtualRide'        => 'zone2',
+            'Swim'               => 'zone1',
+            'Workout'            => 'outline',
+        ];
+    @endphp
+    <a href="{{ route('activities.index') }}" style="font-size: var(--fs-sm); color: var(--accent); display: block; margin-bottom: 8px;">&larr; Indietro alla lista</a>
+    <x-page-header
+        :title="$activity->name ?? 'Attività senza titolo'"
+        :subtitle="fmt_date($activity->started_at, 'd M Y H:i')"
+    >
+        <x-slot:actions>
+            <x-badge :variant="$sportVariants[$activity->sport_type] ?? 'outline'">{{ $activity->sport_type }}</x-badge>
+            @if ($activity->strava_activity_id)
+                <x-button
+                    href="https://www.strava.com/activities/{{ $activity->strava_activity_id }}"
+                    variant="ghost"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Vedi su Strava
+                    <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </x-button>
+            @endif
+        </x-slot:actions>
+    </x-page-header>
 
     {{-- Tab navigation --}}
     @php

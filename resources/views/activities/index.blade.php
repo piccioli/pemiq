@@ -5,10 +5,11 @@
 @section('content')
 <div class="space-y-6">
 
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900">Attività</h1>
-        <span class="text-sm text-gray-500">{{ $activities->total() }} attività trovate</span>
-    </div>
+    <x-page-header title="Attività">
+        <x-slot:actions>
+            <span style="font-size: var(--fs-sm); color: var(--text-muted)">{{ $activities->total() }} attività trovate</span>
+        </x-slot:actions>
+    </x-page-header>
 
     {{-- Filtri --}}
     <div class="bg-white rounded-lg shadow p-4">

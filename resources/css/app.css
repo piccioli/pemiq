@@ -930,6 +930,42 @@ body {
 
 .pq-alert-dismiss:hover { opacity: 1; }
 
+/* ─── PageHeader ────────────────────────────────────────────────── */
+.pq-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.pq-page-header-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.pq-page-header-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--text-strong);
+    font-size: var(--fs-2xl);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.pq-page-header-subtitle {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    margin: 4px 0 0;
+}
+
+.pq-page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
 /* ─── Tailwind v4 theme extension ─────────────────────────────── */
 @theme inline {
     --font-sans: var(--font-body);

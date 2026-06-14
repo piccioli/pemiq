@@ -4,11 +4,11 @@
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
     {{-- Header --}}
-    <div class="text-center mb-10">
-        <span class="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide mb-3">Premium</span>
-        <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.premium_title') }}</h1>
-        <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">{{ __('messages.premium_subtitle') }}</p>
-    </div>
+    <x-page-header
+        eyebrow="Premium"
+        :title="__('messages.premium_title')"
+        :subtitle="__('messages.premium_subtitle')"
+    />
 
     {{-- Free vs Premium comparison --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
