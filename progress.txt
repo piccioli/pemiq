@@ -1,3 +1,18 @@
+## 2026-06-14 - US-016
+- Installed `leaflet@^1.9.4` and `@mapbox/polyline@^1.2.1` via npm on host (npm is NOT in Docker container — always run npm on host).
+- Updated resources/js/app.js: imports `L` from `leaflet`, imports `leaflet/dist/leaflet.css`, imports `* as polyline` from `@mapbox/polyline`. Exposes `window.L` and `window.PolylineDecoder` globally.
+- Updated resources/views/activities/show.blade.php: added map section at the bottom. If `$activity->polyline` is not null, renders a 400px `#activity-map` div and initializes Leaflet via a `DOMContentLoaded` listener (decodes with `window.PolylineDecoder.decode()`, draws polyline with `window.L.polyline()`, tiles from OpenStreetMap, fits bounds). If `$activity->polyline` is null, renders a 400px placeholder div with 'Mappa non disponibile'.
+- Built Vite assets (npm run build) — Leaflet CSS extracted as separate chunk (~71 kB), auto-injected by `@vite(['resources/js/app.js'])`.
+- All 48 tests pass.
+- Files changed: package.json, package-lock.json, resources/js/app.js, resources/views/activities/show.blade.php
+- **Learnings for future iterations:**
+  - `npm` is NOT in the Docker container — run `npm install` and `npm run build` on the host machine, not inside Docker.
+  - Leaflet CSS is imported in app.js (`import 'leaflet/dist/leaflet.css'`) — Vite extracts it and `@vite(['resources/js/app.js'])` auto-injects the `<link>` tag for it. No manual `<link>` tag needed in the layout.
+  - Leaflet + Vite timing: `<script type="module">` (Vite output) executes AFTER HTML parsing but BEFORE DOMContentLoaded. Use `document.addEventListener('DOMContentLoaded', ...)` in inline scripts to safely access `window.L` set by the module.
+  - `@mapbox/polyline` decode: `window.PolylineDecoder.decode(encoded)` returns `[[lat, lng], ...]` — exactly what `L.polyline()` expects, no coordinate swap needed.
+  - Strava stores the encoded polyline in the `polyline` field (mapped from `map.summary_polyline` in ActivitySyncService) — NOT `map_polyline`.
+---
+
 ## 2026-06-14 - US-015
 - Added `show(Activity $activity)` method to ActivityController: `abort_if($activity->user_id !== auth()->id(), 403)` for ownership check, returns `activities.show` view.
 - Added `GET /activities/{activity}` route (auth+verified middleware, named `activities.show`) to routes/web.php.
@@ -604,6 +619,9 @@
 - Filament resource discovery needs `php artisan optimize:clear` to pick up newly created resources (not just filament:clear-cached-components)
 - ApexCharts integration: import from npm in app.js (window.ApexCharts = ApexCharts), build with `npm run build`, add @vite(['resources/js/app.js']) to layout. DO NOT import Alpine.js in app.js (Livewire 3 bundles Alpine).
 - ApexCharts + Livewire: use wire:ignore on chart div, inline <script>window.__data = @json($data);</script> for initial data, $this->dispatch() for updates, Alpine x-init for creation, @event.window for updates.
+- npm runs on HOST (not inside Docker container) — use `npm install` and `npm run build` on the host.
+- Leaflet CSS in Vite: import in app.js (`import 'leaflet/dist/leaflet.css'`), Vite extracts it and @vite() auto-injects the link tag.
+- Non-Livewire pages: init JS using `document.addEventListener('DOMContentLoaded', ...)` to safely access globals set by Vite module scripts (modules execute before DOMContentLoaded).
 
 ---
 
