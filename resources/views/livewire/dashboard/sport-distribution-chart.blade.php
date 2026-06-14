@@ -1,5 +1,5 @@
 <div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-lg font-semibold text-gray-800 mb-4">Distribuzione Sport (Grafico)</h2>
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">{{ __('messages.dashboard_sport_dist_chart_title') }}</h2>
 
     @if ($hasData)
         <script>window.__sportDistChartInitData = @json($chartData);</script>
@@ -23,7 +23,7 @@
                                 const label = w.config.labels[seriesIndex];
                                 const activities = series[seriesIndex];
                                 const dist = self._distances[seriesIndex];
-                                return '<div style=\'padding:8px;font-size:13px;\'><b>' + label + '</b><br/>' + activities + ' attività<br/>' + dist + ' km</div>';
+                                return '<div style=\'padding:8px;font-size:13px;\'><b>' + label + '</b><br/>' + activities + ' {{ __('messages.activities_label') }}<br/>' + dist + ' km</div>';
                             }
                         },
                         plotOptions: {
@@ -34,7 +34,7 @@
                                         show: true,
                                         total: {
                                             show: true,
-                                            label: 'Totale',
+                                            label: '{{ __('messages.chart_total_label') }}',
                                             formatter: function(w) {
                                                 return w.globals.seriesTotals.reduce(function(a, b) { return a + b; }, 0);
                                             }
@@ -58,6 +58,6 @@
             <div wire:ignore x-ref="chartEl" style="min-height: 340px;"></div>
         </div>
     @else
-        <p class="text-gray-500 text-sm">Nessuna attività ancora. Collega Strava e avvia la sincronizzazione.</p>
+        <p class="text-gray-500 text-sm">{{ __('messages.dashboard_no_activities') }}</p>
     @endif
 </div>

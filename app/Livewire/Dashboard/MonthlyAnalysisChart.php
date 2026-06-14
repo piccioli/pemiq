@@ -35,15 +35,11 @@ class MonthlyAnalysisChart extends Component
             $this->metric === 'distance' ? (float) $row->distance_km : (float) $row->hours
         )->values()->toArray();
 
-        $monthNames = [
-            1 => 'Gennaio', 2 => 'Febbraio', 3 => 'Marzo', 4 => 'Aprile',
-            5 => 'Maggio', 6 => 'Giugno', 7 => 'Luglio', 8 => 'Agosto',
-            9 => 'Settembre', 10 => 'Ottobre', 11 => 'Novembre', 12 => 'Dicembre',
-        ];
+        $monthNames = collect(trans('messages.months'))->mapWithKeys(fn ($name, $i) => [$i + 1 => $name])->toArray();
 
         $chartData = [
             'categories' => $categories,
-            'seriesName' => $this->metric === 'distance' ? 'Distanza (km)' : 'Ore',
+            'seriesName' => $this->metric === 'distance' ? trans('messages.stat_distance_km') : trans('messages.col_hours'),
             'seriesData' => $seriesData,
             'yAxisTitle' => $this->metric === 'distance' ? 'km' : 'h',
         ];

@@ -1,6 +1,6 @@
 <div class="bg-white rounded-lg shadow p-6">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">Grafico Analisi Annuale</h2>
+        <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.dashboard_annual_chart_title') }}</h2>
 
         @if ($hasData)
         <div class="flex items-center gap-3">
@@ -18,13 +18,13 @@
                     wire:click="$set('metric', 'distance')"
                     class="px-3 py-1.5 transition-colors {{ $metric === 'distance' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
                 >
-                    Distanza
+                    {{ __('messages.metric_distance') }}
                 </button>
                 <button
                     wire:click="$set('metric', 'hours')"
                     class="px-3 py-1.5 transition-colors border-l border-gray-300 {{ $metric === 'hours' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
                 >
-                    Ore
+                    {{ __('messages.col_hours') }}
                 </button>
             </div>
         </div>
@@ -61,6 +61,6 @@
             <div wire:ignore x-ref="chartEl" style="min-height: 300px;"></div>
         </div>
     @else
-        <p class="text-gray-500 text-sm">Nessuna attività ancora. Collega Strava e avvia la sincronizzazione.</p>
+        <p class="text-gray-500 text-sm">{{ __('messages.dashboard_no_activities') }}</p>
     @endif
 </div>

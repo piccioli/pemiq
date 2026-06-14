@@ -27,7 +27,7 @@ class AnnualAnalysisChart extends Component
         }
 
         $monthlyStats = $service->getMonthlyStats($user, $this->year);
-        $months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+        $months = trans('messages.months_short');
 
         $seriesData = $monthlyStats->map(fn ($row) =>
             $this->metric === 'distance' ? (float) $row->distance_km : (float) $row->hours
@@ -35,7 +35,7 @@ class AnnualAnalysisChart extends Component
 
         $chartData = [
             'categories' => $months,
-            'seriesName' => $this->metric === 'distance' ? 'Distanza (km)' : 'Ore',
+            'seriesName' => $this->metric === 'distance' ? trans('messages.stat_distance_km') : trans('messages.col_hours'),
             'seriesData' => $seriesData,
             'yAxisTitle' => $this->metric === 'distance' ? 'km' : 'h',
         ];
