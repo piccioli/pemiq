@@ -1,3 +1,49 @@
+## 2026-06-14 - US-031
+- Created `app/Http/Controllers/PremiumController.php`: `index()` method checks if user is premium (same logic as EnsurePremium: `is_premium && (!premium_expires_at || premium_expires_at->isFuture())`). Premium users → redirect to `/dashboard` with `success` flash "Il tuo account è già Premium.". Free users → return `premium.index` view.
+- Added route `GET /premium` to `routes/web.php` with `['auth', 'verified']` middleware only (NOT inside the EnsurePremium group), named `premium.index`. Uses `PremiumController@index`.
+- Created `resources/views/premium/index.blade.php`: extends `layouts.app`. Two-column Free vs Premium comparison card layout. Free column lists 4 free features (green checkmarks) + 3 premium features (grayed X). Premium column lists all 7 features with amber checkmarks for premium-exclusive ones. CTA section with mailto link (precompiled subject). "Pagamento self-service disponibile a breve" note.
+- Added 16 translation keys to `lang/it/messages.php` and `lang/en/messages.php`: `premium_already_premium`, `premium_title`, `premium_subtitle`, `premium_free_*` (4 free features), `premium_feat_*` (3 premium features), `premium_cta_title/body/button`, `premium_email_subject`, `premium_self_service_note`.
+- Added 3 tests to `tests/Feature/Premium/PremiumRoutesTest.php`: free user can access `/premium` (200), unauthenticated user redirected to login, premium user redirected to `/dashboard` with correct flash.
+- All 80 tests pass. Blade views compile without errors.
+- Files changed: app/Http/Controllers/PremiumController.php (new), resources/views/premium/index.blade.php (new), routes/web.php, lang/it/messages.php, lang/en/messages.php, tests/Feature/Premium/PremiumRoutesTest.php
+- **Learnings for future iterations:**
+  - The `/premium` route (landing) must NOT be inside the EnsurePremium route group — it must be accessible to free users. Add it as a separate `Route::get('/premium', ...)` before the group.
+  - `config('app.admin_email', 'admin@pemiq.com')` pattern for fallback admin email in views — add `ADMIN_EMAIL` to `.env` and `config/app.php` if a real email is needed.
+  - Premium check in controllers mirrors EnsurePremium: `$user->is_premium && (!$user->premium_expires_at || $user->premium_expires_at->isFuture())`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-030
+- Created `app/Livewire/Premium/YearOverYearChart.php`: Livewire component with public `$yearA` (default current year), `$yearB` (default previous year), `$sportType` (default ''). `mount()` sets yearA=current year, yearB=yearA-1. `render()` queries `TrendAnalysisService::monthlyVolume()` for both years (full-year ranges: Jan 1 → Dec 31), normalizes the result to a fixed 12-slot array (index 0–11) keyed by month number, dispatches `yoy-chart-data` browser event.
+- Created `resources/views/livewire/premium/year-over-year-chart.blade.php`: ApexCharts dual-line chart with fixed x-axis Jan–Dec (from `trans('messages.months_short')`). Anno A = blue (#3B82F6), Anno B = orange (#F97316). Year A/B selectors (last 6 years), optional sport filter. Legend position top-right with circle markers. Follows `wire:ignore` + `window.__yoyChartInitData` + `@yoy-chart-data.window` pattern. `hasData` empty state shows translation key `yoy_no_data`.
+- Updated `resources/views/premium/year-over-year.blade.php`: replaced "Prossimamente" placeholder with page header + `@livewire('premium.year-over-year-chart')`.
+- Added 6 translation keys to `lang/it/messages.php` and `lang/en/messages.php`: `yoy_page_title`, `yoy_chart_title`, `yoy_year_a`, `yoy_year_b`, `yoy_all_sports`, `yoy_no_data`.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: app/Livewire/Premium/YearOverYearChart.php (new), resources/views/livewire/premium/year-over-year-chart.blade.php (new), resources/views/premium/year-over-year.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Year-over-year overlay normalization: use a fixed 12-slot array (`array_fill(0, 12, null)`), then fill slots by extracting `(int) substr($row->period, 5, 2) - 1` as the index. This gives a consistent Jan–Dec x-axis regardless of which months have data.
+  - `availableYears` computed as `currentYear` down to `currentYear - 5` — a simple 6-year window passed as array to the view for the select dropdowns.
+  - `wire:model.live` on year/sport selectors triggers immediate re-render (no explicit action button needed for this component).
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-029
+- Added "Dettaglio confronto" table section to `resources/views/livewire/premium/period-comparison.blade.php`: table below the chart with 5 columns — Metrica (with inline SVG icon), Periodo A (date range + formatted value), Periodo B (date range + formatted value), Delta assoluto (absolute difference with ±, green/red/grey color), Delta (%) (percentage with ↑/↓ arrows or '—' for division-by-zero, same color scheme as KPI cards).
+- Rows: Attività, Distanza, Dislivello, Tempo — driven by the existing `$kpis` array already passed from the component.
+- Icons resolved via PHP associative array keyed on translated label strings, with inline SVG paths for each metric type.
+- Added 4 translation keys to `lang/it/messages.php`: `compare_detail_title`, `compare_col_metric`, `compare_col_delta_abs`, `compare_col_delta_pct`.
+- Added 4 translation keys to `lang/en/messages.php`: same keys with English values.
+- Export button was already present in the header from US-027 — no additional changes needed.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: resources/views/livewire/premium/period-comparison.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Icon map keyed on translated label strings: `$icons[__('messages.key')] = '<path ...>'` — works cleanly when labels are stable within a request; avoids injecting icon arrays from PHP to keep view self-contained.
+  - Blade `{!! $iconPath !!}` for SVG path data is safe when the value comes from a PHP literal array in the view (not from user input).
+  - `tabular-nums` Tailwind utility (maps to `font-variant-numeric: tabular-nums`) keeps numeric columns aligned cleanly without fixed-width font.
+  - Delta absolute sign prefix: `($deltaAbs >= 0 ? '+' : '')` before the formatted number gives explicit +/- for absolute deltas (do NOT apply to percentage arrows which already have ↑/↓).
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-028
 - Updated `app/Livewire/Premium/PeriodComparison.php`: added `$granularity` ('month'|'week') and `$chartType` ('line'|'bar') public properties; added `setGranularity()` and `setChartType()` action methods; added `buildChartData(Collection $dataA, Collection $dataB): array` private method that normalizes both period datasets to the same x-axis length, derives month abbreviation labels from Period B's YYYY-MM periods (or "Sett. N" labels for week granularity), pads the shorter series with null, and includes `title`, `noDataText`, and `chartType` in the payload; dispatches `period-chart-data` browser event from `render()`.
 - Updated `resources/views/livewire/premium/period-comparison.blade.php`: added chart section below KPI cards with two toggle button groups (Mese/Settimana for granularity, Linee/Barre for chart type); ApexCharts dual-series initialization follows `wire:ignore` + `x-ref="chartEl"` + `window.__periodChartInitData` + `@period-chart-data.window` pattern; `buildOptions()` and `updateChart()` functions handle line/bar switching by updating `chart.type`, `stroke`, `fill`, and `plotOptions` in one `updateOptions(options, true, false)` call.
