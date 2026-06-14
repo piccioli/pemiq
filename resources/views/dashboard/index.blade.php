@@ -26,5 +26,8 @@
 
     {{-- Distribuzione per Sport --}}
     @livewire('dashboard.sport-distribution')
+
+    {{-- Grafico Distribuzione Sport --}}
+    @livewire('dashboard.sport-distribution-chart')
 </div>
 @endsection
