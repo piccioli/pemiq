@@ -14,6 +14,24 @@ Started: Dom 14 Giu 2026 18:06:14 CEST
 
 ---
 
+## 2026-06-14 - US-007
+- Created `resources/views/components/form/input.blade.php`: Blade component with `@props` for `label` (optional string), `type` (default: text), `hint` (optional string), `error` (optional string), `required` (bool). Named slot `$leadingIcon` for an icon overlay on the left. Renders a `.pq-field` wrapper with label, `.pq-field-control` (relative positioning for icon), `.pq-input` element (DS-styled), hint, and error message.
+- Added CSS to `resources/css/app.css`: `.pq-field` (flex-column, gap 6px), `.pq-field-label` (text-label font, text-muted color), `.pq-field-required` (danger color asterisk), `.pq-field-hint` (text-caption, text-faint), `.pq-field-error` (text-caption, danger color), `.pq-field-control` (relative flex), `.pq-field-icon` (absolute left overlay), `.pq-input` (surface-2 bg, border-strong border, text-strong color, radius-md, padding 10px 14px, focus: border-focus + ring-focus), `.pq-input-error` (danger border + focus ring), `.pq-field-icon-pad` (padding-left: 38px when icon present).
+- Refactored `resources/views/auth/login.blade.php`: email + password inputs → `<x-form.input>`.
+- Refactored `resources/views/auth/register.blade.php`: name, email, password, password_confirmation inputs → `<x-form.input>` with error pass-through.
+- Refactored `resources/views/auth/forgot-password.blade.php`: email input → `<x-form.input>`.
+- Refactored `resources/views/auth/reset-password.blade.php`: email, password, password_confirmation → `<x-form.input>`.
+- Refactored `resources/views/profile/show.blade.php`: name + email inputs → `<x-form.input>`; "Cambia password" link → `<x-button variant=secondary>`; "Passa a Premium" link → `<x-button>`. The locale `<select>` was left as-is (will be replaced by x-form.select in US-008).
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/form/input.blade.php (new), resources/css/app.css, resources/views/auth/login.blade.php, resources/views/auth/register.blade.php, resources/views/auth/forgot-password.blade.php, resources/views/auth/reset-password.blade.php, resources/views/profile/show.blade.php
+- **Learnings for future iterations:**
+  - `x-form.input` maps to `resources/views/components/form/input.blade.php` — Blade resolves dots to directory separators for components.
+  - Input `id` is derived from `$attributes->get('id') ?? $attributes->get('name')` — passing `name` is sufficient for single-occurrence fields; pass explicit `id` when the same name appears twice on a page.
+  - `:error="$errors->first('name')"` passes the first validation error string (or empty string) — the component shows the error message when non-empty.
+  - The `leadingIcon` named slot requires `@isset($leadingIcon)` in the component — pass icon HTML as `<x-slot:leadingIcon><svg ...></svg></x-slot:leadingIcon>`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-004
 - Created `resources/views/components/card.blade.php`: Blade component with `@props` for `eyebrow` (optional string, renders .pq-eyebrow), `title` (optional string, renders .pq-card-title h2), `padding` (none|sm|md|lg, default: md), `interactive` (bool), `accent` (bool). Named slot `$action` for header right side. Uses `$attributes->class($classes)` to pass through extra attributes (Livewire directives, etc.).
 - Added CSS to `resources/css/app.css`: `.pq-card` (surface bg + border + radius-lg + shadow-sm + edge-top), `.pq-card-accent` (border-top: 2px solid var(--brand)), `.pq-card-interactive` (hover: surface-hover + shadow-md + translateY(-1px)), `.pq-card-pad-{sm|md|lg}` (12/16/24px), `.pq-card-header` (flex justify-between + margin-bottom 16px), `.pq-card-title` (fs-lg, weight 600, text-strong).

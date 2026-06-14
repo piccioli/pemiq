@@ -145,8 +145,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/form/input.blade.php with props: label, type (default: text), hint, error, required, leadingIcon slot. Renders .pq-field wrapper with .pq-field-label, .pq-field-control (relative, for icon overlay), .pq-input (DS-styled), .pq-field-hint, .pq-field-error. Added .pq-field*, .pq-input, .pq-input-error, .pq-field-icon, .pq-field-icon-pad CSS classes to app.css. Refactored all input fields in auth/ (login, register, forgot-password, reset-password) and profile/show.blade.php to <x-form.input>. All 80 tests pass. Vite build succeeds."
     },
     {
       "id": "US-008",
