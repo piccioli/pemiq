@@ -59,8 +59,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/button.blade.php with all 4 variants (primary/secondary/ghost/danger), 3 sizes (sm/md/lg), href→<a>/no-href→<button> rendering, disabled, fullWidth, named $icon/$iconRight slots. CSS classes (.pq-btn, .pq-btn-{variant}, .pq-btn-{size}) added to app.css. Refactored: layouts/app.blade.php (dismiss × buttons, Esci logout), strava/connection-status.blade.php (sync, disconnect, cancel, connect/reconnect buttons), activities/index.blade.php (Filtra, Reset), activities/show.blade.php (Vedi su Strava variant=ghost), premium/index.blade.php (CTA mailto size=lg). All 80 tests pass."
     },
     {
       "id": "US-004",

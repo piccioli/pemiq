@@ -1,3 +1,21 @@
+## 2026-06-14 - US-003
+- Created `resources/views/components/button.blade.php`: Blade component with `@props` for `variant` (primary|secondary|ghost|danger, default: primary), `size` (sm|md|lg, default: md), `href` (renders `<a>` if set, `<button>` otherwise), `disabled` (bool), `fullWidth` (bool). Named slots `$icon` (left) and `$iconRight` (right). Passes all remaining attributes through `$attributes->class($classes)` — enables `wire:click`, `wire:loading.attr`, `@click`, `type`, `target`, `rel` pass-through.
+- Added `.pq-btn`, `.pq-btn-{variant}`, `.pq-btn-{size}`, `.pq-btn-full` CSS classes to `resources/css/app.css`. Hover states via CSS `:hover:not(:disabled):not([aria-disabled="true"])` — no JS needed.
+- Refactored `resources/views/livewire/strava/connection-status.blade.php`: "Sincronizza attività storiche" → `<x-button wire:click wire:loading.attr>`; "Scollega Strava" → `<x-button variant=danger @click>`; "Annulla" → `<x-button variant=secondary @click>`; "Scollega" → `<x-button type=submit variant=danger>`; "Collega/Riconnetti Strava" → `<x-button href=...>`. Confirmation dialog bg updated to DS surface vars.
+- Refactored `resources/views/activities/index.blade.php`: "Filtra" → `<x-button type=submit>`; "Reset" → `<x-button href=... variant=secondary>`.
+- Refactored `resources/views/activities/show.blade.php`: "Vedi su Strava" → `<x-button href=... variant=ghost target=_blank>`.
+- Refactored `resources/views/premium/index.blade.php`: CTA mailto link → `<x-button href=... size=lg>`.
+- Refactored `resources/views/layouts/app.blade.php`: flash message dismiss × buttons → `<x-button variant=ghost size=sm @click>`; "Esci" logout → `<x-button type=submit variant=ghost fullWidth>`.
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/button.blade.php (new), resources/css/app.css, resources/views/layouts/app.blade.php, resources/views/livewire/strava/connection-status.blade.php, resources/views/activities/index.blade.php, resources/views/activities/show.blade.php, resources/views/premium/index.blade.php
+- **Learnings for future iterations:**
+  - Blade component `$attributes->class($classes)` merges custom class string with any extra classes passed by callers, while preserving all other attributes (wire:*, @click, type, etc.) — the correct pattern for reusable DS components.
+  - Named slots in Blade components are available as `$icon` / `$iconRight` variables; use `@isset($icon){{ $icon }}@endisset` to render only when passed.
+  - CSS `:hover:not(:disabled):not([aria-disabled="true"])` is the correct selector to skip hover styles on disabled buttons/links — covers both HTML `disabled` and ARIA `aria-disabled="true"` (used on `<span>` when href + disabled).
+  - `<x-button fullWidth>` renders `pq-btn-full` (width: 100%; justify-content: center) — useful for dropdown full-width items, but the "Esci" logout button needs additional `style="justify-content: flex-start"` to match dropdown-item left-aligned text.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-002
 - Updated `resources/views/layouts/app.blade.php`: replaced old top-nav layout with dark cockpit shell. Body background set to `var(--bg)`. Sticky topbar (60px) with `color-mix(in srgb, var(--bg) 80%, transparent)` + `backdrop-filter: blur(16px)` + `border-bottom: 1px solid var(--border)`. Logo "PEMIQ" in Space Grotesk 700 with `var(--brand)` color. Right area: Premium badge using `--zone-4` amber for premium users, teal `var(--accent)` "Passa a Premium" link for free users, user dropdown with DS styling.
 - Created `resources/views/partials/sidebar-nav.blade.php`: extracted reusable sidebar navigation with `pq-nav-link` class (text-muted default, text-strong hover, accent/accent-soft active). Includes Dashboard, Attività links; conditionally shows Premium section (Trend, Confronta, Anno su Anno) for premium users. Uses Lucide icons (`layout-dashboard`, `activity`, `trending-up`, `git-compare-arrows`, `calendar-range`).
