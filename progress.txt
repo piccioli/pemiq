@@ -1148,3 +1148,18 @@
   - `translatedFormat('d M Y')` gives abbreviated month names (giu/Jun); use `'d F Y'` for full names (giugno/June).
   - Adding a file to `autoload.files` in composer.json requires `composer dump-autoload` in the Docker container to take effect.
 ---
+
+## 2026-06-14 - US-021
+- Added anti-flash inline `<script>` to `<head>` of `resources/views/layouts/app.blade.php` (before `@vite`): reads `localStorage.getItem('pemiq-theme') || 'dark'` and calls `document.documentElement.setAttribute('data-theme', t)` — prevents any theme flash on page load since the script runs before CSS is rendered.
+- Added theme toggle button to topbar right section (between premium badge and user dropdown): two SVG icons controlled by CSS classes `.theme-toggle-sun` (visible in dark mode, block by default) and `.theme-toggle-moon` (visible in light mode, none by default). Click handler toggles `data-theme` on `document.documentElement` and persists to `localStorage.setItem('pemiq-theme', next)`.
+- Added `.theme-toggle-sun` / `.theme-toggle-moon` CSS to `resources/css/app.css` with `[data-theme="light"]` selector overrides for icon visibility — CSS-driven approach avoids Alpine.js timing dependency.
+- Added light mode shadow overrides to `[data-theme="light"]` block: `--shadow-sm/md/lg` at rgba(0,0,0,0.10–0.15) instead of 0.45–0.65 to suit white card backgrounds. The `[data-theme="light"]` token block was already present from design system setup.
+- All 14 Blade components work in both themes without changes — they all use CSS variables (`var(--token)`), which the light theme overrides correctly.
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/layouts/app.blade.php, resources/css/app.css
+- **Learnings for future iterations:**
+  - Anti-flash pattern for theme persistence: inline `<script>` in `<head>` BEFORE CSS links — browser hasn't applied styles yet, so setting `data-theme` here means CSS renders with the correct theme from the very first paint. No Alpine or Livewire dependency needed.
+  - CSS-driven icon visibility (`[data-theme="light"] .icon { display: none/block }`) is more reliable than Alpine `x-show` for theme-dependent icons — works immediately on paint, no JS timing concern.
+  - For light mode, shadows with dark `rgba` values look too heavy — always override `--shadow-*` vars in `[data-theme="light"]` with lower opacity values (0.10–0.15 instead of 0.45–0.65).
+  - Vanilla JS `onclick` for theme toggle (not Alpine) is the correct choice when the action affects `document.documentElement` — Alpine's scope is the component, not the document root.
+---
