@@ -845,6 +845,46 @@ body {
     flex: 1;
 }
 
+/* ─── Segmented Control ──────────────────────────────────────── */
+.pq-segmented-control {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    background: var(--surface-2);
+    border-radius: var(--radius-md);
+}
+
+.pq-segmented-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: calc(var(--radius-md) - 2px);
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1.25;
+    transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+
+.pq-segmented-option:hover {
+    color: var(--text);
+}
+
+.pq-segmented-option-active {
+    background: var(--surface-3);
+    color: var(--text-strong);
+}
+
+.pq-segmented-sm .pq-segmented-option {
+    padding: 4px 10px;
+    font-size: var(--fs-xs);
+}
+
 /* ─── Tailwind v4 theme extension ─────────────────────────────── */
 @theme inline {
     --font-sans: var(--font-body);

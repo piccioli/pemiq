@@ -137,27 +137,25 @@
             <h3 class="text-sm font-semibold text-gray-700">{{ $chartInitData['title'] }}</h3>
             <div class="flex flex-wrap items-center gap-2">
                 {{-- Granularity toggle: Mese / Settimana --}}
-                <div class="inline-flex rounded-md border border-gray-200 overflow-hidden text-xs">
-                    <button
-                        wire:click="setGranularity('month')"
-                        class="px-3 py-1.5 font-medium transition-colors {{ $granularity === 'month' ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50' }}"
-                    >{{ __('messages.compare_granularity_month') }}</button>
-                    <button
-                        wire:click="setGranularity('week')"
-                        class="px-3 py-1.5 font-medium transition-colors border-l border-gray-200 {{ $granularity === 'week' ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50' }}"
-                    >{{ __('messages.compare_granularity_week') }}</button>
-                </div>
+                <x-segmented-control
+                    name="granularity"
+                    :selected="$granularity"
+                    size="sm"
+                    :options="[
+                        ['value' => 'month', 'label' => __('messages.compare_granularity_month')],
+                        ['value' => 'week',  'label' => __('messages.compare_granularity_week')],
+                    ]"
+                />
                 {{-- Chart type toggle: Linee / Barre --}}
-                <div class="inline-flex rounded-md border border-gray-200 overflow-hidden text-xs">
-                    <button
-                        wire:click="setChartType('line')"
-                        class="px-3 py-1.5 font-medium transition-colors {{ $chartType === 'line' ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50' }}"
-                    >{{ __('messages.compare_chart_type_line') }}</button>
-                    <button
-                        wire:click="setChartType('bar')"
-                        class="px-3 py-1.5 font-medium transition-colors border-l border-gray-200 {{ $chartType === 'bar' ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50' }}"
-                    >{{ __('messages.compare_chart_type_bar') }}</button>
-                </div>
+                <x-segmented-control
+                    name="chartType"
+                    :selected="$chartType"
+                    size="sm"
+                    :options="[
+                        ['value' => 'line', 'label' => __('messages.compare_chart_type_line')],
+                        ['value' => 'bar',  'label' => __('messages.compare_chart_type_bar')],
+                    ]"
+                />
             </div>
         </div>
 

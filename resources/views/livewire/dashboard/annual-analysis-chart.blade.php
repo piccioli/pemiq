@@ -10,20 +10,15 @@
                 @endforeach
             </x-form.select>
 
-            <div class="flex rounded-md border border-gray-300 overflow-hidden text-sm">
-                <button
-                    wire:click="$set('metric', 'distance')"
-                    class="px-3 py-1.5 transition-colors {{ $metric === 'distance' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
-                >
-                    {{ __('messages.metric_distance') }}
-                </button>
-                <button
-                    wire:click="$set('metric', 'hours')"
-                    class="px-3 py-1.5 transition-colors border-l border-gray-300 {{ $metric === 'hours' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
-                >
-                    {{ __('messages.col_hours') }}
-                </button>
-            </div>
+            <x-segmented-control
+                name="metric"
+                :selected="$metric"
+                size="sm"
+                :options="[
+                    ['value' => 'distance', 'label' => __('messages.metric_distance')],
+                    ['value' => 'hours',    'label' => __('messages.col_hours')],
+                ]"
+            />
         </div>
         @endif
     </div>
