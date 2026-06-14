@@ -202,6 +202,62 @@
     letter-spacing: -0.02em;
 }
 
+/* ─── Layout shell ────────────────────────────────────────────── */
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+}
+
+[x-cloak] { display: none !important; }
+
+/* Sidebar nav links */
+.pq-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-muted);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.pq-nav-link:hover {
+    color: var(--text-strong);
+    background: var(--surface-2);
+}
+
+.pq-nav-link.active {
+    color: var(--accent);
+    background: var(--accent-soft);
+}
+
+/* Topbar user dropdown item */
+.pq-dropdown-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.pq-dropdown-item:hover {
+    color: var(--text-strong);
+    background: var(--surface-3);
+}
+
 /* ─── Tailwind v4 theme extension ─────────────────────────────── */
 @theme inline {
     --font-sans: var(--font-body);
