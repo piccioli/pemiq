@@ -1,3 +1,17 @@
+## 2026-06-14 - US-015
+- Added `show(Activity $activity)` method to ActivityController: `abort_if($activity->user_id !== auth()->id(), 403)` for ownership check, returns `activities.show` view.
+- Added `GET /activities/{activity}` route (auth+verified middleware, named `activities.show`) to routes/web.php.
+- Created resources/views/activities/show.blade.php: back link to /activities, activity name/date/sport badge header, "Vedi su Strava" external link (only if strava_activity_id not null), 5-column metric cards (distanza, durata, dislivello, velocità media, FC media — shown only if not null), secondary metrics section (moving_time, max_hr, avg_watts, calories — each shown only if not null). Null fields display '—'.
+- Updated resources/views/activities/index.blade.php: activity name now links to `activities.show` route.
+- All 48 tests pass.
+- Files changed: app/Http/Controllers/ActivityController.php, routes/web.php, resources/views/activities/show.blade.php (new), resources/views/activities/index.blade.php
+- **Learnings for future iterations:**
+  - `abort_if($activity->user_id !== auth()->id(), 403)` is the simplest ownership gate for single-model routes — no Policy class needed for small apps.
+  - Strava average_speed is stored in m/s; multiply by 3.6 to convert to km/h.
+  - Conditional metric cards: use `@if ($metric !== null)` to skip rendering the card entirely rather than showing '—' in a prominent metric card; '—' is better suited for table cells.
+  - Making the activity name a link in the index view required only one `<a href>` wrapper — no additional data needed since the `$activity->id` is already on the model.
+---
+
 ## 2026-06-14 - US-014
 - Updated app/Http/Controllers/ActivityController.php: accepts `sport`, `year`, `month` query params. Driver-aware yearExpr/monthExpr private helpers (CAST(strftime) for SQLite, YEAR()/MONTH() for MariaDB). Filters applied via `->where('sport_type', $sport)` and `->whereRaw()` for year/month. `->withQueryString()` on paginator ensures filters persist in pagination links.
 - Computed `$sportTypes` (distinct from user's activities, alphabetical) and `$availableYears` (distinct years from user's activities, desc) and passed to view for populating selects.
