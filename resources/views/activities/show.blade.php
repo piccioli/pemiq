@@ -151,5 +151,31 @@
     </div>
     @endif
 
+    {{-- Mappa percorso --}}
+    @if ($activity->polyline)
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <h2 class="text-sm font-semibold text-gray-700 px-4 pt-4 pb-2">Percorso</h2>
+        <div id="activity-map" style="height: 400px;"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!window.L || !window.PolylineDecoder) return;
+            var encoded = @json($activity->polyline);
+            var latlngs = window.PolylineDecoder.decode(encoded);
+            var map = window.L.map('activity-map');
+            window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+            var track = window.L.polyline(latlngs, { color: '#E85D04', weight: 3 }).addTo(map);
+            map.fitBounds(track.getBounds(), { padding: [20, 20] });
+        });
+    </script>
+    @else
+    <div class="bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center" style="height: 400px;">
+        <p class="text-gray-500 text-sm">Mappa non disponibile</p>
+    </div>
+    @endif
+
 </div>
 @endsection
