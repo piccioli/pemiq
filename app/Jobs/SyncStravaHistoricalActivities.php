@@ -2,8 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Exceptions\Strava\StravaAuthException;
 use App\Exceptions\Strava\StravaRateLimitException;
 use App\Exceptions\Strava\StravaTokenExpiredException;
+use App\Mail\SyncFailedNotification;
 use App\Models\StravaAccount;
 use App\Services\Strava\StravaApiService;
 use App\Services\Strava\StravaTokenService;
@@ -13,6 +15,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
 
 class SyncStravaHistoricalActivities implements ShouldQueue
 {
@@ -35,7 +38,11 @@ class SyncStravaHistoricalActivities implements ShouldQueue
             $activities = $apiService->fetchActivities($this->account);
             $count = $syncService->sync($this->account, $activities, $syncLog);
             $syncService->completeSyncLog($syncLog, $count);
-            $this->account->update(['last_sync_at' => now()]);
+            $this->account->update(['last_sync_at' => now(), 'notified_at' => null]);
+        } catch (StravaAuthException $e) {
+            $syncService->failSyncLog($syncLog, $e->getMessage());
+            $this->sendCriticalFailureNotification();
+            throw $e;
         } catch (StravaTokenExpiredException $e) {
             // Force token refresh before Laravel retries the job
             try {
@@ -52,5 +59,18 @@ class SyncStravaHistoricalActivities implements ShouldQueue
             $syncService->failSyncLog($syncLog, $e->getMessage());
             throw $e;
         }
+    }
+
+    private function sendCriticalFailureNotification(): void
+    {
+        $account = $this->account->fresh();
+
+        if ($account->notified_at !== null) {
+            return;
+        }
+
+        $user = $account->user;
+        Mail::to($user->email)->send(new SyncFailedNotification($account));
+        $account->update(['notified_at' => now()]);
     }
 }

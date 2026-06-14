@@ -15,6 +15,7 @@ class StravaAccount extends Model
         'token_expires_at',
         'last_sync_at',
         'connection_status',
+        'notified_at',
     ];
 
     protected function casts(): array
@@ -24,6 +25,7 @@ class StravaAccount extends Model
             'refresh_token' => 'encrypted',
             'token_expires_at' => 'datetime',
             'last_sync_at' => 'datetime',
+            'notified_at' => 'datetime',
         ];
     }
 
