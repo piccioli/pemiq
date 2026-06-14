@@ -1,3 +1,23 @@
+## 2026-06-14 - US-005
+- Created `resources/views/components/badge.blade.php`: Blade component with `@props` for `variant` (success|warning|danger|info|brand|outline|zone1-5, default: outline), `size` (sm|md, default: sm), `dot` (bool). Uses `$attributes->class($classes)` for pass-through. Dot indicator rendered as a `<span class="pq-badge-dot-indicator">` (8px circle, `background: currentColor`).
+- Added `.pq-badge`, `.pq-badge-{variant}`, `.pq-badge-{size}`, `.pq-badge-dot-indicator` CSS classes to `resources/css/app.css`. Zone variants use `var(--zone-N-soft)` bg + `var(--zone-N)` text; status variants use `var(--{variant}-soft)` bg + `var(--{variant})` text.
+- Refactored `resources/views/activities/index.blade.php`: `$sportColors` Tailwind map → `$sportVariants` DS map; sport badge `<span>` → `<x-badge :variant="$sportVariants[...]">`.
+- Refactored `resources/views/activities/show.blade.php`: same sport badge replacement.
+- Refactored `resources/views/livewire/dashboard/sport-distribution.blade.php`: same sport badge replacement (removes `$badgeClass` local variable).
+- Refactored `resources/views/livewire/strava/connection-status.blade.php`: "Connesso" green span → `<x-badge variant="success" size="md" :dot="true">`; "Sincronizzazione in corso..." disabled button-span → `<x-badge variant="info" size="md">` with inline spinner SVG.
+- Refactored `resources/views/layouts/app.blade.php`: inline-styled `★ Premium` amber span → `<x-badge variant="zone4">`.
+- Refactored `resources/views/profile/show.blade.php`: inline-styled `★ Premium` amber span → `<x-badge variant="zone4" size="md">`.
+- Sport variant mapping: Run/TrailRun/VirtualRun/Hike/Walk → zone3 (green); Ride/GravelRide/MountainBikeRide/VirtualRide → zone2 (blue); Swim → zone1; Workout → outline; unknown → outline.
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/badge.blade.php (new), resources/css/app.css, resources/views/activities/index.blade.php, resources/views/activities/show.blade.php, resources/views/livewire/dashboard/sport-distribution.blade.php, resources/views/livewire/strava/connection-status.blade.php, resources/views/layouts/app.blade.php, resources/views/profile/show.blade.php
+- **Learnings for future iterations:**
+  - Badge dot indicator uses `background: currentColor` — automatically inherits the text color set by the variant class, no per-variant override needed.
+  - Sport badge variant mapping (zone1-5) is defined per-view in a `$sportVariants` PHP array; same mapping should be used wherever sport badges appear for visual consistency.
+  - `<x-badge>` with an inline spinner SVG inside the slot works cleanly — the SVG inherits `currentColor` from the badge variant for consistent tinting.
+  - `size="md"` on badges in non-table contexts (connection status, profile) reads better; `size="sm"` (default) works in dense table rows.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-003
 - Created `resources/views/components/button.blade.php`: Blade component with `@props` for `variant` (primary|secondary|ghost|danger, default: primary), `size` (sm|md|lg, default: md), `href` (renders `<a>` if set, `<button>` otherwise), `disabled` (bool), `fullWidth` (bool). Named slots `$icon` (left) and `$iconRight` (right). Passes all remaining attributes through `$attributes->class($classes)` — enables `wire:click`, `wire:loading.attr`, `@click`, `type`, `target`, `rel` pass-through.
 - Added `.pq-btn`, `.pq-btn-{variant}`, `.pq-btn-{size}`, `.pq-btn-full` CSS classes to `resources/css/app.css`. Hover states via CSS `:hover:not(:disabled):not([aria-disabled="true"])` — no JS needed.

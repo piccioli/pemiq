@@ -103,8 +103,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/badge.blade.php with all 11 variants (success/warning/danger/info/brand/outline/zone1-5), 2 sizes (sm/md), dot indicator (8px circle). Added .pq-badge, .pq-badge-{variant}, .pq-badge-{size}, .pq-badge-dot-indicator CSS classes to app.css. Refactored: activities/index.blade.php (sport badge with zone variant mapping), activities/show.blade.php (sport badge), livewire/dashboard/sport-distribution.blade.php (sport badge), livewire/strava/connection-status.blade.php (Connesso → success dot, Sincronizzazione in corso → info with spinner), layouts/app.blade.php (★ Premium → zone4), profile/show.blade.php (★ Premium → zone4). Sport mapping: Run/TrailRun/VirtualRun/Hike/Walk→zone3, Ride/GravelRide/MountainBikeRide/VirtualRide→zone2, Swim→zone1, Workout→outline. All 80 tests pass. Vite build succeeds."
     },
     {
       "id": "US-006",
