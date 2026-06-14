@@ -1,3 +1,33 @@
+## 2026-06-14 - US-028
+- Updated `app/Livewire/Premium/PeriodComparison.php`: added `$granularity` ('month'|'week') and `$chartType` ('line'|'bar') public properties; added `setGranularity()` and `setChartType()` action methods; added `buildChartData(Collection $dataA, Collection $dataB): array` private method that normalizes both period datasets to the same x-axis length, derives month abbreviation labels from Period B's YYYY-MM periods (or "Sett. N" labels for week granularity), pads the shorter series with null, and includes `title`, `noDataText`, and `chartType` in the payload; dispatches `period-chart-data` browser event from `render()`.
+- Updated `resources/views/livewire/premium/period-comparison.blade.php`: added chart section below KPI cards with two toggle button groups (Mese/Settimana for granularity, Linee/Barre for chart type); ApexCharts dual-series initialization follows `wire:ignore` + `x-ref="chartEl"` + `window.__periodChartInitData` + `@period-chart-data.window` pattern; `buildOptions()` and `updateChart()` functions handle line/bar switching by updating `chart.type`, `stroke`, `fill`, and `plotOptions` in one `updateOptions(options, true, false)` call.
+- Added 8 translation keys to both `lang/it/messages.php` and `lang/en/messages.php`: `compare_chart_title_month`, `compare_chart_title_week`, `compare_granularity_month`, `compare_granularity_week`, `compare_chart_type_line`, `compare_chart_type_bar`, `compare_week_short`, `compare_no_chart_data`.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: app/Livewire/Premium/PeriodComparison.php, resources/views/livewire/premium/period-comparison.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - ApexCharts line↔bar toggle via `updateOptions`: pass `chart.type`, `stroke`, `fill`, and `plotOptions` together in one call with `redrawPaths=true` (`true` as second arg) — partial updates (e.g., just `chart.type`) do not re-render geometry correctly.
+  - Dual-series ApexCharts: `colors: ['#3B82F6', '#7C3AED']` sets the palette for both series; series color can be overridden per-series with `series[i].color` but the top-level `colors` array is simpler and consistent.
+  - Period comparison x-axis normalization: use Period B's bucket labels as categories (since B is the "current" period); pad Period A with `null` values if it has fewer buckets. `null` in an ApexCharts series renders as a gap in line charts and an empty column in bar charts.
+  - `trans('messages.months_short')` used in PHP (not `__()`) since it's called inside a method that builds data, not inside a view context — both work in service/component code but `trans()` is the conventional PHP-context call.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-027
+- Added `periodStats(User $user, ?string $sportType, Carbon $from, Carbon $to): \stdClass` to `app/Services/Dashboard/TrendAnalysisService.php`: aggregates activities in a date range returning `activities`, `distance_km`, `elevation_m`, `hours` as a stdClass with explicit type casts.
+- Created `app/Livewire/Premium/PeriodComparison.php`: Livewire component with public `fromA`/`toA`/`fromB`/`toB` (date strings, wire:model deferred) and `sportType`. `mount()` defaults Period A = 6–3 months ago, Period B = 3 months ago → today. `compare()` method triggers re-render with updated model values. `render()` calls `periodStats()` for both periods, builds 4 KPI arrays (distance/elevation/time/activities), passes labels.
+- Created `resources/views/livewire/premium/period-comparison.blade.php`: header row with disabled "Esporta" button (tooltip "Disponibile a breve"), period selector section (date inputs for A and B + sport filter + "Aggiorna confronto" button using `wire:click="compare"`), 4 KPI cards showing Period B value + delta% vs Period A (green=positive, red=negative, gray=zero or null when A=0).
+- Updated `resources/views/premium/compare.blade.php`: replaced "Prossimamente" placeholder with `@livewire('premium.period-comparison')` and added page title using `compare_page_title` translation key.
+- Added 13 translation keys to `lang/it/messages.php` and `lang/en/messages.php`: `compare_page_title`, `compare_title`, `compare_period_a/b`, `compare_update`, `compare_updating`, `compare_export`, `compare_export_tooltip`, `compare_vs`, `compare_kpi_distance/elevation/time/activities`.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: app/Services/Dashboard/TrendAnalysisService.php, app/Livewire/Premium/PeriodComparison.php (new), resources/views/livewire/premium/period-comparison.blade.php (new), resources/views/premium/compare.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - `wire:model` (without `.live`) in Livewire 3 is deferred — all queued updates are sent when any action is triggered (e.g., `wire:click="compare"`). Use this pattern when you want explicit "Apply" button behavior.
+  - `wire:loading.attr="disabled"` + `wire:loading.remove/wire:loading` on button text: clean pattern for showing spinner text while Livewire request is in flight.
+  - `periodStats()` returns a `\stdClass` with explicit PHP type casts — prevents PDO returning strings from `selectRaw()` aggregations (e.g., `(int)$result->activities`, `(float)$result->distance_km`).
+  - Delta % computation in Blade @php block with `match(true, ...)`: handle null (division by zero) as '—', positive → green, negative → red, zero → gray.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-026
 - Created `app/Livewire/Premium/TrendChart.php`: Livewire component with public properties `metric` (distance/hours), `range` (3months/6months/1year/custom), `sportType` (empty = all), `customFrom`/`customTo` (date strings). `mount()` initializes custom dates to last 6 months. `render()` fetches distinct sport types, computes date range via `getDateRange()`, calls `TrendAnalysisService::monthlyVolume()`, dispatches `trend-chart-data` browser event.
 - Created `resources/views/livewire/premium/trend-chart.blade.php`: ApexCharts area chart (type: 'area', smooth stroke, gradient fill, violet color #7C3AED). Controls: range select (3/6/1year/custom), sport select, distance/hours toggle. Custom range shows two date inputs with wire:model.live. Empty state message. Follows existing wire:ignore + Alpine x-data + @trend-chart-data.window pattern.
