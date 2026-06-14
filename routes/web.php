@@ -104,6 +104,10 @@ Route::post('/strava/sync-historical', [StravaController::class, 'syncHistorical
     ->name('strava.sync-historical');
 
 // Impersonation
+Route::post('/impersonate/start/{user}', [ImpersonateController::class, 'start'])
+    ->middleware('auth')
+    ->name('impersonate.start');
+
 Route::post('/impersonate/stop', [ImpersonateController::class, 'stop'])
     ->middleware('auth')
     ->name('impersonate.stop');
