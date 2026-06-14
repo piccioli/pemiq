@@ -14,6 +14,27 @@ Started: Dom 14 Giu 2026 18:06:14 CEST
 
 ---
 
+## 2026-06-14 - US-008
+- Created `resources/views/components/form/select.blade.php`: Blade component with `@props` for `label` (optional string), `size` (sm|md, default: md), `hint` (optional string), `error` (optional string). Renders `.pq-field` wrapper with optional label, `<select>` element using `$attributes->except(['id'])->class([$selectClasses])`, optional hint and error paragraphs. Uses same pq-field structure as x-form.input.
+- Added CSS to `resources/css/app.css`: `.pq-select` (surface-2 bg, border-strong border, text-strong color, radius-md, padding 10px 36px 10px 14px, appearance:none, SVG chevron background-image at right 12px, focus ring identical to pq-input). `.pq-select-sm` (padding 6px 30px 6px 10px, fs-sm, arrow at right 8px). `.pq-select-error` (danger border + focus ring). Custom arrow SVG: chevron-down with stroke `%2394a3b8` (#94a3b8), works in both dark and light themes.
+- Refactored `resources/views/activities/index.blade.php`: 3 filter selects (sport/year/month) + their `<div class="flex flex-col gap-1">` wrappers and `<label>` elements replaced with `<x-form.select :label="__('messages.col_sport'|col_year|col_month)" name="...">`.
+- Refactored `resources/views/profile/show.blade.php`: locale select + surrounding `<div>` and `<label>` replaced with `<x-form.select :label="__('messages.language')" name="locale" id="locale">`.
+- Refactored `resources/views/livewire/dashboard/annual-analysis-chart.blade.php`: year select → `<x-form.select size="sm" wire:model.live="year">`.
+- Refactored `resources/views/livewire/dashboard/monthly-analysis-chart.blade.php`: year + month selects → `<x-form.select size="sm">`.
+- Refactored `resources/views/livewire/dashboard/monthly-analysis.blade.php`: year select + sr-only label div → `<x-form.select size="sm" id="year-select">`.
+- Refactored `resources/views/livewire/premium/trend-chart.blade.php`: range + sport selects → `<x-form.select size="sm">`.
+- Refactored `resources/views/livewire/premium/year-over-year-chart.blade.php`: yearA + yearB + sport selects → `<x-form.select size="sm">`.
+- Refactored `resources/views/livewire/premium/period-comparison.blade.php`: sport select → `<x-form.select :label="__('messages.col_sport')">`.
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/form/select.blade.php (new), resources/css/app.css, resources/views/activities/index.blade.php, resources/views/profile/show.blade.php, resources/views/livewire/dashboard/annual-analysis-chart.blade.php, monthly-analysis-chart.blade.php, monthly-analysis.blade.php, resources/views/livewire/premium/trend-chart.blade.php, year-over-year-chart.blade.php, period-comparison.blade.php
+- **Learnings for future iterations:**
+  - `x-form.select` maps to `resources/views/components/form/select.blade.php` — Blade resolves dots to directory separators.
+  - SVG in CSS `background-image` cannot use CSS variables (different rendering context) — use hardcoded hex. `#94a3b8` is a neutral gray that works as a faint arrow in both dark and light themes.
+  - `appearance: none; -webkit-appearance: none` removes native browser select arrow — required before adding the custom SVG arrow.
+  - For inline Livewire chart selects without labels, `<x-form.select size="sm">` wraps the select in a `pq-field` div, but since there's no label/hint/error, the div is effectively transparent; the select sizes to its content's natural width.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-007
 - Created `resources/views/components/form/input.blade.php`: Blade component with `@props` for `label` (optional string), `type` (default: text), `hint` (optional string), `error` (optional string), `required` (bool). Named slot `$leadingIcon` for an icon overlay on the left. Renders a `.pq-field` wrapper with label, `.pq-field-control` (relative positioning for icon), `.pq-input` element (DS-styled), hint, and error message.
 - Added CSS to `resources/css/app.css`: `.pq-field` (flex-column, gap 6px), `.pq-field-label` (text-label font, text-muted color), `.pq-field-required` (danger color asterisk), `.pq-field-hint` (text-caption, text-faint), `.pq-field-error` (text-caption, danger color), `.pq-field-control` (relative flex), `.pq-field-icon` (absolute left overlay), `.pq-input` (surface-2 bg, border-strong border, text-strong color, radius-md, padding 10px 14px, focus: border-focus + ring-focus), `.pq-input-error` (danger border + focus ring), `.pq-field-icon-pad` (padding-left: 38px when icon present).

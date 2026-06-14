@@ -163,8 +163,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/form/select.blade.php with props: label (optional), size (sm|md, default md), hint, error. Renders .pq-field wrapper with optional label, .pq-select element (DS-styled), hint and error. Added .pq-select, .pq-select-sm, .pq-select-error CSS to app.css. Custom chevron-down arrow via background-image SVG (color #94a3b8, works in dark/light themes). Refactored: activities/index.blade.php (3 filter selects → x-form.select with col_sport/col_year/col_month labels), profile/show.blade.php (locale select → x-form.select with messages.language label), livewire/dashboard/annual-analysis-chart (year → size=sm), livewire/dashboard/monthly-analysis-chart (year+month → size=sm), livewire/dashboard/monthly-analysis (year → size=sm), livewire/premium/trend-chart (range+sport → size=sm), livewire/premium/year-over-year-chart (yearA+yearB+sport → size=sm), livewire/premium/period-comparison (sport). All 80 tests pass. Vite build succeeds."
     },
     {
       "id": "US-009",
