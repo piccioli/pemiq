@@ -24,6 +24,9 @@
     {{-- Analisi per Mese --}}
     @livewire('dashboard.monthly-analysis')
 
+    {{-- Grafico Analisi Mensile --}}
+    @livewire('dashboard.monthly-analysis-chart')
+
     {{-- Distribuzione per Sport --}}
     @livewire('dashboard.sport-distribution')
 

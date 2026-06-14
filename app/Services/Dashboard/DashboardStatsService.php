@@ -74,6 +74,37 @@ class DashboardStatsService
         ]);
     }
 
+    public function getDailyStats(User $user, int $year, int $month): Collection
+    {
+        $yearExpr  = $this->yearExpr('started_at');
+        $monthExpr = $this->monthExpr('started_at');
+        $dayExpr   = $this->dayExpr('started_at');
+
+        $rows = Activity::where('user_id', $user->id)
+            ->whereRaw("{$yearExpr} = ?", [$year])
+            ->whereRaw("{$monthExpr} = ?", [$month])
+            ->selectRaw("
+                {$dayExpr} as day,
+                COUNT(*) as activities,
+                ROUND(SUM(distance) / 1000, 1) as distance_km,
+                ROUND(SUM(elevation_gain), 1) as elevation_m,
+                ROUND(SUM(elapsed_time) / 3600, 2) as hours
+            ")
+            ->groupByRaw($dayExpr)
+            ->get()
+            ->keyBy('day');
+
+        $daysInMonth = \Carbon\Carbon::create($year, $month)->daysInMonth;
+
+        return collect(range(1, $daysInMonth))->map(fn ($d) => (object) [
+            'day'         => $d,
+            'activities'  => (int) ($rows[$d]->activities ?? 0),
+            'distance_km' => (float) ($rows[$d]->distance_km ?? 0),
+            'elevation_m' => (float) ($rows[$d]->elevation_m ?? 0),
+            'hours'       => (float) ($rows[$d]->hours ?? 0),
+        ]);
+    }
+
     public function getSportDistribution(User $user): Collection
     {
         return Activity::where('user_id', $user->id)
@@ -104,5 +135,14 @@ class DashboardStatsService
         }
 
         return "MONTH({$column})";
+    }
+
+    private function dayExpr(string $column): string
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return "CAST(strftime('%d', {$column}) AS INTEGER)";
+        }
+
+        return "DAY({$column})";
     }
 }
