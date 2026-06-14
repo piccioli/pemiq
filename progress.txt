@@ -485,6 +485,17 @@
   - For FK columns referencing a non-default table (e.g. admin_user_id → users), use `->constrained('users')` with explicit table name
 ---
 
+## 2026-06-14 - US-009
+- Created docs/ops/app-key-rotation.md: comprehensive APP_KEY rotation procedure.
+- Document covers: when to rotate (compromise, personnel change, periodic policy, environment migration), the data loss risk (encrypted cast fields become illegible if key changed without re-encrypting), safe rotation procedure (7 steps), rollback procedure, and a quick checklist.
+- Key steps documented: backup DB → generate new key with `key:generate --show` → set APP_PREVIOUS_KEYS to old key → set APP_KEY to new key → config:clear → run Tinker re-encryption script on StravaAccount chunks → verify no DecryptException → remove APP_PREVIOUS_KEYS → final config:clear.
+- Files changed: docs/ops/app-key-rotation.md (new)
+- **Learnings for future iterations:**
+  - `APP_PREVIOUS_KEYS` (comma-separated) lets Laravel decrypt with old keys while writing with the new key — the correct way to do a zero-data-loss rotation.
+  - `StravaAccount` is the ONLY model with `encrypted` cast fields in this project at this time — only its records need re-encryption during a key rotation.
+  - Sessions stored in Redis are signed with APP_KEY but do NOT contain encrypted-cast data — a key rotation will log all users out (acceptable and expected behavior).
+---
+
 ## Codebase Patterns
 - SQLite test compatibility: YEAR()/MONTH() are MySQL-only; use driver-aware helpers in services (see DashboardStatsService::yearExpr/monthExpr). Also replace `->whereYear()` with `->whereRaw()`.
 - ActivityFactory is at database/factories/ActivityFactory.php — use for tests and seeders.
