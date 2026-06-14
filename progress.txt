@@ -1,3 +1,22 @@
+## 2026-06-14 - US-003
+- Added `start(User $user)` method to ImpersonateController: checks admin role (403 if not), creates AuditLog (impersonate_start), sets session('impersonating_admin_id'), logs in as target user, redirects to dashboard.
+- Added `POST /impersonate/start/{user}` route (auth middleware, named impersonate.start) in routes/web.php.
+- Created tests/Feature/Admin/ImpersonationTest.php: 6 tests, all passing.
+  - test_admin_can_impersonate_non_admin_user: redirects to /dashboard, auth is target user, session has impersonating_admin_id
+  - test_impersonation_banner_is_visible_after_impersonation: GET /profile with session set → assertSee('Stai impersonando')
+  - test_user_with_role_user_cannot_impersonate: POST to start route → 403
+  - test_stop_impersonation_restores_admin_session: POST to stop route → redirects to /admin/users, auth is admin, session key missing
+  - test_impersonation_start_creates_audit_log: audit_logs has impersonate_start record
+  - test_stop_impersonation_creates_audit_log: audit_logs has impersonate_stop record
+- Full test suite: 38 tests pass.
+- Files changed: app/Http/Controllers/ImpersonateController.php, routes/web.php, tests/Feature/Admin/ImpersonationTest.php (new)
+- **Learnings for future iterations:**
+  - To test impersonation banner, use /profile (extends layouts.app) with withSession(['impersonating_admin_id' => $adminId]) — avoids DashboardStatsService MySQL-specific functions
+  - The start() route is an HTTP endpoint needed for testability; the Filament table action also exists for the actual admin UI flow (both produce the same session/audit log result)
+  - assertSessionMissing() on a redirect response checks session after session()->forget() is called in the controller
+  - withSession([...]) in Laravel tests sets the session for that specific request without affecting prior actingAs state
+---
+
 ## 2026-06-14 - US-002
 - Created tests/Feature/Strava/SyncIncrementalActivitiesTest.php: 3 feature tests for SyncStravaIncrementalActivities job.
 - Caso 1: nessuna attività nuova — Http::fake() returns [], SyncLog completed with activities_imported=0, no activities written.
