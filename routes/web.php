@@ -114,6 +114,13 @@ Route::post('/strava/sync-historical', [StravaController::class, 'syncHistorical
     ->middleware(['auth', 'verified'])
     ->name('strava.sync-historical');
 
+// Premium features (EnsurePremium middleware)
+Route::middleware(['auth', 'verified', 'premium'])->prefix('premium')->name('premium.')->group(function () {
+    Route::get('/trends', fn () => view('premium.trends'))->name('trends');
+    Route::get('/compare', fn () => view('premium.compare'))->name('compare');
+    Route::get('/year-over-year', fn () => view('premium.year-over-year'))->name('year-over-year');
+});
+
 // Impersonation
 Route::post('/impersonate/start/{user}', [ImpersonateController::class, 'start'])
     ->middleware('auth')
