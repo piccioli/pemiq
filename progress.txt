@@ -1,3 +1,16 @@
+## 2026-06-14 - US-008
+- Created database/seeders/LargeDatasetSeeder.php.
+- Creates test user testdata@pemiq.com (firstOrCreate, idempotent) then deletes their existing activities before re-seeding.
+- Generates 10,000 activities in 20 batches of 500 using ActivityFactory with ->sequence() to assign sequential strava_activity_id values (base 500,000,000 + offset) — guarantees DB unique constraint is never violated across batches.
+- Factory defaults provide random sport_type from ['Run','Ride','Hike','Walk','TrailRun'] and random started_at in the last 3 years, so distribution across sports and years is guaranteed at 10k scale.
+- `php artisan db:seed --class=LargeDatasetSeeder` completes without errors; all 48 existing tests still pass.
+- Files changed: database/seeders/LargeDatasetSeeder.php (new)
+- **Learnings for future iterations:**
+  - When chunking factory creation, Faker's `unique()` tracker resets between separate `factory()->count(N)->create()` calls — use `->sequence()` with a calculated offset instead to guarantee uniqueness across batches.
+  - `Activity::where('user_id', $user->id)->delete()` before re-seeding makes the seeder idempotent and avoids unique constraint conflicts on repeated runs.
+  - `$this->command->info(...)` outputs progress lines when run via `php artisan db:seed` — useful for long-running seeders.
+---
+
 ## 2026-06-14 - US-007
 - Audited all POST forms in resources/views/ — all forms already contained @csrf (register, login, forgot-password, reset-password, verify-email, profile/show, profile/password, livewire/strava/connection-status, partials/impersonation-banner, layouts/app logout).
 - Created tests/Feature/Auth/CsrfProtectionTest.php with 3 tests:
