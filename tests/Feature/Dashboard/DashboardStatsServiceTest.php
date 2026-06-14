@@ -152,6 +152,31 @@ class DashboardStatsServiceTest extends TestCase
         $this->assertSame(40.0, $jun->distance_km);
     }
 
+    public function test_user_b_cannot_see_user_a_activities(): void
+    {
+        $userA = $this->user;
+        $userB = User::factory()->create();
+
+        // Create 5 activities for user A
+        $this->createActivities(5, Carbon::create(2024, 3, 10), 5_000, 1_800, 50, 'Run');
+
+        // User B has no activities
+        $overviewB = $this->service->getOverviewStats($userB);
+        $annualB   = $this->service->getAnnualStats($userB);
+        $monthlyB  = $this->service->getMonthlyStats($userB, 2024);
+        $sportB    = $this->service->getSportDistribution($userB);
+
+        $this->assertSame(0, $overviewB['total_activities']);
+        $this->assertSame(0.0, $overviewB['total_distance_km']);
+        $this->assertTrue($annualB->isEmpty());
+        $this->assertTrue($sportB->isEmpty());
+        $this->assertSame(0, $monthlyB->firstWhere('month', 3)->activities);
+
+        // User A should still see their own 5 activities
+        $overviewA = $this->service->getOverviewStats($userA);
+        $this->assertSame(5, $overviewA['total_activities']);
+    }
+
     private function createActivities(
         int $count,
         Carbon $date,
