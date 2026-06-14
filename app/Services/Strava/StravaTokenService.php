@@ -2,6 +2,7 @@
 
 namespace App\Services\Strava;
 
+use App\Exceptions\Strava\StravaAuthException;
 use App\Exceptions\Strava\StravaTokenRefreshException;
 use App\Models\StravaAccount;
 use Carbon\Carbon;
@@ -50,6 +51,11 @@ class StravaTokenService
         } catch (\Exception $e) {
             $account->update(['connection_status' => 'error']);
             throw new StravaTokenRefreshException('Network error during token refresh: ' . $e->getMessage());
+        }
+
+        if ($response->status() === 400 || $response->status() === 401) {
+            $account->update(['connection_status' => 'error']);
+            throw new StravaAuthException('Strava account deauthorized or refresh token invalid: HTTP ' . $response->status());
         }
 
         if ($response->failed()) {

@@ -32,31 +32,36 @@ class DashboardStatsService
 
     public function getAnnualStats(User $user): Collection
     {
+        $yearExpr = $this->yearExpr('started_at');
+
         return Activity::where('user_id', $user->id)
-            ->selectRaw('
-                YEAR(started_at) as year,
+            ->selectRaw("
+                {$yearExpr} as year,
                 COUNT(*) as activities,
                 ROUND(SUM(distance) / 1000, 1) as distance_km,
                 ROUND(SUM(elevation_gain), 1) as elevation_m,
                 ROUND(SUM(elapsed_time) / 3600, 2) as hours
-            ')
-            ->groupByRaw('YEAR(started_at)')
-            ->orderByRaw('YEAR(started_at) DESC')
+            ")
+            ->groupByRaw($yearExpr)
+            ->orderByRaw("{$yearExpr} DESC")
             ->get();
     }
 
     public function getMonthlyStats(User $user, int $year): Collection
     {
+        $yearExpr  = $this->yearExpr('started_at');
+        $monthExpr = $this->monthExpr('started_at');
+
         $rows = Activity::where('user_id', $user->id)
-            ->whereYear('started_at', $year)
-            ->selectRaw('
-                MONTH(started_at) as month,
+            ->whereRaw("{$yearExpr} = ?", [$year])
+            ->selectRaw("
+                {$monthExpr} as month,
                 COUNT(*) as activities,
                 ROUND(SUM(distance) / 1000, 1) as distance_km,
                 ROUND(SUM(elevation_gain), 1) as elevation_m,
                 ROUND(SUM(elapsed_time) / 3600, 2) as hours
-            ')
-            ->groupByRaw('MONTH(started_at)')
+            ")
+            ->groupByRaw($monthExpr)
             ->get()
             ->keyBy('month');
 
@@ -66,6 +71,37 @@ class DashboardStatsService
             'distance_km' => (float) ($rows[$m]->distance_km ?? 0),
             'elevation_m' => (float) ($rows[$m]->elevation_m ?? 0),
             'hours'       => (float) ($rows[$m]->hours ?? 0),
+        ]);
+    }
+
+    public function getDailyStats(User $user, int $year, int $month): Collection
+    {
+        $yearExpr  = $this->yearExpr('started_at');
+        $monthExpr = $this->monthExpr('started_at');
+        $dayExpr   = $this->dayExpr('started_at');
+
+        $rows = Activity::where('user_id', $user->id)
+            ->whereRaw("{$yearExpr} = ?", [$year])
+            ->whereRaw("{$monthExpr} = ?", [$month])
+            ->selectRaw("
+                {$dayExpr} as day,
+                COUNT(*) as activities,
+                ROUND(SUM(distance) / 1000, 1) as distance_km,
+                ROUND(SUM(elevation_gain), 1) as elevation_m,
+                ROUND(SUM(elapsed_time) / 3600, 2) as hours
+            ")
+            ->groupByRaw($dayExpr)
+            ->get()
+            ->keyBy('day');
+
+        $daysInMonth = \Carbon\Carbon::create($year, $month)->daysInMonth;
+
+        return collect(range(1, $daysInMonth))->map(fn ($d) => (object) [
+            'day'         => $d,
+            'activities'  => (int) ($rows[$d]->activities ?? 0),
+            'distance_km' => (float) ($rows[$d]->distance_km ?? 0),
+            'elevation_m' => (float) ($rows[$d]->elevation_m ?? 0),
+            'hours'       => (float) ($rows[$d]->hours ?? 0),
         ]);
     }
 
@@ -81,5 +117,32 @@ class DashboardStatsService
             ->groupBy('sport_type')
             ->orderByRaw('COUNT(*) DESC')
             ->get();
+    }
+
+    private function yearExpr(string $column): string
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return "CAST(strftime('%Y', {$column}) AS INTEGER)";
+        }
+
+        return "YEAR({$column})";
+    }
+
+    private function monthExpr(string $column): string
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return "CAST(strftime('%m', {$column}) AS INTEGER)";
+        }
+
+        return "MONTH({$column})";
+    }
+
+    private function dayExpr(string $column): string
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return "CAST(strftime('%d', {$column}) AS INTEGER)";
+        }
+
+        return "DAY({$column})";
     }
 }

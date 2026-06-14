@@ -51,10 +51,10 @@ class ActivitySyncService
         ]);
     }
 
-    public function failSyncLog(SyncLog $log, string $error): void
+    public function failSyncLog(SyncLog $log, string $error, string $status = 'failed'): void
     {
         $log->update([
-            'status' => 'failed',
+            'status' => $status,
             'error_message' => $error,
         ]);
     }

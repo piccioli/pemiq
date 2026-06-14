@@ -1,3 +1,389 @@
+## 2026-06-14 - US-031
+- Created `app/Http/Controllers/PremiumController.php`: `index()` method checks if user is premium (same logic as EnsurePremium: `is_premium && (!premium_expires_at || premium_expires_at->isFuture())`). Premium users → redirect to `/dashboard` with `success` flash "Il tuo account è già Premium.". Free users → return `premium.index` view.
+- Added route `GET /premium` to `routes/web.php` with `['auth', 'verified']` middleware only (NOT inside the EnsurePremium group), named `premium.index`. Uses `PremiumController@index`.
+- Created `resources/views/premium/index.blade.php`: extends `layouts.app`. Two-column Free vs Premium comparison card layout. Free column lists 4 free features (green checkmarks) + 3 premium features (grayed X). Premium column lists all 7 features with amber checkmarks for premium-exclusive ones. CTA section with mailto link (precompiled subject). "Pagamento self-service disponibile a breve" note.
+- Added 16 translation keys to `lang/it/messages.php` and `lang/en/messages.php`: `premium_already_premium`, `premium_title`, `premium_subtitle`, `premium_free_*` (4 free features), `premium_feat_*` (3 premium features), `premium_cta_title/body/button`, `premium_email_subject`, `premium_self_service_note`.
+- Added 3 tests to `tests/Feature/Premium/PremiumRoutesTest.php`: free user can access `/premium` (200), unauthenticated user redirected to login, premium user redirected to `/dashboard` with correct flash.
+- All 80 tests pass. Blade views compile without errors.
+- Files changed: app/Http/Controllers/PremiumController.php (new), resources/views/premium/index.blade.php (new), routes/web.php, lang/it/messages.php, lang/en/messages.php, tests/Feature/Premium/PremiumRoutesTest.php
+- **Learnings for future iterations:**
+  - The `/premium` route (landing) must NOT be inside the EnsurePremium route group — it must be accessible to free users. Add it as a separate `Route::get('/premium', ...)` before the group.
+  - `config('app.admin_email', 'admin@pemiq.com')` pattern for fallback admin email in views — add `ADMIN_EMAIL` to `.env` and `config/app.php` if a real email is needed.
+  - Premium check in controllers mirrors EnsurePremium: `$user->is_premium && (!$user->premium_expires_at || $user->premium_expires_at->isFuture())`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-030
+- Created `app/Livewire/Premium/YearOverYearChart.php`: Livewire component with public `$yearA` (default current year), `$yearB` (default previous year), `$sportType` (default ''). `mount()` sets yearA=current year, yearB=yearA-1. `render()` queries `TrendAnalysisService::monthlyVolume()` for both years (full-year ranges: Jan 1 → Dec 31), normalizes the result to a fixed 12-slot array (index 0–11) keyed by month number, dispatches `yoy-chart-data` browser event.
+- Created `resources/views/livewire/premium/year-over-year-chart.blade.php`: ApexCharts dual-line chart with fixed x-axis Jan–Dec (from `trans('messages.months_short')`). Anno A = blue (#3B82F6), Anno B = orange (#F97316). Year A/B selectors (last 6 years), optional sport filter. Legend position top-right with circle markers. Follows `wire:ignore` + `window.__yoyChartInitData` + `@yoy-chart-data.window` pattern. `hasData` empty state shows translation key `yoy_no_data`.
+- Updated `resources/views/premium/year-over-year.blade.php`: replaced "Prossimamente" placeholder with page header + `@livewire('premium.year-over-year-chart')`.
+- Added 6 translation keys to `lang/it/messages.php` and `lang/en/messages.php`: `yoy_page_title`, `yoy_chart_title`, `yoy_year_a`, `yoy_year_b`, `yoy_all_sports`, `yoy_no_data`.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: app/Livewire/Premium/YearOverYearChart.php (new), resources/views/livewire/premium/year-over-year-chart.blade.php (new), resources/views/premium/year-over-year.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Year-over-year overlay normalization: use a fixed 12-slot array (`array_fill(0, 12, null)`), then fill slots by extracting `(int) substr($row->period, 5, 2) - 1` as the index. This gives a consistent Jan–Dec x-axis regardless of which months have data.
+  - `availableYears` computed as `currentYear` down to `currentYear - 5` — a simple 6-year window passed as array to the view for the select dropdowns.
+  - `wire:model.live` on year/sport selectors triggers immediate re-render (no explicit action button needed for this component).
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-029
+- Added "Dettaglio confronto" table section to `resources/views/livewire/premium/period-comparison.blade.php`: table below the chart with 5 columns — Metrica (with inline SVG icon), Periodo A (date range + formatted value), Periodo B (date range + formatted value), Delta assoluto (absolute difference with ±, green/red/grey color), Delta (%) (percentage with ↑/↓ arrows or '—' for division-by-zero, same color scheme as KPI cards).
+- Rows: Attività, Distanza, Dislivello, Tempo — driven by the existing `$kpis` array already passed from the component.
+- Icons resolved via PHP associative array keyed on translated label strings, with inline SVG paths for each metric type.
+- Added 4 translation keys to `lang/it/messages.php`: `compare_detail_title`, `compare_col_metric`, `compare_col_delta_abs`, `compare_col_delta_pct`.
+- Added 4 translation keys to `lang/en/messages.php`: same keys with English values.
+- Export button was already present in the header from US-027 — no additional changes needed.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: resources/views/livewire/premium/period-comparison.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Icon map keyed on translated label strings: `$icons[__('messages.key')] = '<path ...>'` — works cleanly when labels are stable within a request; avoids injecting icon arrays from PHP to keep view self-contained.
+  - Blade `{!! $iconPath !!}` for SVG path data is safe when the value comes from a PHP literal array in the view (not from user input).
+  - `tabular-nums` Tailwind utility (maps to `font-variant-numeric: tabular-nums`) keeps numeric columns aligned cleanly without fixed-width font.
+  - Delta absolute sign prefix: `($deltaAbs >= 0 ? '+' : '')` before the formatted number gives explicit +/- for absolute deltas (do NOT apply to percentage arrows which already have ↑/↓).
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-028
+- Updated `app/Livewire/Premium/PeriodComparison.php`: added `$granularity` ('month'|'week') and `$chartType` ('line'|'bar') public properties; added `setGranularity()` and `setChartType()` action methods; added `buildChartData(Collection $dataA, Collection $dataB): array` private method that normalizes both period datasets to the same x-axis length, derives month abbreviation labels from Period B's YYYY-MM periods (or "Sett. N" labels for week granularity), pads the shorter series with null, and includes `title`, `noDataText`, and `chartType` in the payload; dispatches `period-chart-data` browser event from `render()`.
+- Updated `resources/views/livewire/premium/period-comparison.blade.php`: added chart section below KPI cards with two toggle button groups (Mese/Settimana for granularity, Linee/Barre for chart type); ApexCharts dual-series initialization follows `wire:ignore` + `x-ref="chartEl"` + `window.__periodChartInitData` + `@period-chart-data.window` pattern; `buildOptions()` and `updateChart()` functions handle line/bar switching by updating `chart.type`, `stroke`, `fill`, and `plotOptions` in one `updateOptions(options, true, false)` call.
+- Added 8 translation keys to both `lang/it/messages.php` and `lang/en/messages.php`: `compare_chart_title_month`, `compare_chart_title_week`, `compare_granularity_month`, `compare_granularity_week`, `compare_chart_type_line`, `compare_chart_type_bar`, `compare_week_short`, `compare_no_chart_data`.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: app/Livewire/Premium/PeriodComparison.php, resources/views/livewire/premium/period-comparison.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - ApexCharts line↔bar toggle via `updateOptions`: pass `chart.type`, `stroke`, `fill`, and `plotOptions` together in one call with `redrawPaths=true` (`true` as second arg) — partial updates (e.g., just `chart.type`) do not re-render geometry correctly.
+  - Dual-series ApexCharts: `colors: ['#3B82F6', '#7C3AED']` sets the palette for both series; series color can be overridden per-series with `series[i].color` but the top-level `colors` array is simpler and consistent.
+  - Period comparison x-axis normalization: use Period B's bucket labels as categories (since B is the "current" period); pad Period A with `null` values if it has fewer buckets. `null` in an ApexCharts series renders as a gap in line charts and an empty column in bar charts.
+  - `trans('messages.months_short')` used in PHP (not `__()`) since it's called inside a method that builds data, not inside a view context — both work in service/component code but `trans()` is the conventional PHP-context call.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-027
+- Added `periodStats(User $user, ?string $sportType, Carbon $from, Carbon $to): \stdClass` to `app/Services/Dashboard/TrendAnalysisService.php`: aggregates activities in a date range returning `activities`, `distance_km`, `elevation_m`, `hours` as a stdClass with explicit type casts.
+- Created `app/Livewire/Premium/PeriodComparison.php`: Livewire component with public `fromA`/`toA`/`fromB`/`toB` (date strings, wire:model deferred) and `sportType`. `mount()` defaults Period A = 6–3 months ago, Period B = 3 months ago → today. `compare()` method triggers re-render with updated model values. `render()` calls `periodStats()` for both periods, builds 4 KPI arrays (distance/elevation/time/activities), passes labels.
+- Created `resources/views/livewire/premium/period-comparison.blade.php`: header row with disabled "Esporta" button (tooltip "Disponibile a breve"), period selector section (date inputs for A and B + sport filter + "Aggiorna confronto" button using `wire:click="compare"`), 4 KPI cards showing Period B value + delta% vs Period A (green=positive, red=negative, gray=zero or null when A=0).
+- Updated `resources/views/premium/compare.blade.php`: replaced "Prossimamente" placeholder with `@livewire('premium.period-comparison')` and added page title using `compare_page_title` translation key.
+- Added 13 translation keys to `lang/it/messages.php` and `lang/en/messages.php`: `compare_page_title`, `compare_title`, `compare_period_a/b`, `compare_update`, `compare_updating`, `compare_export`, `compare_export_tooltip`, `compare_vs`, `compare_kpi_distance/elevation/time/activities`.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: app/Services/Dashboard/TrendAnalysisService.php, app/Livewire/Premium/PeriodComparison.php (new), resources/views/livewire/premium/period-comparison.blade.php (new), resources/views/premium/compare.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - `wire:model` (without `.live`) in Livewire 3 is deferred — all queued updates are sent when any action is triggered (e.g., `wire:click="compare"`). Use this pattern when you want explicit "Apply" button behavior.
+  - `wire:loading.attr="disabled"` + `wire:loading.remove/wire:loading` on button text: clean pattern for showing spinner text while Livewire request is in flight.
+  - `periodStats()` returns a `\stdClass` with explicit PHP type casts — prevents PDO returning strings from `selectRaw()` aggregations (e.g., `(int)$result->activities`, `(float)$result->distance_km`).
+  - Delta % computation in Blade @php block with `match(true, ...)`: handle null (division by zero) as '—', positive → green, negative → red, zero → gray.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-026
+- Created `app/Livewire/Premium/TrendChart.php`: Livewire component with public properties `metric` (distance/hours), `range` (3months/6months/1year/custom), `sportType` (empty = all), `customFrom`/`customTo` (date strings). `mount()` initializes custom dates to last 6 months. `render()` fetches distinct sport types, computes date range via `getDateRange()`, calls `TrendAnalysisService::monthlyVolume()`, dispatches `trend-chart-data` browser event.
+- Created `resources/views/livewire/premium/trend-chart.blade.php`: ApexCharts area chart (type: 'area', smooth stroke, gradient fill, violet color #7C3AED). Controls: range select (3/6/1year/custom), sport select, distance/hours toggle. Custom range shows two date inputs with wire:model.live. Empty state message. Follows existing wire:ignore + Alpine x-data + @trend-chart-data.window pattern.
+- Updated `resources/views/premium/trends.blade.php`: replaced "Prossimamente" placeholder with `@livewire('premium.trend-chart')`.
+- Added 10 translation keys to `lang/it/messages.php` and `lang/en/messages.php`: trend_page_title, trend_chart_title, trend_range_*, trend_from, trend_to, trend_all_sports, trend_no_data.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: app/Livewire/Premium/TrendChart.php (new), resources/views/livewire/premium/trend-chart.blade.php (new), resources/views/premium/trends.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Livewire Premium components live in `app/Livewire/Premium/` with alias `premium.component-name` (e.g. `@livewire('premium.trend-chart')`).
+  - ApexCharts area chart: use `type: 'area'` with `fill.type: 'gradient'` and `stroke.curve: 'smooth'` for trend visualization. updateOptions with all three (series, xaxis, yaxis) in one call using `true` (redraw) to update categories correctly.
+  - Custom date range inputs: use `wire:model.live` on `<input type="date">` — Livewire handles Carbon parsing server-side; keep null/empty string guards in `getDateRange()`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-025
+- Created `app/Services/Dashboard/TrendAnalysisService.php` with two public methods:
+  - `weeklyVolume(User $user, ?string $sportType, Carbon $from, Carbon $to): Collection` — groups activities by ISO week (YYYY-WW) within the date range, returns period/activities/distance_km/hours ordered chronologically.
+  - `monthlyVolume(User $user, ?string $sportType, Carbon $from, Carbon $to): Collection` — groups activities by month (YYYY-MM), same columns.
+- Both methods are scoped on `user_id`, accept optional `sportType` filter (null = all sports), use driver-aware helpers (`strftime` for SQLite, `DATE_FORMAT` for MySQL).
+- Used `/ 1000.0` and `/ 3600.0` (float literals) to avoid SQLite integer division bug.
+- Created `tests/Feature/Dashboard/TrendAnalysisServiceTest.php`: 10 tests covering zero-activity edge cases, correct aggregation, sport type filtering, date range exclusion, same-week grouping, and cross-user isolation.
+- All 77 tests pass.
+- Files changed: app/Services/Dashboard/TrendAnalysisService.php (new), tests/Feature/Dashboard/TrendAnalysisServiceTest.php (new)
+- **Learnings for future iterations:**
+  - SQLite integer division: `SUM(int_col) / 3600` returns integer in SQLite. Always use `/ 3600.0` or `/ 1000.0` (float literal) for correct results. DashboardStatsService has the same pattern but tests use multiples that divide evenly, masking the bug.
+  - Weekly period label format: `strftime('%Y-%W', col)` in SQLite and `DATE_FORMAT(col, '%Y-%u')` in MySQL both produce "YYYY-WW" sortable strings (week 00-53).
+  - Monthly period label format: `strftime('%Y-%m', col)` and `DATE_FORMAT(col, '%Y-%m')` both produce "YYYY-MM" — same syntax, same output.
+  - Date range filtering: use `where('started_at', '>=', $from)` and `where('started_at', '<=', $to)` directly — no startOfDay/endOfDay manipulation to avoid mutating Carbon arguments.
+---
+
+## 2026-06-14 - US-024
+- Updated `resources/views/layouts/app.blade.php`: added `@php $isPremiumActive = ...` block in desktop nav; shows amber "★ Premium" badge for premium users, "Passa a Premium" link to `/premium` for free users. Same conditional in mobile menu (reuses `$isPremiumActive` set in desktop section — Blade shares PHP scope within the same template).
+- Updated `resources/views/profile/show.blade.php`: added "Account" section below the Password section. Premium users see amber "★ Premium" badge with optional expiry date (`fmt_date`). Free users see a "Passa a Premium" amber CTA button linking to `/premium`.
+- Premium check: `is_premium === true` AND (`premium_expires_at === null` OR `premium_expires_at->isFuture()`) — consistent with EnsurePremium middleware.
+- All 67 tests pass.
+- Files changed: resources/views/layouts/app.blade.php, resources/views/profile/show.blade.php
+- **Learnings for future iterations:**
+  - Blade PHP scope is shared within a single template: a `@php` variable set in one section (desktop nav) is accessible in later sections (mobile menu) — no need to repeat the computation.
+  - `/premium` route does not yet exist (US-031 pending) — use literal path `/premium` not `route('premium')` to avoid RouteNotFoundException.
+  - Premium check in views mirrors EnsurePremium middleware logic: `is_premium && (!premium_expires_at || premium_expires_at->isFuture())`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-023
+- Added premium route group in `routes/web.php`: `Route::middleware(['auth', 'verified', 'premium'])->prefix('premium')->name('premium.')->group(...)` with routes for `/premium/trends`, `/premium/compare`, `/premium/year-over-year`.
+- Created 3 placeholder Blade views: `resources/views/premium/trends.blade.php`, `compare.blade.php`, `year-over-year.blade.php` — each extends `layouts.app` and shows a "Prossimamente" placeholder.
+- Created `tests/Feature/Premium/PremiumRoutesTest.php`: 7 tests covering unauthenticated redirect to login, Free user redirect to /dashboard with error flash for all 3 routes, Premium user 200 response for all 3 routes.
+- All 67 tests pass.
+- Files changed: routes/web.php, resources/views/premium/trends.blade.php (new), resources/views/premium/compare.blade.php (new), resources/views/premium/year-over-year.blade.php (new), tests/Feature/Premium/PremiumRoutesTest.php (new)
+- **Learnings for future iterations:**
+  - Premium route group uses prefix 'premium' and name prefix 'premium.' — use `route('premium.trends')` etc. in views and tests.
+  - Flash message from EnsurePremium middleware is 'Funzionalità riservata agli utenti Premium.' (not 'disponibile') — tests must match this exact string.
+  - The `/premium` route (without suffix) is NOT included in the EnsurePremium group — US-031 requires it to be accessible to all authenticated users.
+---
+
+## 2026-06-14 - US-022
+- Changed `routes/web.php`: route `/` now returns `view('landing')` for guests; redirects to `dashboard` for authenticated users. Named the route `home`.
+- Created `resources/views/landing.blade.php`: standalone HTML page (no layout extension) with Tailwind CDN + Alpine.js CDN. Sections: public navbar (logo, Accedi link, Registrati CTA), hero (headline, subheadline, dual CTA buttons), stats bar, 6-feature grid, Free vs Premium plan cards, CTA banner, footer.
+- Updated `tests/Feature/ExampleTest.php`: changed `assertRedirect()` to `assertStatus(200)` for the guest `/` case; added new test `authenticated_user_visiting_root_is_redirected_to_dashboard` with `RefreshDatabase` trait; added `use RefreshDatabase;`.
+- All 60 tests pass.
+- Files changed: routes/web.php, resources/views/landing.blade.php (new), tests/Feature/ExampleTest.php
+- **Learnings for future iterations:**
+  - The `/` route previously redirected guests to `/login` — now it returns the landing view. Any test asserting `assertRedirect()` on `/` for a guest user must be updated to `assertStatus(200)`.
+  - Landing page is standalone (no layout extension) to avoid auth()->user() calls in app.blade.php that would fail for unauthenticated users.
+  - Adding a test that creates a User model requires `use RefreshDatabase` on the test class; the ExampleTest previously had this commented out since it didn't touch the DB.
+  - Route named `home` for `/` — use `route('home')` if needed in other places (logout redirects to `/` via literal string, not `route('home')`, which is fine).
+---
+
+## 2026-06-14 - US-020
+- Audited all 7 view files in `resources/views/livewire/dashboard/` — found hardcoded Italian strings in headings, empty states, table column headers, toggle button labels, month name arrays, and JavaScript tooltip/chart config.
+- Added 25 new keys to `lang/it/messages.php` and `lang/en/messages.php`: section titles, empty-state messages, stat labels, column headers, metric toggles, chart config labels, full month names array (`months`), and short month abbreviations array (`months_short`).
+- Updated all 7 Blade view files: replaced every Italian string with `__('messages.key')` or `trans('messages.key')` calls. JS-embedded strings in `sport-distribution-chart.blade.php` tooltip (`attività`, `Totale`) use inline `{{ __() }}` within the Blade/JS template.
+- Updated `app/Livewire/Dashboard/AnnualAnalysisChart.php`: replaced hardcoded short month abbreviations array and `seriesName` strings with `trans('messages.months_short')` and `trans('messages.stat_distance_km')`/`trans('messages.col_hours')`.
+- Updated `app/Livewire/Dashboard/MonthlyAnalysisChart.php`: replaced hardcoded full month names array with `collect(trans('messages.months'))->mapWithKeys(fn($name, $i) => [$i + 1 => $name])->toArray()` to preserve 1-indexed format needed by the month selector.
+- All 59 tests pass.
+- Files changed: lang/it/messages.php, lang/en/messages.php, resources/views/livewire/dashboard/overview-stats.blade.php, annual-analysis.blade.php, monthly-analysis.blade.php, sport-distribution.blade.php, annual-analysis-chart.blade.php, monthly-analysis-chart.blade.php, sport-distribution-chart.blade.php, app/Livewire/Dashboard/AnnualAnalysisChart.php, app/Livewire/Dashboard/MonthlyAnalysisChart.php
+- **Learnings for future iterations:**
+  - `trans('messages.months')` returns a 0-indexed array when the lang file uses a numeric array. Use `collect()->mapWithKeys()` to convert to 1-indexed when needed by month selectors.
+  - Inline `{{ __('messages.key') }}` works inside Alpine.js x-data JS strings in Blade templates — Blade processes it before the browser sees any JS.
+  - JS tooltip closures in ApexCharts (inside `x-data`) can contain Blade expressions — the entire Blade template is server-rendered before delivery.
+  - `dashboard_no_activities_year` uses a `:year` placeholder — pass as `__('messages.dashboard_no_activities_year', ['year' => $year])`.
+  - All new translation keys follow the existing flat naming convention with underscores (not nested dot-notation arrays).
+---
+
+## 2026-06-14 - US-018
+- Created `app/Exceptions/Strava/StravaAuthException.php`: new exception for critical (non-recoverable) auth failures (user deauthorized app, refresh token permanently invalid).
+- Updated `app/Services/Strava/StravaTokenService.php`: `refreshToken()` now throws `StravaAuthException` when Strava returns HTTP 400 or 401 (permanent rejection), and keeps `StravaTokenRefreshException` for transient failures (network errors, 5xx).
+- Created `database/migrations/2026_06_14_100000_add_notified_at_to_strava_accounts.php`: adds `notified_at` nullable timestamp column to `strava_accounts`.
+- Updated `app/Models/StravaAccount.php`: added `notified_at` to `$fillable` and `'notified_at' => 'datetime'` cast.
+- Created `app/Mail/SyncFailedNotification.php`: Mailable with subject 'Sincronizzazione Strava fallita — ricollegamento necessario'.
+- Created `resources/views/emails/sync-failed-notification.blade.php`: Italian-language email explaining the failure and linking to /dashboard.
+- Updated `app/Jobs/SyncStravaHistoricalActivities.php`: catches `StravaAuthException` (critical), calls `sendCriticalFailureNotification()` (sends mail only if `notified_at` is null, then sets it); resets `notified_at = null` on successful sync.
+- Updated `app/Jobs/SyncStravaIncrementalActivities.php`: same pattern as historical job.
+- Created `tests/Feature/Strava/SyncFailedNotificationTest.php`: 6 tests covering critical failure → email sent + notified_at set; no duplicate email when notified_at already set; transitory failure → no email; successful sync → notified_at reset; same for incremental job.
+- All 54 tests pass.
+- Files changed: app/Exceptions/Strava/StravaAuthException.php (new), app/Mail/SyncFailedNotification.php (new), database/migrations/2026_06_14_100000_add_notified_at_to_strava_accounts.php (new), resources/views/emails/sync-failed-notification.blade.php (new), tests/Feature/Strava/SyncFailedNotificationTest.php (new), app/Services/Strava/StravaTokenService.php, app/Models/StravaAccount.php, app/Jobs/SyncStravaHistoricalActivities.php, app/Jobs/SyncStravaIncrementalActivities.php
+- **Learnings for future iterations:**
+  - Critical vs transitory distinction: StravaAuthException (400/401 on refresh → permanent, user must re-connect) vs StravaTokenRefreshException (network/5xx → transient, will retry). This distinction lives in StravaTokenService.
+  - `notified_at` pattern: set to now() on first notification, reset to null on successful sync — prevents duplicate emails across multiple failed syncs.
+  - Mail::fake() in tests: use `Mail::assertSent(ClassName::class, fn($mail) => $mail->hasTo(...))` and `Mail::assertNothingSent()`.
+  - Mailable with SerializesModels: pass StravaAccount as public readonly property; the model is serialized by ID and re-fetched on queue processing.
+---
+
+## 2026-06-14 - US-017
+- Removed `#[Poll('5s')]` class attribute from `app/Livewire/Strava/ConnectionStatus.php` — polling is now driven by the view only when needed.
+- Updated `render()`: fetches latest SyncLog via `getLatestSync(StravaAccount)` and passes `syncStatus`, `syncActivitiesImported`, `syncErrorMessage` to view (removed `syncRunning` bool).
+- Added private `getLatestSync(StravaAccount): ?SyncLog` method (replaces `isSyncRunning()`).
+- Updated `startHistoricalSync()`: guards on `$latestSync?->status === 'running'` instead of the old `isSyncRunning()`.
+- Updated `resources/views/livewire/strava/connection-status.blade.php`:
+  - Root `<div>` gains `wire:poll.5000ms` only when `$stravaAccount && $syncStatus === 'running'` — zero polling when no account or no active sync.
+  - Status notification area: 'running' → "Sincronizzazione in corso (N attività importate)" with spinner; 'completed' → "Sincronizzazione completata"; 'failed' → "Sincronizzazione fallita — [error truncated to 100 chars]"; fallback → `$syncMessage` (e.g. 'Sincronizzazione avviata').
+  - Button area: `$syncStatus === 'running'` replaces old `$syncRunning` bool to conditionally show spinner vs active button.
+- All 48 tests pass.
+- Files changed: app/Livewire/Strava/ConnectionStatus.php, resources/views/livewire/strava/connection-status.blade.php
+- **Learnings for future iterations:**
+  - Conditional `wire:poll` in Livewire 3: use `@if($condition) wire:poll.5000ms @endif` on the root `<div>`. Livewire morphdom will add/remove the attribute on re-render, correctly starting/stopping the client-side interval.
+  - `\Illuminate\Support\Str::limit($text, 100)` is the Blade-safe way to truncate error messages — use the fully qualified class name in Blade to avoid `use` imports in views.
+  - Getting the latest SyncLog: `SyncLog::where('strava_account_id', $id)->latest('started_at')->first()` — `latest()` defaults to `created_at`, specify `started_at` explicitly.
+---
+
+## 2026-06-14 - US-016
+- Installed `leaflet@^1.9.4` and `@mapbox/polyline@^1.2.1` via npm on host (npm is NOT in Docker container — always run npm on host).
+- Updated resources/js/app.js: imports `L` from `leaflet`, imports `leaflet/dist/leaflet.css`, imports `* as polyline` from `@mapbox/polyline`. Exposes `window.L` and `window.PolylineDecoder` globally.
+- Updated resources/views/activities/show.blade.php: added map section at the bottom. If `$activity->polyline` is not null, renders a 400px `#activity-map` div and initializes Leaflet via a `DOMContentLoaded` listener (decodes with `window.PolylineDecoder.decode()`, draws polyline with `window.L.polyline()`, tiles from OpenStreetMap, fits bounds). If `$activity->polyline` is null, renders a 400px placeholder div with 'Mappa non disponibile'.
+- Built Vite assets (npm run build) — Leaflet CSS extracted as separate chunk (~71 kB), auto-injected by `@vite(['resources/js/app.js'])`.
+- All 48 tests pass.
+- Files changed: package.json, package-lock.json, resources/js/app.js, resources/views/activities/show.blade.php
+- **Learnings for future iterations:**
+  - `npm` is NOT in the Docker container — run `npm install` and `npm run build` on the host machine, not inside Docker.
+  - Leaflet CSS is imported in app.js (`import 'leaflet/dist/leaflet.css'`) — Vite extracts it and `@vite(['resources/js/app.js'])` auto-injects the `<link>` tag for it. No manual `<link>` tag needed in the layout.
+  - Leaflet + Vite timing: `<script type="module">` (Vite output) executes AFTER HTML parsing but BEFORE DOMContentLoaded. Use `document.addEventListener('DOMContentLoaded', ...)` in inline scripts to safely access `window.L` set by the module.
+  - `@mapbox/polyline` decode: `window.PolylineDecoder.decode(encoded)` returns `[[lat, lng], ...]` — exactly what `L.polyline()` expects, no coordinate swap needed.
+  - Strava stores the encoded polyline in the `polyline` field (mapped from `map.summary_polyline` in ActivitySyncService) — NOT `map_polyline`.
+---
+
+## 2026-06-14 - US-015
+- Added `show(Activity $activity)` method to ActivityController: `abort_if($activity->user_id !== auth()->id(), 403)` for ownership check, returns `activities.show` view.
+- Added `GET /activities/{activity}` route (auth+verified middleware, named `activities.show`) to routes/web.php.
+- Created resources/views/activities/show.blade.php: back link to /activities, activity name/date/sport badge header, "Vedi su Strava" external link (only if strava_activity_id not null), 5-column metric cards (distanza, durata, dislivello, velocità media, FC media — shown only if not null), secondary metrics section (moving_time, max_hr, avg_watts, calories — each shown only if not null). Null fields display '—'.
+- Updated resources/views/activities/index.blade.php: activity name now links to `activities.show` route.
+- All 48 tests pass.
+- Files changed: app/Http/Controllers/ActivityController.php, routes/web.php, resources/views/activities/show.blade.php (new), resources/views/activities/index.blade.php
+- **Learnings for future iterations:**
+  - `abort_if($activity->user_id !== auth()->id(), 403)` is the simplest ownership gate for single-model routes — no Policy class needed for small apps.
+  - Strava average_speed is stored in m/s; multiply by 3.6 to convert to km/h.
+  - Conditional metric cards: use `@if ($metric !== null)` to skip rendering the card entirely rather than showing '—' in a prominent metric card; '—' is better suited for table cells.
+  - Making the activity name a link in the index view required only one `<a href>` wrapper — no additional data needed since the `$activity->id` is already on the model.
+---
+
+## 2026-06-14 - US-014
+- Updated app/Http/Controllers/ActivityController.php: accepts `sport`, `year`, `month` query params. Driver-aware yearExpr/monthExpr private helpers (CAST(strftime) for SQLite, YEAR()/MONTH() for MariaDB). Filters applied via `->where('sport_type', $sport)` and `->whereRaw()` for year/month. `->withQueryString()` on paginator ensures filters persist in pagination links.
+- Computed `$sportTypes` (distinct from user's activities, alphabetical) and `$availableYears` (distinct years from user's activities, desc) and passed to view for populating selects.
+- Updated resources/views/activities/index.blade.php: filter form (GET, 3 selects: sport/year/month with correct `@selected` attribute). Italian month names array (Gennaio..Dicembre). Reset link visible only when a filter is active. Empty state shows 'Nessuna attività trovata' when filter active, original message otherwise.
+- All 48 tests pass.
+- Files changed: app/Http/Controllers/ActivityController.php, resources/views/activities/index.blade.php
+- **Learnings for future iterations:**
+  - `->paginate(20)->withQueryString()` preserves all current query string params in pagination links — always use this for filtered/sorted lists.
+  - `@selected($expr)` Blade directive (Laravel 9+) renders `selected="selected"` when expression is truthy — cleaner than ternary in option tags.
+  - Empty state differentiation: check if any filter is active to show 'Nessuna attività trovata' vs. 'Nessuna attività ancora' for genuinely empty user.
+  - Driver-aware year/month helpers follow the exact same pattern as DashboardStatsService — reuse this pattern in any new controller that filters by date parts.
+---
+
+## 2026-06-14 - US-013
+- Created app/Http/Controllers/ActivityController.php: index() method uses auth()->user()->activities()->orderBy('started_at', 'desc')->paginate(20) — scoped via Eloquent relationship, no N+1 (no eager-loaded relationships needed for the list).
+- Added GET /activities route in routes/web.php with ['auth', 'verified'] middleware, named 'activities.index'.
+- Created resources/views/activities/index.blade.php: extends layouts.app, table with columns Data/Sport/Titolo/Distanza/Durata/Dislivello. Sport badges reuse same $sportColors map as sport-distribution view. Distance: metres ÷ 1000 formatted with number_format(1dp). Duration: floor(s/3600):str_pad(floor((s%3600)/60), 2) h:mm format. Elevation: number_format(0dp) m. Null fields shown as '—'. Pagination via $activities->links().
+- Updated resources/views/layouts/app.blade.php: added 'Attività' link in desktop nav and mobile menu, highlighted when routeIs('activities.*').
+- All 48 tests pass.
+- Files changed: app/Http/Controllers/ActivityController.php (new), routes/web.php, resources/views/activities/index.blade.php (new), resources/views/layouts/app.blade.php
+- **Learnings for future iterations:**
+  - `auth()->user()->activities()` Eloquent relationship already scopes by user_id — cleaner than `Activity::where('user_id', auth()->id())` and avoids N+1 if further eager-loading is needed later.
+  - Pagination links are rendered with `$activities->links()` — requires `$activities->hasPages()` check to hide the div when not needed.
+  - Activity list view does NOT need eager loading for any relationship since only activity columns are shown — no N+1 risk.
+  - `activities.index` route naming follows Laravel resource convention (`resource.method`) — use `request()->routeIs('activities.*')` for active-state matching in navbar.
+---
+
+## 2026-06-14 - US-012
+- Added `getDailyStats(User $user, int $year, int $month): Collection` to DashboardStatsService: groups activities by day within the given month using a SQLite-compatible `dayExpr()` helper (strftime('%d') for SQLite, DAY() for MySQL). Fills all days 1..N (Carbon::create($year,$month)->daysInMonth) so missing days show 0.
+- Created app/Livewire/Dashboard/MonthlyAnalysisChart.php: public $year (default current year), $month (default current month), $metric = 'distance'. render() dispatches 'monthly-chart-data' event with daily categories/seriesData. Falls back to max available year if current year has no data.
+- Created resources/views/livewire/dashboard/monthly-analysis-chart.blade.php: year + month selectors (wire:model.live), Distanza/Ore toggle (wire:click $set). ApexCharts bar chart using blue color (#3B82F6) to differentiate from annual chart (orange). wire:ignore on chart div, inline window.__monthlyChartInitData for initial setup, @monthly-chart-data.window listener for updates.
+- Updated resources/views/dashboard/index.blade.php: added @livewire('dashboard.monthly-analysis-chart') after the monthly-analysis table component.
+- Fixed tests/Feature/Auth/RegistrationTest.php: added getDailyStats to mock expectations (dashboard now calls this method on render).
+- All 48 tests pass.
+- Files changed: app/Services/Dashboard/DashboardStatsService.php (getDailyStats + dayExpr added), app/Livewire/Dashboard/MonthlyAnalysisChart.php (new), resources/views/livewire/dashboard/monthly-analysis-chart.blade.php (new), resources/views/dashboard/index.blade.php, tests/Feature/Auth/RegistrationTest.php
+- **Learnings for future iterations:**
+  - `dayExpr()` follows the same SQLite/MySQL branching pattern as yearExpr/monthExpr — add a private helper for each new date part needed.
+  - `Carbon::create($year, $month)->daysInMonth` is the cleanest way to get the number of days in a given month (handles leap years automatically).
+  - When adding a new render() call to a Livewire component visible on the dashboard, also update the `DashboardStatsService` mock in RegistrationTest (and any other test that renders the dashboard with a mocked service).
+  - updateOptions({series, xaxis, yaxis}, true, false) with redrawPaths=true is needed when updating all three to correctly reflow the chart — just updateSeries() does not update x-axis categories.
+---
+
+## 2026-06-14 - US-011
+- Created app/Livewire/Dashboard/SportDistributionChart.php: Livewire component that calls getSportDistribution() and builds chartData (labels, series, distances, colors). Maps sport_type strings to hex colors consistent with existing Tailwind badge colors. Dispatches 'sport-distribution-chart-data' event with the data.
+- Created resources/views/livewire/dashboard/sport-distribution-chart.blade.php: donut chart using ApexCharts. window.__sportDistChartInitData set via inline <script> for initial data. Alpine.js x-data stores _distances array in component scope for use in custom tooltip closure. Tooltip shows sport name, activity count, and distance (km). wire:ignore on chart div prevents Livewire from destroying the ApexCharts DOM. @sport-distribution-chart-data.window listener calls updateChart() for updates.
+- Updated resources/views/dashboard/index.blade.php: added @livewire('dashboard.sport-distribution-chart') after the sport-distribution table component.
+- All 48 existing tests still pass.
+- Files changed: app/Livewire/Dashboard/SportDistributionChart.php (new), resources/views/livewire/dashboard/sport-distribution-chart.blade.php (new), resources/views/dashboard/index.blade.php (updated)
+- **Learnings for future iterations:**
+  - ApexCharts donut custom tooltip: store auxiliary arrays (e.g. distances) on the Alpine component instance (`this._distances`) to make them accessible inside the ApexCharts `tooltip.custom` closure via `self._distances`.
+  - ApexCharts donut update: call `chart.updateOptions({ labels, colors }, false, false)` then `chart.updateSeries(series)` separately — updating labels requires updateOptions, not updateSeries.
+  - Sport hex colors that match existing Tailwind badge classes: Run=#F97316, TrailRun=#22C55E, Ride=#3B82F6, GravelRide=#14B8A6, MountainBikeRide=#EAB308, VirtualRide=#0EA5E9, VirtualRun=#F59E0B, Hike=#84CC16, Walk=#A855F7, Swim=#06B6D4, Workout=#9CA3AF.
+---
+
+## 2026-06-14 - US-010
+- Installed apexcharts@^5.15.0 via npm (added to package.json dependencies).
+- Updated resources/js/app.js: imports ApexCharts from 'apexcharts' and exposes it as window.ApexCharts.
+- Built Vite assets (npm run build) — output: public/build/assets/app-*.js (584 kB, includes ApexCharts).
+- Added @vite(['resources/js/app.js']) to resources/views/layouts/app.blade.php <head> — loads compiled JS alongside existing CDN Tailwind.
+- Created app/Livewire/Dashboard/AnnualAnalysisChart.php: Livewire component with public int $year (default: current year) and public string $metric = 'distance'. render() fetches getAnnualStats() for available years and getMonthlyStats() for the selected year. Builds chartData array (categories, seriesName, seriesData, yAxisTitle) and dispatches 'annual-chart-data' browser event with the data via $this->dispatch().
+- Created resources/views/livewire/dashboard/annual-analysis-chart.blade.php: year selector (wire:model.live) and Distanza/Ore toggle (wire:click $set). Chart div initialized via Alpine.js x-init reading window.__annualChartInitData (set in inline <script> with @json). wire:ignore on the chart container prevents Livewire from destroying ApexCharts DOM. @annual-chart-data.window listener calls updateChart() for subsequent year/metric changes.
+- Updated resources/views/dashboard/index.blade.php: added @livewire('dashboard.annual-analysis-chart') after the existing annual-analysis table component.
+- All 48 existing tests still pass.
+- Files changed: package.json, package-lock.json, resources/js/app.js (updated), resources/views/layouts/app.blade.php (updated), app/Livewire/Dashboard/AnnualAnalysisChart.php (new), resources/views/livewire/dashboard/annual-analysis-chart.blade.php (new), resources/views/dashboard/index.blade.php (updated).
+- **Learnings for future iterations:**
+  - Alpine.js is bundled with Livewire 3 automatically — do NOT import Alpine.js in app.js (would create two instances). Only expose window.ApexCharts (or other libs) from app.js.
+  - ApexCharts + Livewire + Alpine pattern: use inline <script>window.__data = @json($data);</script> before the Alpine div to avoid HTML attribute quote escaping issues. x-init reads window.__data for initial chart creation.
+  - wire:ignore on the chart container div prevents Livewire morphing from destroying ApexCharts' internal SVG DOM. Critical for chart persistence across Livewire re-renders.
+  - $this->dispatch('event-name', data: $payload) in Livewire 3 dispatches a browser CustomEvent with event.detail.data = $payload. Alpine listens with @event-name.window="handler($event.detail.data)".
+  - Livewire events dispatched from render() are sent in AJAX responses (not during SSR initial load). Use x-init for initial chart setup; browser events for subsequent updates.
+---
+
+## 2026-06-14 - US-008
+- Created database/seeders/LargeDatasetSeeder.php.
+- Creates test user testdata@pemiq.com (firstOrCreate, idempotent) then deletes their existing activities before re-seeding.
+- Generates 10,000 activities in 20 batches of 500 using ActivityFactory with ->sequence() to assign sequential strava_activity_id values (base 500,000,000 + offset) — guarantees DB unique constraint is never violated across batches.
+- Factory defaults provide random sport_type from ['Run','Ride','Hike','Walk','TrailRun'] and random started_at in the last 3 years, so distribution across sports and years is guaranteed at 10k scale.
+- `php artisan db:seed --class=LargeDatasetSeeder` completes without errors; all 48 existing tests still pass.
+- Files changed: database/seeders/LargeDatasetSeeder.php (new)
+- **Learnings for future iterations:**
+  - When chunking factory creation, Faker's `unique()` tracker resets between separate `factory()->count(N)->create()` calls — use `->sequence()` with a calculated offset instead to guarantee uniqueness across batches.
+  - `Activity::where('user_id', $user->id)->delete()` before re-seeding makes the seeder idempotent and avoids unique constraint conflicts on repeated runs.
+  - `$this->command->info(...)` outputs progress lines when run via `php artisan db:seed` — useful for long-running seeders.
+---
+
+## 2026-06-14 - US-007
+- Audited all POST forms in resources/views/ — all forms already contained @csrf (register, login, forgot-password, reset-password, verify-email, profile/show, profile/password, livewire/strava/connection-status, partials/impersonation-banner, layouts/app logout).
+- Created tests/Feature/Auth/CsrfProtectionTest.php with 3 tests:
+  - test_post_register_without_csrf_token_returns_419: overrides env to 'production' to disable the testing bypass in PreventRequestForgery, sends POST /register without _token, asserts 419.
+  - test_post_login_without_csrf_token_returns_419: same pattern for POST /login.
+  - test_all_post_forms_have_csrf_directive: reads each form view file and asserts @csrf is present.
+- All 48 tests pass.
+- Files changed: tests/Feature/Auth/CsrfProtectionTest.php (new)
+- **Learnings for future iterations:**
+  - Laravel's PreventRequestForgery (CSRF) middleware skips verification when `$this->app->runningInConsole() && $this->app->runningUnitTests()`. To test for 419 in PHPUnit, override the env binding: `$this->app->instance('env', 'production')` — this makes `runningUnitTests()` return false and CSRF is enforced. Always restore with `$this->app->instance('env', 'testing')` in tearDown.
+  - The CSRF middleware class in Laravel 13 is `Illuminate\Foundation\Http\Middleware\PreventRequestForgery` (ValidateCsrfToken is deprecated, extends it).
+  - All POST forms in this project already had @csrf from initial implementation — no Blade changes were needed.
+---
+
+## 2026-06-14 - US-005
+- Created database/factories/ActivityFactory.php: standard factory with sensible defaults for all Activity fields (nullable fields set to null by default).
+- Updated app/Services/Dashboard/DashboardStatsService.php: added private yearExpr() and monthExpr() helpers that return SQLite-compatible `CAST(strftime(...) AS INTEGER)` when the driver is 'sqlite', and MySQL-native `YEAR()`/`MONTH()` otherwise. Also replaced `->whereYear()` with `->whereRaw()` using the same helper to fix SQLite compatibility for getMonthlyStats.
+- Created tests/Feature/Dashboard/DashboardStatsServiceTest.php: 3 feature tests.
+  - test_user_with_no_activities_returns_neutral_values: all 4 methods return 0/empty without exceptions.
+  - test_activities_with_null_distance_and_elapsed_time_do_not_throw: SQL SUM ignores NULLs, aggregated counts still correct.
+  - test_50_activities_across_3_years_have_consistent_aggregates: 50 activities across 2023/2024/2025 with known distances/times; annual totals, monthly distribution, and overview stats all match manually computed sums.
+- All 44 tests pass.
+- Files changed: database/factories/ActivityFactory.php (new), app/Services/Dashboard/DashboardStatsService.php, tests/Feature/Dashboard/DashboardStatsServiceTest.php (new)
+- **Learnings for future iterations:**
+  - SQLite does NOT support MySQL's YEAR()/MONTH() functions — use driver-aware helpers that branch on `DB::connection()->getDriverName() === 'sqlite'` and return `CAST(strftime('%Y'/'%m', col) AS INTEGER)` for SQLite.
+  - Laravel's `->whereYear()` generates `YEAR(col) = ?` which fails in SQLite — replace with `->whereRaw("$yearExpr = ?", [$year])` using the same helper.
+  - ActivityFactory now exists at database/factories/ActivityFactory.php — use it in future tests and seeders (US-008 seeder can reference this factory).
+---
+
+## 2026-06-14 - US-004
+- Created tests/Feature/Middleware/EnsurePremiumTest.php: 3 feature tests for EnsurePremium middleware.
+- Registered a test route with `['auth', 'premium']` middleware in setUp() to test against real route behaviour.
+- test_unauthenticated_user_is_redirected_to_login: GET without actingAs → auth middleware redirects to /login (not 500).
+- test_non_premium_user_is_redirected_to_dashboard_with_flash: user(is_premium=false) → redirect /dashboard, session has 'error' flash.
+- test_premium_user_can_access_protected_route: user(is_premium=true, premium_expires_at=future) → 200 OK.
+- Confirmed 'premium' alias already registered in bootstrap/app.php — no changes needed.
+- Full test suite: 41 tests pass.
+- Files changed: tests/Feature/Middleware/EnsurePremiumTest.php (new)
+- **Learnings for future iterations:**
+  - To test a specific middleware in isolation, register a disposable test route in setUp() using `Route::middleware([...])->get('/test-route', fn() => response('OK'))` — no need to wait for real premium routes to exist
+  - The `auth` middleware must be included on the test route so that unauthenticated requests get redirected to /login rather than hitting the EnsurePremium middleware which redirects to /dashboard
+  - `assertSessionHas('error', '...')` checks the flashed session value on the redirect response directly
+---
+
+## 2026-06-14 - US-003
+- Added `start(User $user)` method to ImpersonateController: checks admin role (403 if not), creates AuditLog (impersonate_start), sets session('impersonating_admin_id'), logs in as target user, redirects to dashboard.
+- Added `POST /impersonate/start/{user}` route (auth middleware, named impersonate.start) in routes/web.php.
+- Created tests/Feature/Admin/ImpersonationTest.php: 6 tests, all passing.
+  - test_admin_can_impersonate_non_admin_user: redirects to /dashboard, auth is target user, session has impersonating_admin_id
+  - test_impersonation_banner_is_visible_after_impersonation: GET /profile with session set → assertSee('Stai impersonando')
+  - test_user_with_role_user_cannot_impersonate: POST to start route → 403
+  - test_stop_impersonation_restores_admin_session: POST to stop route → redirects to /admin/users, auth is admin, session key missing
+  - test_impersonation_start_creates_audit_log: audit_logs has impersonate_start record
+  - test_stop_impersonation_creates_audit_log: audit_logs has impersonate_stop record
+- Full test suite: 38 tests pass.
+- Files changed: app/Http/Controllers/ImpersonateController.php, routes/web.php, tests/Feature/Admin/ImpersonationTest.php (new)
+- **Learnings for future iterations:**
+  - To test impersonation banner, use /profile (extends layouts.app) with withSession(['impersonating_admin_id' => $adminId]) — avoids DashboardStatsService MySQL-specific functions
+  - The start() route is an HTTP endpoint needed for testability; the Filament table action also exists for the actual admin UI flow (both produce the same session/audit log result)
+  - assertSessionMissing() on a redirect response checks session after session()->forget() is called in the controller
+  - withSession([...]) in Laravel tests sets the session for that specific request without affecting prior actingAs state
+---
+
+## 2026-06-14 - US-002
+- Created tests/Feature/Strava/SyncIncrementalActivitiesTest.php: 3 feature tests for SyncStravaIncrementalActivities job.
+- Caso 1: nessuna attività nuova — Http::fake() returns [], SyncLog completed with activities_imported=0, no activities written.
+- Caso 2: nuove attività presenti — 2 activities returned, both saved correctly in activities table with correct user_id.
+- Caso 3: API inaccessibile — mock StravaApiService to throw StravaApiException, SyncLog status='failed' with error_message.
+- All 32 tests pass (3 new + 29 existing).
+- **Learnings for future iterations:**
+  - SyncStravaIncrementalActivities uses `last_sync_at` to determine sync type: if set → 'incremental' (passes Carbon to fetchActivities); if null → 'historical'
+  - For incremental sync tests, set account `last_sync_at` to a past date in setUp so sync_type is 'incremental'
+  - Http::fake() with empty array `[]` correctly terminates the pagination loop in StravaApiService (empty array hits the `empty($data)` break)
+  - No sleep() calls triggered in tests since each fake response is <100 items (pagination sleep only triggers when count==100)
+---
+
 ## 2026-06-13 - US-035
 - Created app/Http/Middleware/EnsurePremium.php: blocks non-premium users (is_premium=false or premium_expires_at in the past), redirects to /dashboard with error flash.
 - Registered EnsurePremium with alias 'premium' in bootstrap/app.php.
@@ -396,7 +782,34 @@
   - For FK columns referencing a non-default table (e.g. admin_user_id → users), use `->constrained('users')` with explicit table name
 ---
 
+## 2026-06-14 - US-009
+- Created docs/ops/app-key-rotation.md: comprehensive APP_KEY rotation procedure.
+- Document covers: when to rotate (compromise, personnel change, periodic policy, environment migration), the data loss risk (encrypted cast fields become illegible if key changed without re-encrypting), safe rotation procedure (7 steps), rollback procedure, and a quick checklist.
+- Key steps documented: backup DB → generate new key with `key:generate --show` → set APP_PREVIOUS_KEYS to old key → set APP_KEY to new key → config:clear → run Tinker re-encryption script on StravaAccount chunks → verify no DecryptException → remove APP_PREVIOUS_KEYS → final config:clear.
+- Files changed: docs/ops/app-key-rotation.md (new)
+- **Learnings for future iterations:**
+  - `APP_PREVIOUS_KEYS` (comma-separated) lets Laravel decrypt with old keys while writing with the new key — the correct way to do a zero-data-loss rotation.
+  - `StravaAccount` is the ONLY model with `encrypted` cast fields in this project at this time — only its records need re-encryption during a key rotation.
+  - Sessions stored in Redis are signed with APP_KEY but do NOT contain encrypted-cast data — a key rotation will log all users out (acceptable and expected behavior).
+---
+
+## 2026-06-14 - US-019
+- Created `app/Mail/StravaTokenExpiredNotification.php`: Mailable with subject 'Token Strava scaduto — ricollegamento necessario'.
+- Created `resources/views/emails/strava-token-expired-notification.blade.php`: Italian email explaining token expiry with link to /dashboard.
+- Updated `app/Jobs/SyncStravaHistoricalActivities.php`: in the `StravaTokenExpiredException` catch block, now catches `StravaAuthException` specifically from the refresh attempt and calls `sendTokenExpiredNotification()` (new private method). Transient refresh failures (`StravaTokenRefreshException`/`\Exception`) still fall through silently for retry. Added `sendTokenExpiredNotification()` private method using same `notified_at` gate as `sendCriticalFailureNotification()`.
+- Updated `app/Jobs/SyncStravaIncrementalActivities.php`: same pattern as historical job.
+- Created `tests/Feature/Strava/StravaTokenExpiredNotificationTest.php`: 5 tests covering: permanent refresh failure → email sent + notified_at set; no duplicate when notified_at set; transient failure → no email; incremental sync same behavior; successful sync → no notification.
+- All 59 tests pass.
+- Files changed: app/Mail/StravaTokenExpiredNotification.php (new), resources/views/emails/strava-token-expired-notification.blade.php (new), tests/Feature/Strava/StravaTokenExpiredNotificationTest.php (new), app/Jobs/SyncStravaHistoricalActivities.php, app/Jobs/SyncStravaIncrementalActivities.php
+- **Learnings for future iterations:**
+  - `StravaTokenExpiredNotification` vs `SyncFailedNotification`: the former is triggered when StravaAuthException is thrown during the token refresh attempt (inside the StravaTokenExpiredException handler); the latter is triggered when StravaAuthException comes directly from fetchActivities(). Both use `notified_at` as a dedup gate — only one notification is ever sent per broken session.
+  - To mock both StravaApiService AND StravaTokenService in the same test: use `$this->mock(StravaApiService::class, ...)` to throw StravaTokenExpiredException, then `$this->mock(StravaTokenService::class, ...)` to throw StravaAuthException on ensureValidToken(). The job's inner try/catch calls ensureValidToken() on the fresh account — the mock intercepts that call.
+  - Inner catch ordering matters: `catch (StravaAuthException)` must come before `catch (\Exception)` so permanent failures are distinguished from transient ones.
+---
+
 ## Codebase Patterns
+- SQLite test compatibility: YEAR()/MONTH()/DAY() are MySQL-only; use driver-aware helpers in services (see DashboardStatsService::yearExpr/monthExpr/dayExpr). Also replace `->whereYear()` with `->whereRaw()`.
+- ActivityFactory is at database/factories/ActivityFactory.php — use for tests and seeders.
 - .env must use Docker service names as hostnames: DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit (not 127.0.0.1)
 - MariaDB Docker credentials: user=pemiq, password=pemiq, database=pemiq
 - User model uses traditional $fillable/$hidden/$casts properties (not PHP 8.4 #[Fillable] attribute syntax)
@@ -414,6 +827,16 @@
 - **Filament v4 BREAKING**: `$navigationGroup` is typed `UnitEnum|string|null` in parent — use `getNavigationGroup(): ?string` method instead of static property
 - **Filament v4 BREAKING**: `$navigationIcon` is typed `BackedEnum|string|null` in parent — use `getNavigationIcon()` method instead
 - Filament resource discovery needs `php artisan optimize:clear` to pick up newly created resources (not just filament:clear-cached-components)
+- ApexCharts integration: import from npm in app.js (window.ApexCharts = ApexCharts), build with `npm run build`, add @vite(['resources/js/app.js']) to layout. DO NOT import Alpine.js in app.js (Livewire 3 bundles Alpine).
+- ApexCharts + Livewire: use wire:ignore on chart div, inline <script>window.__data = @json($data);</script> for initial data, $this->dispatch() for updates, Alpine x-init for creation, @event.window for updates.
+- npm runs on HOST (not inside Docker container) — use `npm install` and `npm run build` on the host.
+- Leaflet CSS in Vite: import in app.js (`import 'leaflet/dist/leaflet.css'`), Vite extracts it and @vite() auto-injects the link tag.
+- Non-Livewire pages: init JS using `document.addEventListener('DOMContentLoaded', ...)` to safely access globals set by Vite module scripts (modules execute before DOMContentLoaded).
+- i18n in Blade/JS: inline `{{ __('messages.key') }}` inside Alpine.js x-data JS strings is valid — Blade renders server-side before JS is parsed by browser.
+- Month names in lang files: `trans('messages.months')` returns 0-indexed array. Use `collect(...)->mapWithKeys(fn($name, $i) => [$i + 1 => $name])` to convert to 1-indexed for month selectors.
+- Locale-aware formatting: use `fmt_number($value, $decimals)` (NOT `number_format()`) and `fmt_date($date, $format)` (NOT `->format()`) in all views — defined in `app/Helpers/FormatHelper.php`, autoloaded via `composer.json` files[]. IT uses `,`/`.`; EN uses `.`/`,`.
+- SQLite integer division gotcha: `SUM(integer_col) / integer_literal` performs integer division in SQLite. Always use `/ 1000.0` or `/ 3600.0` (float literals) to force float division. DashboardStatsService has this issue too but existing tests happen to use multiples that divide evenly.
+- TrendAnalysisService weekly/monthly period labels: SQLite returns `strftime('%Y-%W', ...)` → "2024-03", MySQL `DATE_FORMAT('%Y-%u')` → same "YYYY-WW" format. Monthly: `strftime('%Y-%m', ...)` and `DATE_FORMAT('%Y-%m')` both return "2024-01" format.
 
 ---
 
@@ -447,4 +870,35 @@
 - **Learnings for future iterations:**
   - Laravel `encrypted` cast works transparently via $casts — no extra config needed, APP_KEY is used for encryption
   - For enum columns in migrations, use `$table->enum('col', ['a','b','c'])->default('a')` pattern
+---
+
+## 2026-06-14 - US-006
+- Audited DashboardStatsService: all 4 methods (getOverviewStats, getAnnualStats, getMonthlyStats, getSportDistribution) already had correct `where('user_id', $user->id)` scoping — no fixes needed.
+- Added `test_user_b_cannot_see_user_a_activities` to tests/Feature/Dashboard/DashboardStatsServiceTest.php: creates 5 activities for userA, verifies userB sees 0 activities across all 4 service methods, verifies userA still sees their own 5 activities.
+- All 45 tests pass.
+- Files changed: tests/Feature/Dashboard/DashboardStatsServiceTest.php
+- **Learnings for future iterations:**
+  - DashboardStatsService was already correctly scoped by user_id from the initial implementation — cross-user isolation was in place, only the test coverage was missing.
+  - Cross-user isolation tests should always create two independent User::factory() instances and assert that data created for one user is invisible to the other.
+---
+
+## 2026-06-14 - US-021
+- Created `app/Helpers/FormatHelper.php`: global helper file with `fmt_number(float|int|null $value, int $decimals = 0): string` and `fmt_date(Carbon|string|null $date, string $format = 'd M Y'): string`.
+- `fmt_number()`: reads `app()->getLocale()`, uses `,`/`.` separators for IT and `.`/`,` for EN — replaces all `number_format()` calls in views.
+- `fmt_date()`: uses `->locale(app()->getLocale())->translatedFormat($format)` so month names are localized (e.g. "14 giu 2026" in IT, "14 Jun 2026" in EN).
+- Registered helper in `composer.json` `autoload.files` array; ran `composer dump-autoload` in container.
+- Updated `resources/views/livewire/dashboard/overview-stats.blade.php`: 3 `number_format()` → `fmt_number()`.
+- Updated `resources/views/livewire/dashboard/annual-analysis.blade.php`: 4 `number_format()` → `fmt_number()`.
+- Updated `resources/views/livewire/dashboard/monthly-analysis.blade.php`: 4 `number_format()` → `fmt_number()`.
+- Updated `resources/views/livewire/dashboard/sport-distribution.blade.php`: 3 `number_format()` → `fmt_number()`.
+- Updated `resources/views/activities/index.blade.php`: hardcoded Italian `$monthNames` array → `trans('messages.months')`; 2 `number_format()` → `fmt_number()`; `->format('d/m/Y')` → `fmt_date($activity->started_at, 'd M Y')`.
+- Updated `resources/views/activities/show.blade.php`: `->format('d/m/Y H:i')` → `fmt_date($activity->started_at, 'd M Y H:i')`; all `number_format()` calls → `fmt_number()`.
+- Updated `resources/views/livewire/strava/connection-status.blade.php`: `->format('d/m/Y H:i')` → `fmt_date($stravaAccount->last_sync_at, 'd M Y H:i')`.
+- All 59 tests pass.
+- Files changed: app/Helpers/FormatHelper.php (new), composer.json, resources/views/livewire/dashboard/overview-stats.blade.php, annual-analysis.blade.php, monthly-analysis.blade.php, sport-distribution.blade.php, resources/views/activities/index.blade.php, resources/views/activities/show.blade.php, resources/views/livewire/strava/connection-status.blade.php
+- **Learnings for future iterations:**
+  - `fmt_number()` and `fmt_date()` are now global helpers — use them everywhere instead of `number_format()` or `->format()` in views.
+  - Locale is read via `app()->getLocale()` at render time, so the `SetLocale` middleware must run before views are rendered (it does, since it's registered on the web middleware group).
+  - `translatedFormat('d M Y')` gives abbreviated month names (giu/Jun); use `'d F Y'` for full names (giugno/June).
+  - Adding a file to `autoload.files` in composer.json requires `composer dump-autoload` in the Docker container to take effect.
 ---

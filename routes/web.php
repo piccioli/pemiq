@@ -6,16 +6,19 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\ProfilePasswordController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImpersonateController;
+use App\Http\Controllers\PremiumController;
 use App\Http\Controllers\StravaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
-});
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('landing');
+})->name('home');
 
 // Login
 Route::get('/login', [LoginController::class, 'show'])->name('login');
@@ -86,6 +89,15 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Activities
+Route::get('/activities', [ActivityController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('activities.index');
+
+Route::get('/activities/{activity}', [ActivityController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('activities.show');
+
 // Strava OAuth
 Route::get('/strava/redirect', [StravaController::class, 'redirect'])
     ->middleware(['auth', 'verified'])
@@ -103,7 +115,23 @@ Route::post('/strava/sync-historical', [StravaController::class, 'syncHistorical
     ->middleware(['auth', 'verified'])
     ->name('strava.sync-historical');
 
+// Premium landing page (accessible to all authenticated users)
+Route::get('/premium', [PremiumController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('premium.index');
+
+// Premium features (EnsurePremium middleware)
+Route::middleware(['auth', 'verified', 'premium'])->prefix('premium')->name('premium.')->group(function () {
+    Route::get('/trends', fn () => view('premium.trends'))->name('trends');
+    Route::get('/compare', fn () => view('premium.compare'))->name('compare');
+    Route::get('/year-over-year', fn () => view('premium.year-over-year'))->name('year-over-year');
+});
+
 // Impersonation
+Route::post('/impersonate/start/{user}', [ImpersonateController::class, 'start'])
+    ->middleware('auth')
+    ->name('impersonate.start');
+
 Route::post('/impersonate/stop', [ImpersonateController::class, 'stop'])
     ->middleware('auth')
     ->name('impersonate.stop');

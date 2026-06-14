@@ -1,5 +1,5 @@
 <div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-lg font-semibold text-gray-800 mb-4">Distribuzione per Sport</h2>
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">{{ __('messages.dashboard_sport_dist_title') }}</h2>
 
     @php
         $sportColors = [
@@ -19,17 +19,17 @@
 
     @if ($sportStats->isEmpty())
         <p class="text-gray-500 text-sm">
-            Nessuna attività ancora. Collega Strava e avvia la sincronizzazione.
+            {{ __('messages.dashboard_no_activities') }}
         </p>
     @else
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sport</th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Attività</th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Distanza (km)</th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ore</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.col_sport') }}</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.col_activities') }}</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.stat_distance_km') }}</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.col_hours') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -43,9 +43,9 @@
                                     {{ $row->sport_type }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->activities) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->distance_km, 1) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ number_format($row->hours, 1) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->activities) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->distance_km, 1) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">{{ fmt_number($row->hours, 1) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

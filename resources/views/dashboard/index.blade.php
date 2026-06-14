@@ -18,10 +18,19 @@
     {{-- Analisi per Anno --}}
     @livewire('dashboard.annual-analysis')
 
+    {{-- Grafico Analisi Annuale --}}
+    @livewire('dashboard.annual-analysis-chart')
+
     {{-- Analisi per Mese --}}
     @livewire('dashboard.monthly-analysis')
 
+    {{-- Grafico Analisi Mensile --}}
+    @livewire('dashboard.monthly-analysis-chart')
+
     {{-- Distribuzione per Sport --}}
     @livewire('dashboard.sport-distribution')
+
+    {{-- Grafico Distribuzione Sport --}}
+    @livewire('dashboard.sport-distribution-chart')
 </div>
 @endsection

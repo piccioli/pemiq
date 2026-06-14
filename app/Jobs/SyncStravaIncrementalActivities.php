@@ -2,7 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Exceptions\Strava\StravaAuthException;
 use App\Exceptions\Strava\StravaTokenExpiredException;
+use App\Mail\SyncFailedNotification;
+use App\Mail\StravaTokenExpiredNotification;
 use App\Models\StravaAccount;
 use App\Services\Strava\StravaApiService;
 use App\Services\Strava\StravaTokenService;
@@ -12,6 +15,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
 
 class SyncStravaIncrementalActivities implements ShouldQueue
 {
@@ -37,12 +41,19 @@ class SyncStravaIncrementalActivities implements ShouldQueue
             $activities = $apiService->fetchActivities($this->account, $after);
             $count = $syncService->sync($this->account, $activities, $syncLog);
             $syncService->completeSyncLog($syncLog, $count);
-            $this->account->update(['last_sync_at' => now()]);
+            $this->account->update(['last_sync_at' => now(), 'notified_at' => null]);
+        } catch (StravaAuthException $e) {
+            $syncService->failSyncLog($syncLog, $e->getMessage());
+            $this->sendCriticalFailureNotification();
+            throw $e;
         } catch (StravaTokenExpiredException $e) {
             try {
                 $tokenService->ensureValidToken($this->account->fresh());
+            } catch (StravaAuthException) {
+                // Token refresh permanently failed — notify user once
+                $this->sendTokenExpiredNotification();
             } catch (\Exception) {
-                // Refresh failed — next retry will attempt again
+                // Transient refresh failure — next retry will attempt again
             }
             $syncService->failSyncLog($syncLog, 'Token scaduto, verrà riprovato');
             throw $e;
@@ -50,5 +61,31 @@ class SyncStravaIncrementalActivities implements ShouldQueue
             $syncService->failSyncLog($syncLog, $e->getMessage());
             throw $e;
         }
+    }
+
+    private function sendCriticalFailureNotification(): void
+    {
+        $account = $this->account->fresh();
+
+        if ($account->notified_at !== null) {
+            return;
+        }
+
+        $user = $account->user;
+        Mail::to($user->email)->send(new SyncFailedNotification($account));
+        $account->update(['notified_at' => now()]);
+    }
+
+    private function sendTokenExpiredNotification(): void
+    {
+        $account = $this->account->fresh();
+
+        if ($account->notified_at !== null) {
+            return;
+        }
+
+        $user = $account->user;
+        Mail::to($user->email)->send(new StravaTokenExpiredNotification($account));
+        $account->update(['notified_at' => now()]);
     }
 }

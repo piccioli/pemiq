@@ -76,6 +76,7 @@ class RegistrationTest extends TestCase
             ]);
             $mock->shouldReceive('getAnnualStats')->andReturn(collect());
             $mock->shouldReceive('getMonthlyStats')->andReturn(collect());
+            $mock->shouldReceive('getDailyStats')->andReturn(collect());
             $mock->shouldReceive('getSportDistribution')->andReturn(collect());
         });
 

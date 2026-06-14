@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PEMIQ — @yield('title', 'App')</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/js/app.js'])
 
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
@@ -25,6 +26,23 @@
                        class="text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-orange-600' : 'text-gray-600 hover:text-gray-900' }} transition-colors">
                         Dashboard
                     </a>
+                    <a href="{{ route('activities.index') }}"
+                       class="text-sm font-medium {{ request()->routeIs('activities.*') ? 'text-orange-600' : 'text-gray-600 hover:text-gray-900' }} transition-colors">
+                        Attività
+                    </a>
+                    @php
+                        $isPremiumActive = auth()->user()->is_premium && (!auth()->user()->premium_expires_at || auth()->user()->premium_expires_at->isFuture());
+                    @endphp
+                    @if($isPremiumActive)
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">
+                            ★ Premium
+                        </span>
+                    @else
+                        <a href="/premium"
+                           class="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors">
+                            Passa a Premium
+                        </a>
+                    @endif
                 </div>
 
                 {{-- Desktop user menu --}}
@@ -94,6 +112,18 @@
                    class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-orange-600 bg-orange-50' : 'text-gray-700 hover:bg-gray-50' }}">
                     Dashboard
                 </a>
+                <a href="{{ route('activities.index') }}"
+                   class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('activities.*') ? 'text-orange-600 bg-orange-50' : 'text-gray-700 hover:bg-gray-50' }}">
+                    Attività
+                </a>
+                @if($isPremiumActive)
+                    <span class="block px-3 py-2 text-sm font-semibold text-amber-800">★ Premium</span>
+                @else
+                    <a href="/premium"
+                       class="block px-3 py-2 rounded-md text-sm font-medium text-amber-600 hover:bg-amber-50">
+                        Passa a Premium
+                    </a>
+                @endif
                 <a href="{{ route('profile.show') }}"
                    class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                     Profilo
