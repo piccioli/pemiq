@@ -1,3 +1,20 @@
+## 2026-06-14 - US-009
+- Created `resources/views/components/switch.blade.php`: Blade component with `@props` for `label` (string), `name` (string), `checked` (bool, default false). Uses Alpine.js `x-data="{ on: @js((bool) $checked) }"` as single source of truth. Renders a hidden input with `:value="on ? '1' : '0'"` for form submission. Track is a `<button role=switch>` (40×22px) with `@click="on = !on"` and `:class="{ 'pq-switch-on': on }"`. Thumb is a white 18px circle that slides via CSS `transform: translateX(18px)` when `pq-switch-on` class is present.
+- Added `.pq-switch`, `.pq-switch-track`, `.pq-switch-track.pq-switch-on`, `.pq-switch-thumb`, `.pq-switch-track.pq-switch-on .pq-switch-thumb`, `.pq-switch-label` CSS classes to `resources/css/app.css`. Track transition uses `var(--dur-base) var(--ease-out)`; thumb transition uses `var(--dur-base) var(--ease-spring)`.
+- Created migration `2026_06_14_200000_add_email_notifications_to_users_table.php`: adds `email_notifications` boolean (default true) to users table.
+- Updated `app/Models/User.php`: added `email_notifications` to `$fillable` and `'email_notifications' => 'boolean'` cast.
+- Updated `app/Http/Controllers/Auth/ProfileController.php`: added `email_notifications` to fill, read via `(bool) $request->input('email_notifications', false)`.
+- Updated `resources/views/profile/show.blade.php`: added `<x-switch name="email_notifications" :label="__('messages.email_notifications_label')" :checked="(bool) old('email_notifications', auth()->user()->email_notifications)" />` inside the profile form.
+- Added `email_notifications_label` translation key to `lang/it/messages.php` and `lang/en/messages.php`.
+- Files changed: resources/views/components/switch.blade.php (new), resources/css/app.css, database/migrations/2026_06_14_200000_add_email_notifications_to_users_table.php (new), app/Models/User.php, app/Http/Controllers/Auth/ProfileController.php, resources/views/profile/show.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Switch component uses a hidden input (`:value="on ? '1' : '0'"`) rather than `x-model` on a checkbox — this avoids Alpine's checkbox value-as-string quirk and gives a clean boolean `0`/`1` for form submission.
+  - `@js((bool) $checked)` in Alpine `x-data` outputs `true`/`false` JS literals regardless of whether `$checked` is a PHP bool, `"1"`, `"0"`, or null — the cast is essential.
+  - CSS-only animation: `pq-switch-on` class on the track changes background via CSS transition; `pq-switch-on .pq-switch-thumb` changes transform. Alpine just toggles the class — no inline styles needed.
+  - Profile form `email_notifications` submission: when switch is OFF, the hidden input submits `"0"` which `(bool) $request->input(...)` converts to `false`. When ON, submits `"1"` → `true`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-006
 - Created `resources/views/components/tag.blade.php`: Blade component with `@props` for `selected` (bool), `removable` (bool), `interactive` (bool, default: true), `removeHref` (string optional). Renders as `<span>` using `$attributes->class($classes)`. Named `$icon` slot. When `removable=true`, renders a `<a href>` (if removeHref set) or `<button>` × element with class `pq-tag-remove`.
 - Added `.pq-tag`, `.pq-tag-selected`, `.pq-tag-static`, `.pq-tag-label`, `.pq-tag-remove` CSS classes to `resources/css/app.css`. Default state: `var(--surface-2)` bg + `var(--border)` border + `var(--text-muted)` text. Selected: `var(--accent-soft)` bg + `var(--brand)` border + `var(--accent)` text. Remove button: inherits color, hover → `var(--danger)`.

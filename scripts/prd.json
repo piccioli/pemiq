@@ -183,8 +183,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/switch.blade.php with props: label, name, checked (bool). Uses Alpine.js x-data { on: @js((bool)$checked) } as single source of truth; hidden input :value=\"on ? '1' : '0'\" for form submission; button with role=switch, @click toggles on, :class adds pq-switch-on. Added .pq-switch, .pq-switch-track, .pq-switch-thumb, .pq-switch-label CSS to app.css. Added email_notifications boolean column to users table (migration + model fillable + cast). Updated ProfileController to accept email_notifications as boolean input. Refactored profile/show.blade.php with <x-switch> for email_notifications preference. Added email_notifications_label translation key to both lang files. All 80 tests pass. Vite build succeeds."
     },
     {
       "id": "US-010",
