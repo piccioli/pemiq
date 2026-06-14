@@ -66,6 +66,31 @@
                 Cambia password
             </a>
         </div>
+
+        @php
+            $isPremiumProfile = auth()->user()->is_premium && (!auth()->user()->premium_expires_at || auth()->user()->premium_expires_at->isFuture());
+        @endphp
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <h2 class="text-base font-semibold text-gray-700 mb-3">Account</h2>
+            @if($isPremiumProfile)
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-amber-100 text-amber-800 border border-amber-300">
+                        ★ Premium
+                    </span>
+                    @if(auth()->user()->premium_expires_at)
+                        <span class="text-sm text-gray-500">scade il {{ fmt_date(auth()->user()->premium_expires_at, 'd M Y') }}</span>
+                    @endif
+                </div>
+            @else
+                <div class="flex flex-col space-y-2">
+                    <p class="text-sm text-gray-500">Stai usando il piano <strong>Free</strong>.</p>
+                    <a href="/premium"
+                       class="inline-block w-full text-center bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors">
+                        Passa a Premium
+                    </a>
+                </div>
+            @endif
+        </div>
     </div>
 </div>
 @endsection
