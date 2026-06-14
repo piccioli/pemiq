@@ -87,4 +87,12 @@ return [
     'compare_col_metric'        => 'Metric',
     'compare_col_delta_abs'     => 'Absolute Delta',
     'compare_col_delta_pct'     => 'Delta (%)',
+
+    // Premium year over year
+    'yoy_page_title'  => 'Year Over Year',
+    'yoy_chart_title' => 'Monthly Volume by Year (km)',
+    'yoy_year_a'      => 'Year A',
+    'yoy_year_b'      => 'Year B',
+    'yoy_all_sports'  => 'All sports',
+    'yoy_no_data'     => 'No activities for the selected periods.',
 ];

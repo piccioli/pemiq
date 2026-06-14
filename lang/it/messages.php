@@ -87,4 +87,12 @@ return [
     'compare_col_metric'        => 'Metrica',
     'compare_col_delta_abs'     => 'Delta assoluto',
     'compare_col_delta_pct'     => 'Delta (%)',
+
+    // Premium anno su anno
+    'yoy_page_title'  => 'Anno su Anno',
+    'yoy_chart_title' => 'Volume mensile per anno (km)',
+    'yoy_year_a'      => 'Anno A',
+    'yoy_year_b'      => 'Anno B',
+    'yoy_all_sports'  => 'Tutti gli sport',
+    'yoy_no_data'     => 'Nessuna attività per i periodi selezionati.',
 ];
