@@ -429,8 +429,8 @@
         "Typecheck passes"
       ],
       "priority": 22,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created docs/design/components.md (and docs/design/ directory). Documents all 14 Blade components: x-button, x-card, x-badge, x-tag, x-form.input, x-form.select, x-switch, x-metric-tile, x-zone-bar, x-progress-bar, x-tabs, x-segmented-control, x-alert, x-page-header — each with props table (type, default, notes) and minimal Blade usage example. Token reference section with 12 semantic aliases (--bg, --surface, --surface-2, --text, --text-strong, --text-muted, --border, --accent, --brand, --danger, --success, --zone-1..5) and usage descriptions. Anti-pattern section with 3 examples: hardcoded Tailwind colors → var() tokens; raw token values → semantic aliases; emoji → Lucide icons + x-badge. Intro links to Claude Design project URL. All 80 tests pass."
     }
   ]
 }

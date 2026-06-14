@@ -1163,3 +1163,16 @@
   - For light mode, shadows with dark `rgba` values look too heavy — always override `--shadow-*` vars in `[data-theme="light"]` with lower opacity values (0.10–0.15 instead of 0.45–0.65).
   - Vanilla JS `onclick` for theme toggle (not Alpine) is the correct choice when the action affects `document.documentElement` — Alpine's scope is the component, not the document root.
 ---
+
+## 2026-06-14 - US-022
+- Created `docs/design/` directory (new) and `docs/design/components.md`.
+- Document covers all 14 DS Blade components: x-button, x-card, x-badge, x-tag, x-form.input, x-form.select, x-switch, x-metric-tile, x-zone-bar, x-progress-bar, x-tabs, x-segmented-control, x-alert, x-page-header. Each entry has: component name, props table (type, default, notes), and a minimal Blade usage example.
+- Token reference section: 12 semantic aliases with description of when to use each.
+- Anti-pattern section with 3 concrete examples: (1) Tailwind color classes → CSS var() tokens; (2) raw hex/ink tokens → semantic aliases; (3) emoji → Lucide icons + x-badge.
+- Intro links to the Claude Design project URL stored in memory.
+- All 80 tests pass.
+- Files changed: docs/design/components.md (new)
+- **Learnings for future iterations:**
+  - Component docs live in `docs/design/components.md` — update this file when adding new DS components or changing existing prop signatures.
+  - The Claude Design project URL for the PEMIQ DS is stored in the memory system at `reference_design-system.md`.
+---
