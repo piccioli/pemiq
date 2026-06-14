@@ -1,3 +1,16 @@
+## 2026-06-14 - US-018
+- Refactored `resources/views/activities/index.blade.php`: replaced filter form `<div class="bg-white rounded-lg shadow p-4">` with `<x-card>`; replaced table wrapper `<div class="bg-white rounded-lg shadow overflow-hidden">` with `<x-card padding="none" style="overflow: hidden;">`; replaced entire `<table>` Tailwind styling with `.pq-table` DS class; replaced `hover:bg-gray-50` with `.pq-table tbody tr:hover { background: var(--surface-hover) }` via CSS; replaced Tailwind text-gray-* on cells/empty-state/pagination with DS token inline styles; replaced `border-t border-gray-200` dividers with `border-top: 1px solid var(--border)`.
+- Added `.pq-table` CSS block to `resources/css/app.css`: base table, thead th (DS token styled), tbody tr (border/hover), tbody td (DS font-size/color), col-right/col-muted/col-truncate utility classes.
+- Refactored `resources/views/activities/show.blade.php`: replaced 5 main metric `<x-card padding="sm">` blocks with `<x-metric-tile>` components (distance/zone-2/route, duration/brand/clock, elevation/zone-3/mountain-snow, avg-speed/zone-2/gauge, avg-hr/zone-5/heart-pulse — avg-hr tile only rendered when not null); updated secondary metrics card from Tailwind color classes to DS token inline styles; updated Leaflet polyline color from `#E85D04` to `#16D4B4` (DS brand teal).
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/css/app.css, resources/views/activities/index.blade.php, resources/views/activities/show.blade.php
+- **Learnings for future iterations:**
+  - `.pq-table` CSS class pattern: add DS-token styled table CSS to app.css, then apply class to `<table>` — no per-row/per-cell Tailwind needed. Col utility classes (col-right, col-muted, col-truncate) on `<td>` cover alignment and color variants.
+  - `<x-card padding="none" style="overflow: hidden;">` is the correct way to pass additional inline styles to a card that needs overflow hidden (e.g. for table containers) — `$attributes->class()` preserves the `style` attribute from callers.
+  - For non-Livewire Blade views, `<i data-lucide="name">` Lucide icons are safe and correct — they are replaced on DOMContentLoaded. Only avoid them inside Livewire component views where morphdom re-renders don't trigger createIcons().
+  - `<x-metric-tile>` value/unit split: pass the numeric string as `value` and the unit string separately as `unit` (e.g. value="6.43" unit="km"). For null/unavailable metrics, pass value="—" and omit unit (unit=null). The tile renders the unit inline after the value within `.pq-metric`.
+---
+
 ## 2026-06-14 - US-017
 - Refactored `resources/views/livewire/dashboard/annual-analysis-chart.blade.php`: moved title from inline `<h2>` to `<x-card :eyebrow="...">` prop; moved year select + segmented-control into `<x-slot:action>` (renders in card header flex row via `.pq-card-header` justify-content: space-between); removed the `<div class="flex justify-between">` wrapper; updated ApexCharts color from `#E85D04` (orange) to `#16D4B4` (DS brand teal).
 - Refactored `resources/views/livewire/dashboard/monthly-analysis-chart.blade.php`: same pattern as annual chart; updated ApexCharts color from `#3B82F6` (blue) to `#16D4B4` (DS brand teal).
