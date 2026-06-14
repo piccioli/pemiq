@@ -118,4 +118,8 @@ return [
 
     // Switch preferenze
     'email_notifications_label' => 'Notifiche email per errori di sincronizzazione',
+
+    // ZoneBar
+    'zone_distribution_title' => 'Tempo in Zona',
+    'zone_distribution_mock'  => 'Dati di esempio',
 ];

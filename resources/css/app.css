@@ -697,6 +697,66 @@ body {
     user-select: none;
 }
 
+/* ─── ZoneBar component ──────────────────────────────────────── */
+.pq-zone-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pq-zone-bar-track {
+    display: flex;
+    flex-direction: row;
+    height: 12px;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    background: var(--surface-3);
+}
+
+.pq-zone-bar-segment {
+    height: 100%;
+    width: 0;
+    transition: width var(--dur-slow) var(--ease-out);
+    flex-shrink: 0;
+}
+
+.pq-zone-bar-segment[data-zone="1"] { background: var(--zone-1); }
+.pq-zone-bar-segment[data-zone="2"] { background: var(--zone-2); }
+.pq-zone-bar-segment[data-zone="3"] { background: var(--zone-3); }
+.pq-zone-bar-segment[data-zone="4"] { background: var(--zone-4); }
+.pq-zone-bar-segment[data-zone="5"] { background: var(--zone-5); }
+
+.pq-zone-bar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+}
+
+.pq-zone-bar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: var(--text-caption);
+    color: var(--text-muted);
+}
+
+.pq-zone-bar-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.pq-zone-bar-legend-code {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.pq-zone-bar-legend-time {
+    color: var(--text-faint);
+}
+
 /* ─── Tailwind v4 theme extension ─────────────────────────────── */
 @theme inline {
     --font-sans: var(--font-body);
