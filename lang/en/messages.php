@@ -48,4 +48,16 @@ return [
     'activities_label'                 => 'activities',
     'months'                           => ['January','February','March','April','May','June','July','August','September','October','November','December'],
     'months_short'                     => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+
+    // Premium trend analysis
+    'trend_page_title'    => 'Trend Analysis',
+    'trend_chart_title'   => 'Volume Over Time',
+    'trend_range_3months' => 'Last 3 months',
+    'trend_range_6months' => 'Last 6 months',
+    'trend_range_1year'   => 'Last year',
+    'trend_range_custom'  => 'Custom',
+    'trend_from'          => 'From',
+    'trend_to'            => 'To',
+    'trend_all_sports'    => 'All sports',
+    'trend_no_data'       => 'No activities in the selected period.',
 ];
