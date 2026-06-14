@@ -475,6 +475,87 @@ body {
     margin-top: 2px;
 }
 
+/* ─── Form Input component ───────────────────────────────────── */
+.pq-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pq-field-label {
+    font: var(--text-label);
+    color: var(--text-muted);
+    display: block;
+}
+
+.pq-field-required {
+    color: var(--danger);
+    margin-left: 2px;
+}
+
+.pq-field-hint {
+    font: var(--text-caption);
+    color: var(--text-faint);
+    margin: 0;
+}
+
+.pq-field-error {
+    font: var(--text-caption);
+    color: var(--danger);
+    margin: 0;
+}
+
+.pq-field-control {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pq-field-icon {
+    position: absolute;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    color: var(--text-faint);
+    pointer-events: none;
+}
+
+.pq-input {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-strong);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font: var(--text-body);
+    font-family: var(--font-body);
+    outline: none;
+    transition: border-color var(--dur-fast) var(--ease-out),
+                box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.pq-input::placeholder {
+    color: var(--text-faint);
+}
+
+.pq-input:focus {
+    border-color: var(--border-focus);
+    box-shadow: var(--ring-focus);
+}
+
+.pq-input-error {
+    border-color: var(--danger);
+}
+
+.pq-input-error:focus {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 20%, transparent);
+}
+
+.pq-field-icon-pad {
+    padding-left: 38px;
+}
+
 /* ─── Tailwind v4 theme extension ─────────────────────────────── */
 @theme inline {
     --font-sans: var(--font-body);
