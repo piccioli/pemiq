@@ -1,3 +1,18 @@
+## 2026-06-14 - US-005
+- Created database/factories/ActivityFactory.php: standard factory with sensible defaults for all Activity fields (nullable fields set to null by default).
+- Updated app/Services/Dashboard/DashboardStatsService.php: added private yearExpr() and monthExpr() helpers that return SQLite-compatible `CAST(strftime(...) AS INTEGER)` when the driver is 'sqlite', and MySQL-native `YEAR()`/`MONTH()` otherwise. Also replaced `->whereYear()` with `->whereRaw()` using the same helper to fix SQLite compatibility for getMonthlyStats.
+- Created tests/Feature/Dashboard/DashboardStatsServiceTest.php: 3 feature tests.
+  - test_user_with_no_activities_returns_neutral_values: all 4 methods return 0/empty without exceptions.
+  - test_activities_with_null_distance_and_elapsed_time_do_not_throw: SQL SUM ignores NULLs, aggregated counts still correct.
+  - test_50_activities_across_3_years_have_consistent_aggregates: 50 activities across 2023/2024/2025 with known distances/times; annual totals, monthly distribution, and overview stats all match manually computed sums.
+- All 44 tests pass.
+- Files changed: database/factories/ActivityFactory.php (new), app/Services/Dashboard/DashboardStatsService.php, tests/Feature/Dashboard/DashboardStatsServiceTest.php (new)
+- **Learnings for future iterations:**
+  - SQLite does NOT support MySQL's YEAR()/MONTH() functions — use driver-aware helpers that branch on `DB::connection()->getDriverName() === 'sqlite'` and return `CAST(strftime('%Y'/'%m', col) AS INTEGER)` for SQLite.
+  - Laravel's `->whereYear()` generates `YEAR(col) = ?` which fails in SQLite — replace with `->whereRaw("$yearExpr = ?", [$year])` using the same helper.
+  - ActivityFactory now exists at database/factories/ActivityFactory.php — use it in future tests and seeders (US-008 seeder can reference this factory).
+---
+
 ## 2026-06-14 - US-004
 - Created tests/Feature/Middleware/EnsurePremiumTest.php: 3 feature tests for EnsurePremium middleware.
 - Registered a test route with `['auth', 'premium']` middleware in setUp() to test against real route behaviour.
@@ -444,6 +459,8 @@
 ---
 
 ## Codebase Patterns
+- SQLite test compatibility: YEAR()/MONTH() are MySQL-only; use driver-aware helpers in services (see DashboardStatsService::yearExpr/monthExpr). Also replace `->whereYear()` with `->whereRaw()`.
+- ActivityFactory is at database/factories/ActivityFactory.php — use for tests and seeders.
 - .env must use Docker service names as hostnames: DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit (not 127.0.0.1)
 - MariaDB Docker credentials: user=pemiq, password=pemiq, database=pemiq
 - User model uses traditional $fillable/$hidden/$casts properties (not PHP 8.4 #[Fillable] attribute syntax)
