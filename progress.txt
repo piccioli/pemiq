@@ -1,3 +1,30 @@
+## 2026-06-14 - US-012
+- Added `getDailyStats(User $user, int $year, int $month): Collection` to DashboardStatsService: groups activities by day within the given month using a SQLite-compatible `dayExpr()` helper (strftime('%d') for SQLite, DAY() for MySQL). Fills all days 1..N (Carbon::create($year,$month)->daysInMonth) so missing days show 0.
+- Created app/Livewire/Dashboard/MonthlyAnalysisChart.php: public $year (default current year), $month (default current month), $metric = 'distance'. render() dispatches 'monthly-chart-data' event with daily categories/seriesData. Falls back to max available year if current year has no data.
+- Created resources/views/livewire/dashboard/monthly-analysis-chart.blade.php: year + month selectors (wire:model.live), Distanza/Ore toggle (wire:click $set). ApexCharts bar chart using blue color (#3B82F6) to differentiate from annual chart (orange). wire:ignore on chart div, inline window.__monthlyChartInitData for initial setup, @monthly-chart-data.window listener for updates.
+- Updated resources/views/dashboard/index.blade.php: added @livewire('dashboard.monthly-analysis-chart') after the monthly-analysis table component.
+- Fixed tests/Feature/Auth/RegistrationTest.php: added getDailyStats to mock expectations (dashboard now calls this method on render).
+- All 48 tests pass.
+- Files changed: app/Services/Dashboard/DashboardStatsService.php (getDailyStats + dayExpr added), app/Livewire/Dashboard/MonthlyAnalysisChart.php (new), resources/views/livewire/dashboard/monthly-analysis-chart.blade.php (new), resources/views/dashboard/index.blade.php, tests/Feature/Auth/RegistrationTest.php
+- **Learnings for future iterations:**
+  - `dayExpr()` follows the same SQLite/MySQL branching pattern as yearExpr/monthExpr — add a private helper for each new date part needed.
+  - `Carbon::create($year, $month)->daysInMonth` is the cleanest way to get the number of days in a given month (handles leap years automatically).
+  - When adding a new render() call to a Livewire component visible on the dashboard, also update the `DashboardStatsService` mock in RegistrationTest (and any other test that renders the dashboard with a mocked service).
+  - updateOptions({series, xaxis, yaxis}, true, false) with redrawPaths=true is needed when updating all three to correctly reflow the chart — just updateSeries() does not update x-axis categories.
+---
+
+## 2026-06-14 - US-011
+- Created app/Livewire/Dashboard/SportDistributionChart.php: Livewire component that calls getSportDistribution() and builds chartData (labels, series, distances, colors). Maps sport_type strings to hex colors consistent with existing Tailwind badge colors. Dispatches 'sport-distribution-chart-data' event with the data.
+- Created resources/views/livewire/dashboard/sport-distribution-chart.blade.php: donut chart using ApexCharts. window.__sportDistChartInitData set via inline <script> for initial data. Alpine.js x-data stores _distances array in component scope for use in custom tooltip closure. Tooltip shows sport name, activity count, and distance (km). wire:ignore on chart div prevents Livewire from destroying the ApexCharts DOM. @sport-distribution-chart-data.window listener calls updateChart() for updates.
+- Updated resources/views/dashboard/index.blade.php: added @livewire('dashboard.sport-distribution-chart') after the sport-distribution table component.
+- All 48 existing tests still pass.
+- Files changed: app/Livewire/Dashboard/SportDistributionChart.php (new), resources/views/livewire/dashboard/sport-distribution-chart.blade.php (new), resources/views/dashboard/index.blade.php (updated)
+- **Learnings for future iterations:**
+  - ApexCharts donut custom tooltip: store auxiliary arrays (e.g. distances) on the Alpine component instance (`this._distances`) to make them accessible inside the ApexCharts `tooltip.custom` closure via `self._distances`.
+  - ApexCharts donut update: call `chart.updateOptions({ labels, colors }, false, false)` then `chart.updateSeries(series)` separately — updating labels requires updateOptions, not updateSeries.
+  - Sport hex colors that match existing Tailwind badge classes: Run=#F97316, TrailRun=#22C55E, Ride=#3B82F6, GravelRide=#14B8A6, MountainBikeRide=#EAB308, VirtualRide=#0EA5E9, VirtualRun=#F59E0B, Hike=#84CC16, Walk=#A855F7, Swim=#06B6D4, Workout=#9CA3AF.
+---
+
 ## 2026-06-14 - US-010
 - Installed apexcharts@^5.15.0 via npm (added to package.json dependencies).
 - Updated resources/js/app.js: imports ApexCharts from 'apexcharts' and exposes it as window.ApexCharts.
@@ -515,7 +542,7 @@
 ---
 
 ## Codebase Patterns
-- SQLite test compatibility: YEAR()/MONTH() are MySQL-only; use driver-aware helpers in services (see DashboardStatsService::yearExpr/monthExpr). Also replace `->whereYear()` with `->whereRaw()`.
+- SQLite test compatibility: YEAR()/MONTH()/DAY() are MySQL-only; use driver-aware helpers in services (see DashboardStatsService::yearExpr/monthExpr/dayExpr). Also replace `->whereYear()` with `->whereRaw()`.
 - ActivityFactory is at database/factories/ActivityFactory.php — use for tests and seeders.
 - .env must use Docker service names as hostnames: DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit (not 127.0.0.1)
 - MariaDB Docker credentials: user=pemiq, password=pemiq, database=pemiq
