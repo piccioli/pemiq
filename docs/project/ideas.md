@@ -101,7 +101,8 @@ flowchart LR
 **Obiettivo:** portare l'intera UI a un linguaggio visivo coerente definito nel design system, sostituendo le classi Tailwind hardcoded con token semantici e componenti Blade riutilizzabili.
 
 **Dipende da:** v0.2.0  
-**Design System:** [Claude Design — PEMIQ](https://claude.ai/design/p/e74541dc-e4b8-4382-ad6f-27ecb5aa1be1?via=share)
+**Design System:** [Claude Design — PEMIQ](https://claude.ai/design/p/e74541dc-e4b8-4382-ad6f-27ecb5aa1be1?via=share)  
+**PRD:** [tasks/prd-design-system.md](../../tasks/prd-design-system.md)
 
 ### Deliverable
 
