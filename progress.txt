@@ -1,3 +1,19 @@
+## 2026-06-14 - US-025
+- Created `app/Services/Dashboard/TrendAnalysisService.php` with two public methods:
+  - `weeklyVolume(User $user, ?string $sportType, Carbon $from, Carbon $to): Collection` — groups activities by ISO week (YYYY-WW) within the date range, returns period/activities/distance_km/hours ordered chronologically.
+  - `monthlyVolume(User $user, ?string $sportType, Carbon $from, Carbon $to): Collection` — groups activities by month (YYYY-MM), same columns.
+- Both methods are scoped on `user_id`, accept optional `sportType` filter (null = all sports), use driver-aware helpers (`strftime` for SQLite, `DATE_FORMAT` for MySQL).
+- Used `/ 1000.0` and `/ 3600.0` (float literals) to avoid SQLite integer division bug.
+- Created `tests/Feature/Dashboard/TrendAnalysisServiceTest.php`: 10 tests covering zero-activity edge cases, correct aggregation, sport type filtering, date range exclusion, same-week grouping, and cross-user isolation.
+- All 77 tests pass.
+- Files changed: app/Services/Dashboard/TrendAnalysisService.php (new), tests/Feature/Dashboard/TrendAnalysisServiceTest.php (new)
+- **Learnings for future iterations:**
+  - SQLite integer division: `SUM(int_col) / 3600` returns integer in SQLite. Always use `/ 3600.0` or `/ 1000.0` (float literal) for correct results. DashboardStatsService has the same pattern but tests use multiples that divide evenly, masking the bug.
+  - Weekly period label format: `strftime('%Y-%W', col)` in SQLite and `DATE_FORMAT(col, '%Y-%u')` in MySQL both produce "YYYY-WW" sortable strings (week 00-53).
+  - Monthly period label format: `strftime('%Y-%m', col)` and `DATE_FORMAT(col, '%Y-%m')` both produce "YYYY-MM" — same syntax, same output.
+  - Date range filtering: use `where('started_at', '>=', $from)` and `where('started_at', '<=', $to)` directly — no startOfDay/endOfDay manipulation to avoid mutating Carbon arguments.
+---
+
 ## 2026-06-14 - US-024
 - Updated `resources/views/layouts/app.blade.php`: added `@php $isPremiumActive = ...` block in desktop nav; shows amber "★ Premium" badge for premium users, "Passa a Premium" link to `/premium` for free users. Same conditional in mobile menu (reuses `$isPremiumActive` set in desktop section — Blade shares PHP scope within the same template).
 - Updated `resources/views/profile/show.blade.php`: added "Account" section below the Password section. Premium users see amber "★ Premium" badge with optional expiry date (`fmt_date`). Free users see a "Passa a Premium" amber CTA button linking to `/premium`.
@@ -729,6 +745,8 @@
 - i18n in Blade/JS: inline `{{ __('messages.key') }}` inside Alpine.js x-data JS strings is valid — Blade renders server-side before JS is parsed by browser.
 - Month names in lang files: `trans('messages.months')` returns 0-indexed array. Use `collect(...)->mapWithKeys(fn($name, $i) => [$i + 1 => $name])` to convert to 1-indexed for month selectors.
 - Locale-aware formatting: use `fmt_number($value, $decimals)` (NOT `number_format()`) and `fmt_date($date, $format)` (NOT `->format()`) in all views — defined in `app/Helpers/FormatHelper.php`, autoloaded via `composer.json` files[]. IT uses `,`/`.`; EN uses `.`/`,`.
+- SQLite integer division gotcha: `SUM(integer_col) / integer_literal` performs integer division in SQLite. Always use `/ 1000.0` or `/ 3600.0` (float literals) to force float division. DashboardStatsService has this issue too but existing tests happen to use multiples that divide evenly.
+- TrendAnalysisService weekly/monthly period labels: SQLite returns `strftime('%Y-%W', ...)` → "2024-03", MySQL `DATE_FORMAT('%Y-%u')` → same "YYYY-WW" format. Monthly: `strftime('%Y-%m', ...)` and `DATE_FORMAT('%Y-%m')` both return "2024-01" format.
 
 ---
 
