@@ -13,10 +13,11 @@ use App\Http\Controllers\StravaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
-});
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('landing');
+})->name('home');
 
 // Login
 Route::get('/login', [LoginController::class, 'show'])->name('login');
