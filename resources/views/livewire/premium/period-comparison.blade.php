@@ -133,4 +133,87 @@
             </div>
         @endforeach
     </div>
+
+    {{-- Dual-line comparison chart --}}
+    <div class="bg-white rounded-lg shadow p-5">
+        {{-- Chart header with toggles --}}
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h3 class="text-sm font-semibold text-gray-700">{{ $chartInitData['title'] }}</h3>
+            <div class="flex flex-wrap items-center gap-2">
+                {{-- Granularity toggle: Mese / Settimana --}}
+                <div class="inline-flex rounded-md border border-gray-200 overflow-hidden text-xs">
+                    <button
+                        wire:click="setGranularity('month')"
+                        class="px-3 py-1.5 font-medium transition-colors {{ $granularity === 'month' ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50' }}"
+                    >{{ __('messages.compare_granularity_month') }}</button>
+                    <button
+                        wire:click="setGranularity('week')"
+                        class="px-3 py-1.5 font-medium transition-colors border-l border-gray-200 {{ $granularity === 'week' ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50' }}"
+                    >{{ __('messages.compare_granularity_week') }}</button>
+                </div>
+                {{-- Chart type toggle: Linee / Barre --}}
+                <div class="inline-flex rounded-md border border-gray-200 overflow-hidden text-xs">
+                    <button
+                        wire:click="setChartType('line')"
+                        class="px-3 py-1.5 font-medium transition-colors {{ $chartType === 'line' ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50' }}"
+                    >{{ __('messages.compare_chart_type_line') }}</button>
+                    <button
+                        wire:click="setChartType('bar')"
+                        class="px-3 py-1.5 font-medium transition-colors border-l border-gray-200 {{ $chartType === 'bar' ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50' }}"
+                    >{{ __('messages.compare_chart_type_bar') }}</button>
+                </div>
+            </div>
+        </div>
+
+        <script>window.__periodChartInitData = @json($chartInitData);</script>
+        <div
+            x-data="{
+                chart: null,
+                init() {
+                    const d = window.__periodChartInitData;
+                    this.chart = new window.ApexCharts(this.$refs.chartEl, this.buildOptions(d));
+                    this.chart.render();
+                },
+                buildOptions(d) {
+                    const isBar = d.chartType === 'bar';
+                    return {
+                        chart: { type: isBar ? 'bar' : 'line', height: 280, toolbar: { show: false }, fontFamily: 'inherit', animations: { enabled: true } },
+                        series: [
+                            { name: d.periodALabel, data: d.seriesA },
+                            { name: d.periodBLabel, data: d.seriesB }
+                        ],
+                        colors: ['#3B82F6', '#7C3AED'],
+                        xaxis: { categories: d.categories, labels: { rotate: -30, style: { fontSize: '11px' } } },
+                        yaxis: { labels: { formatter: function(v) { return v != null ? v.toFixed(1) : ''; } } },
+                        stroke: isBar ? { show: false } : { curve: 'smooth', width: 2 },
+                        fill: isBar ? { opacity: 0.85 } : { type: 'gradient', gradient: { opacityFrom: 0.25, opacityTo: 0.05 } },
+                        plotOptions: isBar ? { bar: { columnWidth: '60%', borderRadius: 3 } } : {},
+                        dataLabels: { enabled: false },
+                        tooltip: { shared: true, intersect: false, y: { formatter: function(v) { return v != null ? v.toFixed(1) + ' km' : '—'; } } },
+                        legend: { show: true, position: 'top' },
+                        noData: { text: d.noDataText },
+                        grid: { borderColor: '#f1f5f9' }
+                    };
+                },
+                updateChart(d) {
+                    if (!this.chart) return;
+                    const isBar = d.chartType === 'bar';
+                    this.chart.updateOptions({
+                        chart: { type: isBar ? 'bar' : 'line' },
+                        series: [
+                            { name: d.periodALabel, data: d.seriesA },
+                            { name: d.periodBLabel, data: d.seriesB }
+                        ],
+                        xaxis: { categories: d.categories },
+                        stroke: isBar ? { show: false } : { curve: 'smooth', width: 2 },
+                        fill: isBar ? { opacity: 0.85 } : { type: 'gradient', gradient: { opacityFrom: 0.25, opacityTo: 0.05 } },
+                        plotOptions: isBar ? { bar: { columnWidth: '60%', borderRadius: 3 } } : {}
+                    }, true, false);
+                }
+            }"
+            @period-chart-data.window="updateChart($event.detail.data)"
+        >
+            <div wire:ignore x-ref="chartEl" style="min-height: 280px;"></div>
+        </div>
+    </div>
 </div>
