@@ -18,6 +18,9 @@
     {{-- Analisi per Anno --}}
     @livewire('dashboard.annual-analysis')
 
+    {{-- Grafico Analisi Annuale --}}
+    @livewire('dashboard.annual-analysis-chart')
+
     {{-- Analisi per Mese --}}
     @livewire('dashboard.monthly-analysis')
 
