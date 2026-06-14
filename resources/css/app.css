@@ -698,6 +698,45 @@ body {
 }
 
 /* ─── ZoneBar component ──────────────────────────────────────── */
+/* ─── Progress Bar ───────────────────────────────────────────── */
+.pq-progress-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pq-progress-bar-label {
+    font: var(--text-label);
+    color: var(--text-muted);
+}
+
+.pq-progress-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pq-progress-bar-track {
+    flex: 1;
+    background: var(--surface-3);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.pq-progress-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    transition: width var(--dur-slow) var(--ease-out);
+}
+
+.pq-progress-bar-value {
+    font: var(--text-caption);
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ─── Zone Bar ───────────────────────────────────────────────── */
 .pq-zone-bar {
     display: flex;
     flex-direction: column;
