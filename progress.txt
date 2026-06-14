@@ -1,3 +1,16 @@
+## 2026-06-14 - US-002
+- Created tests/Feature/Strava/SyncIncrementalActivitiesTest.php: 3 feature tests for SyncStravaIncrementalActivities job.
+- Caso 1: nessuna attività nuova — Http::fake() returns [], SyncLog completed with activities_imported=0, no activities written.
+- Caso 2: nuove attività presenti — 2 activities returned, both saved correctly in activities table with correct user_id.
+- Caso 3: API inaccessibile — mock StravaApiService to throw StravaApiException, SyncLog status='failed' with error_message.
+- All 32 tests pass (3 new + 29 existing).
+- **Learnings for future iterations:**
+  - SyncStravaIncrementalActivities uses `last_sync_at` to determine sync type: if set → 'incremental' (passes Carbon to fetchActivities); if null → 'historical'
+  - For incremental sync tests, set account `last_sync_at` to a past date in setUp so sync_type is 'incremental'
+  - Http::fake() with empty array `[]` correctly terminates the pagination loop in StravaApiService (empty array hits the `empty($data)` break)
+  - No sleep() calls triggered in tests since each fake response is <100 items (pagination sleep only triggers when count==100)
+---
+
 ## 2026-06-13 - US-035
 - Created app/Http/Middleware/EnsurePremium.php: blocks non-premium users (is_premium=false or premium_expires_at in the past), redirects to /dashboard with error flash.
 - Registered EnsurePremium with alias 'premium' in bootstrap/app.php.
