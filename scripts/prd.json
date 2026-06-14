@@ -81,8 +81,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/card.blade.php with all props (eyebrow, title, padding, interactive, accent). Added .pq-card, .pq-card-accent, .pq-card-interactive, .pq-card-pad-{sm|md|lg}, .pq-card-header, .pq-card-title CSS classes to app.css. Refactored: all 7 dashboard livewire panels, strava/connection-status (using inner <span wire:poll.5000ms hidden> since @if inside component tags is unsupported), all 3 premium livewire panels (trend-chart, year-over-year-chart, period-comparison with 4 KPI cards + chart section + detail table), activities/show metric cards + secondary metrics + map section. All 80 tests pass. Vite build succeeds."
     },
     {
       "id": "US-005",
