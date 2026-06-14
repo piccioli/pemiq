@@ -1,3 +1,21 @@
+## 2026-06-14 - US-010
+- Installed apexcharts@^5.15.0 via npm (added to package.json dependencies).
+- Updated resources/js/app.js: imports ApexCharts from 'apexcharts' and exposes it as window.ApexCharts.
+- Built Vite assets (npm run build) — output: public/build/assets/app-*.js (584 kB, includes ApexCharts).
+- Added @vite(['resources/js/app.js']) to resources/views/layouts/app.blade.php <head> — loads compiled JS alongside existing CDN Tailwind.
+- Created app/Livewire/Dashboard/AnnualAnalysisChart.php: Livewire component with public int $year (default: current year) and public string $metric = 'distance'. render() fetches getAnnualStats() for available years and getMonthlyStats() for the selected year. Builds chartData array (categories, seriesName, seriesData, yAxisTitle) and dispatches 'annual-chart-data' browser event with the data via $this->dispatch().
+- Created resources/views/livewire/dashboard/annual-analysis-chart.blade.php: year selector (wire:model.live) and Distanza/Ore toggle (wire:click $set). Chart div initialized via Alpine.js x-init reading window.__annualChartInitData (set in inline <script> with @json). wire:ignore on the chart container prevents Livewire from destroying ApexCharts DOM. @annual-chart-data.window listener calls updateChart() for subsequent year/metric changes.
+- Updated resources/views/dashboard/index.blade.php: added @livewire('dashboard.annual-analysis-chart') after the existing annual-analysis table component.
+- All 48 existing tests still pass.
+- Files changed: package.json, package-lock.json, resources/js/app.js (updated), resources/views/layouts/app.blade.php (updated), app/Livewire/Dashboard/AnnualAnalysisChart.php (new), resources/views/livewire/dashboard/annual-analysis-chart.blade.php (new), resources/views/dashboard/index.blade.php (updated).
+- **Learnings for future iterations:**
+  - Alpine.js is bundled with Livewire 3 automatically — do NOT import Alpine.js in app.js (would create two instances). Only expose window.ApexCharts (or other libs) from app.js.
+  - ApexCharts + Livewire + Alpine pattern: use inline <script>window.__data = @json($data);</script> before the Alpine div to avoid HTML attribute quote escaping issues. x-init reads window.__data for initial chart creation.
+  - wire:ignore on the chart container div prevents Livewire morphing from destroying ApexCharts' internal SVG DOM. Critical for chart persistence across Livewire re-renders.
+  - $this->dispatch('event-name', data: $payload) in Livewire 3 dispatches a browser CustomEvent with event.detail.data = $payload. Alpine listens with @event-name.window="handler($event.detail.data)".
+  - Livewire events dispatched from render() are sent in AJAX responses (not during SSR initial load). Use x-init for initial chart setup; browser events for subsequent updates.
+---
+
 ## 2026-06-14 - US-008
 - Created database/seeders/LargeDatasetSeeder.php.
 - Creates test user testdata@pemiq.com (firstOrCreate, idempotent) then deletes their existing activities before re-seeding.
@@ -516,6 +534,8 @@
 - **Filament v4 BREAKING**: `$navigationGroup` is typed `UnitEnum|string|null` in parent — use `getNavigationGroup(): ?string` method instead of static property
 - **Filament v4 BREAKING**: `$navigationIcon` is typed `BackedEnum|string|null` in parent — use `getNavigationIcon()` method instead
 - Filament resource discovery needs `php artisan optimize:clear` to pick up newly created resources (not just filament:clear-cached-components)
+- ApexCharts integration: import from npm in app.js (window.ApexCharts = ApexCharts), build with `npm run build`, add @vite(['resources/js/app.js']) to layout. DO NOT import Alpine.js in app.js (Livewire 3 bundles Alpine).
+- ApexCharts + Livewire: use wire:ignore on chart div, inline <script>window.__data = @json($data);</script> for initial data, $this->dispatch() for updates, Alpine x-init for creation, @event.window for updates.
 
 ---
 
