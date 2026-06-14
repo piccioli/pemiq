@@ -1,3 +1,17 @@
+## 2026-06-14 - US-026
+- Created `app/Livewire/Premium/TrendChart.php`: Livewire component with public properties `metric` (distance/hours), `range` (3months/6months/1year/custom), `sportType` (empty = all), `customFrom`/`customTo` (date strings). `mount()` initializes custom dates to last 6 months. `render()` fetches distinct sport types, computes date range via `getDateRange()`, calls `TrendAnalysisService::monthlyVolume()`, dispatches `trend-chart-data` browser event.
+- Created `resources/views/livewire/premium/trend-chart.blade.php`: ApexCharts area chart (type: 'area', smooth stroke, gradient fill, violet color #7C3AED). Controls: range select (3/6/1year/custom), sport select, distance/hours toggle. Custom range shows two date inputs with wire:model.live. Empty state message. Follows existing wire:ignore + Alpine x-data + @trend-chart-data.window pattern.
+- Updated `resources/views/premium/trends.blade.php`: replaced "Prossimamente" placeholder with `@livewire('premium.trend-chart')`.
+- Added 10 translation keys to `lang/it/messages.php` and `lang/en/messages.php`: trend_page_title, trend_chart_title, trend_range_*, trend_from, trend_to, trend_all_sports, trend_no_data.
+- All 77 tests pass. Blade views compile without errors.
+- Files changed: app/Livewire/Premium/TrendChart.php (new), resources/views/livewire/premium/trend-chart.blade.php (new), resources/views/premium/trends.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Livewire Premium components live in `app/Livewire/Premium/` with alias `premium.component-name` (e.g. `@livewire('premium.trend-chart')`).
+  - ApexCharts area chart: use `type: 'area'` with `fill.type: 'gradient'` and `stroke.curve: 'smooth'` for trend visualization. updateOptions with all three (series, xaxis, yaxis) in one call using `true` (redraw) to update categories correctly.
+  - Custom date range inputs: use `wire:model.live` on `<input type="date">` — Livewire handles Carbon parsing server-side; keep null/empty string guards in `getDateRange()`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-025
 - Created `app/Services/Dashboard/TrendAnalysisService.php` with two public methods:
   - `weeklyVolume(User $user, ?string $sportType, Carbon $from, Carbon $to): Collection` — groups activities by ISO week (YYYY-WW) within the date range, returns period/activities/distance_km/hours ordered chronologically.
