@@ -1,17 +1,15 @@
 <div class="space-y-6">
     {{-- Header with export placeholder --}}
     <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.compare_title') }}</h2>
-        <button
-            disabled
-            title="{{ __('messages.compare_export_tooltip') }}"
-            class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
+        <h2 style="font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); color: var(--text-strong)">{{ __('messages.compare_title') }}</h2>
+        <x-button variant="secondary" :disabled="true" title="{{ __('messages.compare_export_tooltip') }}">
+            <x-slot:icon>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+            </x-slot:icon>
             {{ __('messages.compare_export') }}
-        </button>
+        </x-button>
     </div>
 
     {{-- Period selectors --}}
@@ -19,35 +17,19 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             {{-- Period A --}}
             <div>
-                <label class="block text-xs font-medium text-blue-700 mb-1">{{ __('messages.compare_period_a') }}</label>
+                <label class="block mb-1" style="font-size: var(--fs-xs); font-weight: 500; color: var(--zone-2)">{{ __('messages.compare_period_a') }}</label>
                 <div class="flex gap-2">
-                    <input
-                        type="date"
-                        wire:model="fromA"
-                        class="flex-1 text-sm border border-gray-300 rounded-md px-2 py-1.5 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                    <input
-                        type="date"
-                        wire:model="toA"
-                        class="flex-1 text-sm border border-gray-300 rounded-md px-2 py-1.5 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
-                    >
+                    <input type="date" wire:model="fromA" class="flex-1 pq-input">
+                    <input type="date" wire:model="toA" class="flex-1 pq-input">
                 </div>
             </div>
 
             {{-- Period B --}}
             <div>
-                <label class="block text-xs font-medium text-violet-700 mb-1">{{ __('messages.compare_period_b') }}</label>
+                <label class="block mb-1" style="font-size: var(--fs-xs); font-weight: 500; color: var(--accent)">{{ __('messages.compare_period_b') }}</label>
                 <div class="flex gap-2">
-                    <input
-                        type="date"
-                        wire:model="fromB"
-                        class="flex-1 text-sm border border-gray-300 rounded-md px-2 py-1.5 text-gray-700 focus:ring-violet-500 focus:border-violet-500"
-                    >
-                    <input
-                        type="date"
-                        wire:model="toB"
-                        class="flex-1 text-sm border border-gray-300 rounded-md px-2 py-1.5 text-gray-700 focus:ring-violet-500 focus:border-violet-500"
-                    >
+                    <input type="date" wire:model="fromB" class="flex-1 pq-input">
+                    <input type="date" wire:model="toB" class="flex-1 pq-input">
                 </div>
             </div>
 
@@ -63,78 +45,77 @@
 
             {{-- Update button --}}
             <div class="lg:col-span-2">
-                <button
+                <x-button
                     wire:click="compare"
                     wire:loading.attr="disabled"
-                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-lg transition-colors disabled:opacity-60"
+                    class="w-full sm:w-auto"
                 >
                     <span wire:loading.remove wire:target="compare">{{ __('messages.compare_update') }}</span>
                     <span wire:loading wire:target="compare">{{ __('messages.compare_updating') }}</span>
-                </button>
+                </x-button>
             </div>
         </div>
 
         {{-- Period labels --}}
-        <div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-500">
+        <div class="flex flex-wrap gap-4 mt-3" style="font-size: var(--fs-xs); color: var(--text-muted)">
             <span class="flex items-center gap-1">
-                <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                <span class="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: var(--zone-2)"></span>
                 {{ __('messages.compare_period_a') }}: {{ $periodALabel }}
             </span>
             <span class="flex items-center gap-1">
-                <span class="inline-block w-2.5 h-2.5 rounded-full bg-violet-500"></span>
+                <span class="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: var(--accent)"></span>
                 {{ __('messages.compare_period_b') }}: {{ $periodBLabel }}
             </span>
         </div>
     </x-card>
 
-    {{-- 4 KPI cards --}}
+    {{-- 4 KPI tiles --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        @php
+            $kpiAccents = ['zone-2', 'zone-3', 'brand', 'zone-5'];
+            $kpiIcons   = ['route', 'mountain-snow', 'clock', 'activity'];
+        @endphp
         @foreach ($kpis as $kpi)
             @php
                 $valA = $kpi['valueA'];
                 $valB = $kpi['valueB'];
+                $dec  = $kpi['decimals'];
+                $fmtValue = $dec > 0 ? fmt_number($valB, $dec) : (string)(int)$valB;
                 $deltaRaw = $valA != 0 ? (($valB - $valA) / $valA) * 100 : null;
-                $deltaText = match(true) {
-                    $deltaRaw === null => '—',
-                    $deltaRaw > 0     => '↑ ' . number_format(abs($deltaRaw), 1) . '%',
-                    $deltaRaw < 0     => '↓ ' . number_format(abs($deltaRaw), 1) . '%',
+                $deltaTxt = match(true) {
+                    $deltaRaw === null => null,
+                    $deltaRaw > 0     => fmt_number(abs($deltaRaw), 1) . '%',
+                    $deltaRaw < 0     => fmt_number(abs($deltaRaw), 1) . '%',
                     default           => '0%',
                 };
-                $deltaClass = match(true) {
-                    $deltaRaw === null => 'text-gray-400',
-                    $deltaRaw > 0     => 'text-green-600',
-                    $deltaRaw < 0     => 'text-red-600',
-                    default           => 'text-gray-400',
+                $deltaDir = match(true) {
+                    $deltaRaw === null => 'flat',
+                    $deltaRaw > 0     => 'up',
+                    $deltaRaw < 0     => 'down',
+                    default           => 'flat',
                 };
+                $fmtValA  = $dec > 0 ? fmt_number($valA, $dec) : (string)(int)$valA;
+                $deltaCtx = __('messages.compare_vs') . ' ' . $fmtValA . ($kpi['unit'] ? ' ' . $kpi['unit'] : '');
+                $accent   = $kpiAccents[$loop->index] ?? 'brand';
+                $iconName = $kpiIcons[$loop->index] ?? 'activity';
             @endphp
-            <x-card padding="md">
-                <p class="text-sm text-gray-500 font-medium mb-2">{{ $kpi['label'] }}</p>
-
-                {{-- Period B value (primary) --}}
-                <p class="text-2xl font-bold text-gray-900">
-                    {{ $kpi['decimals'] > 0 ? fmt_number($valB, $kpi['decimals']) : (int) $valB }}
-                    @if($kpi['unit'])
-                        <span class="text-sm font-normal text-gray-500">{{ $kpi['unit'] }}</span>
-                    @endif
-                </p>
-
-                {{-- Delta --}}
-                <p class="text-sm mt-1 font-medium {{ $deltaClass }}">{{ $deltaText }}</p>
-
-                {{-- Period A reference --}}
-                <p class="text-xs text-gray-400 mt-1">
-                    {{ __('messages.compare_vs') }}
-                    {{ $kpi['decimals'] > 0 ? fmt_number($valA, $kpi['decimals']) : (int) $valA }}{{ $kpi['unit'] ? ' ' . $kpi['unit'] : '' }}
-                </p>
-            </x-card>
+            <x-metric-tile
+                :label="$kpi['label']"
+                :value="$fmtValue"
+                :unit="$kpi['unit']"
+                :delta="$deltaTxt"
+                :deltaDir="$deltaDir"
+                :deltaContext="$deltaCtx"
+                :accent="$accent"
+            >
+                <x-slot:icon><i data-lucide="{{ $iconName }}"></i></x-slot:icon>
+            </x-metric-tile>
         @endforeach
     </div>
 
     {{-- Dual-line comparison chart --}}
-    <x-card padding="md">
-        {{-- Chart header with toggles --}}
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <h3 class="text-sm font-semibold text-gray-700">{{ $chartInitData['title'] }}</h3>
+    <x-card :eyebrow="$chartInitData['title']" padding="md">
+        <x-slot:action>
             <div class="flex flex-wrap items-center gap-2">
                 {{-- Granularity toggle: Mese / Settimana --}}
                 <x-segmented-control
@@ -157,7 +138,7 @@
                     ]"
                 />
             </div>
-        </div>
+        </x-slot:action>
 
         <script>window.__periodChartInitData = @json($chartInitData);</script>
         <div
@@ -176,7 +157,7 @@
                             { name: d.periodALabel, data: d.seriesA },
                             { name: d.periodBLabel, data: d.seriesB }
                         ],
-                        colors: ['#3B82F6', '#7C3AED'],
+                        colors: ['#4F8DF5', '#16D4B4'],
                         xaxis: { categories: d.categories, labels: { rotate: -30, style: { fontSize: '11px' } } },
                         yaxis: { labels: { formatter: function(v) { return v != null ? v.toFixed(1) : ''; } } },
                         stroke: isBar ? { show: false } : { curve: 'smooth', width: 2 },
@@ -186,7 +167,7 @@
                         tooltip: { shared: true, intersect: false, y: { formatter: function(v) { return v != null ? v.toFixed(1) + ' km' : '—'; } } },
                         legend: { show: true, position: 'top' },
                         noData: { text: d.noDataText },
-                        grid: { borderColor: '#f1f5f9' }
+                        grid: { borderColor: 'var(--border)' }
                     };
                 },
                 updateChart(d) {
@@ -212,28 +193,25 @@
     </x-card>
 
     {{-- Detail comparison table --}}
-    <x-card padding="none">
-        <div class="px-5 py-4 border-b border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-700">{{ __('messages.compare_detail_title') }}</h3>
-        </div>
+    <x-card padding="none" :eyebrow="__('messages.compare_detail_title')">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50">
+            <table class="pq-table w-full">
+                <thead>
                     <tr>
-                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('messages.compare_col_metric') }}</th>
-                        <th class="px-5 py-3 text-right text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                        <th style="text-align: left">{{ __('messages.compare_col_metric') }}</th>
+                        <th style="text-align: right; color: var(--zone-2)">
                             {{ __('messages.compare_period_a') }}<br>
-                            <span class="font-normal normal-case text-gray-400">{{ $periodALabel }}</span>
+                            <span style="font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-faint)">{{ $periodALabel }}</span>
                         </th>
-                        <th class="px-5 py-3 text-right text-xs font-semibold text-violet-600 uppercase tracking-wide">
+                        <th style="text-align: right; color: var(--accent)">
                             {{ __('messages.compare_period_b') }}<br>
-                            <span class="font-normal normal-case text-gray-400">{{ $periodBLabel }}</span>
+                            <span style="font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-faint)">{{ $periodBLabel }}</span>
                         </th>
-                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('messages.compare_col_delta_abs') }}</th>
-                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('messages.compare_col_delta_pct') }}</th>
+                        <th style="text-align: right">{{ __('messages.compare_col_delta_abs') }}</th>
+                        <th style="text-align: right">{{ __('messages.compare_col_delta_pct') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody>
                     @foreach ($kpis as $kpi)
                         @php
                             $valA     = $kpi['valueA'];
@@ -253,16 +231,16 @@
                                 $deltaRaw < 0      => '↓ ' . fmt_number(abs($deltaRaw), 1) . '%',
                                 default            => '0%',
                             };
-                            $deltaClass = match(true) {
-                                $deltaRaw === null => 'text-gray-400',
-                                $deltaRaw > 0      => 'text-green-600',
-                                $deltaRaw < 0      => 'text-red-600',
-                                default            => 'text-gray-400',
+                            $deltaStyle = match(true) {
+                                $deltaRaw === null => 'color: var(--text-faint)',
+                                $deltaRaw > 0      => 'color: var(--success)',
+                                $deltaRaw < 0      => 'color: var(--danger)',
+                                default            => 'color: var(--text-faint)',
                             };
-                            $absClass = match(true) {
-                                $deltaAbs > 0 => 'text-green-600',
-                                $deltaAbs < 0 => 'text-red-600',
-                                default       => 'text-gray-400',
+                            $absStyle = match(true) {
+                                $deltaAbs > 0 => 'color: var(--success)',
+                                $deltaAbs < 0 => 'color: var(--danger)',
+                                default       => 'color: var(--text-faint)',
                             };
 
                             $icons = [
@@ -273,27 +251,27 @@
                             ];
                             $iconPath = $icons[$kpi['label']] ?? '';
                         @endphp
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-5 py-3 font-medium text-gray-700">
+                        <tr>
+                            <td style="color: var(--text)">
                                 <span class="inline-flex items-center gap-2">
                                     @if ($iconPath)
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             {!! $iconPath !!}
                                         </svg>
                                     @endif
                                     {{ $kpi['label'] }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3 text-right text-gray-700 tabular-nums">
+                            <td class="col-right" style="color: var(--text-muted)">
                                 {{ $fmtA }}{{ $unit ? ' ' . $unit : '' }}
                             </td>
-                            <td class="px-5 py-3 text-right font-semibold text-gray-900 tabular-nums">
+                            <td class="col-right" style="color: var(--text-strong); font-weight: 600">
                                 {{ $fmtB }}{{ $unit ? ' ' . $unit : '' }}
                             </td>
-                            <td class="px-5 py-3 text-right font-medium tabular-nums {{ $absClass }}">
+                            <td class="col-right" style="font-weight: 500; {{ $absStyle }}">
                                 {{ $fmtDeltaAbs }}{{ $unit ? ' ' . $unit : '' }}
                             </td>
-                            <td class="px-5 py-3 text-right font-medium tabular-nums {{ $deltaClass }}">
+                            <td class="col-right" style="font-weight: 500; {{ $deltaStyle }}">
                                 {{ $fmtDeltaPct }}
                             </td>
                         </tr>

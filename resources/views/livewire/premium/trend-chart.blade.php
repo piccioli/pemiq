@@ -1,7 +1,5 @@
-<x-card padding="lg">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.trend_chart_title') }}</h2>
-
+<x-card :eyebrow="__('messages.trend_chart_title')" padding="lg">
+    <x-slot:action>
         <div class="flex flex-wrap items-center gap-3">
             {{-- Range selector --}}
             <x-form.select size="sm" wire:model.live="range">
@@ -30,26 +28,18 @@
                 ]"
             />
         </div>
-    </div>
+    </x-slot:action>
 
     {{-- Custom date range inputs --}}
     @if ($range === 'custom')
         <div class="flex flex-wrap items-center gap-3 mb-4">
             <div class="flex items-center gap-2">
-                <label class="text-sm text-gray-600">{{ __('messages.trend_from') }}</label>
-                <input
-                    type="date"
-                    wire:model.live="customFrom"
-                    class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-violet-500 focus:border-violet-500"
-                >
+                <label style="font-size: var(--fs-sm); color: var(--text-muted)">{{ __('messages.trend_from') }}</label>
+                <input type="date" wire:model.live="customFrom" class="pq-input">
             </div>
             <div class="flex items-center gap-2">
-                <label class="text-sm text-gray-600">{{ __('messages.trend_to') }}</label>
-                <input
-                    type="date"
-                    wire:model.live="customTo"
-                    class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-violet-500 focus:border-violet-500"
-                >
+                <label style="font-size: var(--fs-sm); color: var(--text-muted)">{{ __('messages.trend_to') }}</label>
+                <input type="date" wire:model.live="customTo" class="pq-input">
             </div>
         </div>
     @endif
@@ -77,7 +67,7 @@
                             title: { text: data.yAxisTitle },
                             labels: { formatter: function(val) { return val.toFixed(1); } }
                         },
-                        colors: ['#7C3AED'],
+                        colors: ['#16D4B4'],
                         fill: {
                             type: 'gradient',
                             gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 90, 100] }
@@ -87,7 +77,7 @@
                         tooltip: {
                             y: { formatter: function(val) { return val.toFixed(1); } }
                         },
-                        grid: { borderColor: '#f1f5f9' },
+                        grid: { borderColor: 'var(--border)' },
                         markers: { size: 4 }
                     });
                     this.chart.render();
@@ -106,6 +96,6 @@
             <div wire:ignore x-ref="chartEl" style="min-height: 320px;"></div>
         </div>
     @else
-        <p class="text-gray-500 text-sm">{{ __('messages.trend_no_data') }}</p>
+        <p style="color: var(--text-muted); font-size: var(--fs-sm)">{{ __('messages.trend_no_data') }}</p>
     @endif
 </x-card>
