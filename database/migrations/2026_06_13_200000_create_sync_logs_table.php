@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('strava_account_id')->constrained()->cascadeOnDelete();
             $table->enum('sync_type', ['historical', 'incremental']);
-            $table->enum('status', ['pending', 'running', 'completed', 'failed']);
+            $table->enum('status', ['pending', 'running', 'completed', 'failed', 'rate_limited']);
             $table->timestamp('started_at');
             $table->timestamp('completed_at')->nullable();
             $table->integer('activities_imported')->default(0);

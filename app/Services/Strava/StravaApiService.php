@@ -3,6 +3,7 @@
 namespace App\Services\Strava;
 
 use App\Exceptions\Strava\StravaApiException;
+use App\Exceptions\Strava\StravaRateLimitException;
 use App\Exceptions\Strava\StravaTokenExpiredException;
 use App\Models\StravaAccount;
 use Carbon\Carbon;
@@ -88,7 +89,7 @@ class StravaApiService
 
             if ($response->status() === 429) {
                 if ($attempt >= count($delays)) {
-                    throw new StravaApiException('Strava rate limit exceeded after retries');
+                    throw new StravaRateLimitException('Strava rate limit exceeded after retries');
                 }
                 sleep($delays[$attempt]);
                 $attempt++;

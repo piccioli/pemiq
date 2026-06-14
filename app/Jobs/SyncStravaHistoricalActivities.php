@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Exceptions\Strava\StravaRateLimitException;
 use App\Exceptions\Strava\StravaTokenExpiredException;
 use App\Models\StravaAccount;
 use App\Services\Strava\StravaApiService;
@@ -43,6 +44,9 @@ class SyncStravaHistoricalActivities implements ShouldQueue
                 // Refresh failed — next retry will attempt again
             }
             $syncService->failSyncLog($syncLog, 'Token scaduto, verrà riprovato');
+            throw $e;
+        } catch (StravaRateLimitException $e) {
+            $syncService->failSyncLog($syncLog, $e->getMessage(), 'rate_limited');
             throw $e;
         } catch (\Exception $e) {
             $syncService->failSyncLog($syncLog, $e->getMessage());
