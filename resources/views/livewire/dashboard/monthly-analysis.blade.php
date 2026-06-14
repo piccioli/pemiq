@@ -1,4 +1,4 @@
-<div class="bg-white rounded-lg shadow p-6">
+<x-card padding="lg">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.dashboard_monthly_analysis_title') }}</h2>
 
@@ -51,4 +51,4 @@
             </table>
         </div>
     @endif
-</div>
+</x-card>

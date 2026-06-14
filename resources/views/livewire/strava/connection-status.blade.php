@@ -1,5 +1,7 @@
-<div class="bg-white rounded-lg shadow p-6"
-     @if ($stravaAccount && $syncStatus === 'running') wire:poll.5000ms @endif>
+<x-card padding="lg">
+    @if ($stravaAccount && $syncStatus === 'running')
+        <span wire:poll.5000ms hidden></span>
+    @endif
     <h2 class="text-lg font-semibold text-gray-800 mb-4">Connessione Strava</h2>
 
     @if ($syncStatus === 'running')
@@ -98,4 +100,4 @@
             </x-button>
         </div>
     @endif
-</div>
+</x-card>

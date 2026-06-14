@@ -15,7 +15,7 @@
     </div>
 
     {{-- Period selectors --}}
-    <div class="bg-white rounded-lg shadow p-5">
+    <x-card padding="md">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             {{-- Period A --}}
             <div>
@@ -89,7 +89,7 @@
                 {{ __('messages.compare_period_b') }}: {{ $periodBLabel }}
             </span>
         </div>
-    </div>
+    </x-card>
 
     {{-- 4 KPI cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -111,7 +111,7 @@
                     default           => 'text-gray-400',
                 };
             @endphp
-            <div class="bg-white rounded-lg shadow p-5">
+            <x-card padding="md">
                 <p class="text-sm text-gray-500 font-medium mb-2">{{ $kpi['label'] }}</p>
 
                 {{-- Period B value (primary) --}}
@@ -130,12 +130,12 @@
                     {{ __('messages.compare_vs') }}
                     {{ $kpi['decimals'] > 0 ? fmt_number($valA, $kpi['decimals']) : (int) $valA }}{{ $kpi['unit'] ? ' ' . $kpi['unit'] : '' }}
                 </p>
-            </div>
+            </x-card>
         @endforeach
     </div>
 
     {{-- Dual-line comparison chart --}}
-    <div class="bg-white rounded-lg shadow p-5">
+    <x-card padding="md">
         {{-- Chart header with toggles --}}
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h3 class="text-sm font-semibold text-gray-700">{{ $chartInitData['title'] }}</h3>
@@ -215,10 +215,10 @@
         >
             <div wire:ignore x-ref="chartEl" style="min-height: 280px;"></div>
         </div>
-    </div>
+    </x-card>
 
     {{-- Detail comparison table --}}
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <x-card padding="none">
         <div class="px-5 py-4 border-b border-gray-100">
             <h3 class="text-sm font-semibold text-gray-700">{{ __('messages.compare_detail_title') }}</h3>
         </div>
@@ -307,5 +307,5 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </x-card>
 </div>

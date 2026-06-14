@@ -1,4 +1,4 @@
-<div class="bg-white rounded-lg shadow p-6">
+<x-card padding="lg">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.dashboard_monthly_chart_title') }}</h2>
 
@@ -75,4 +75,4 @@
     @else
         <p class="text-gray-500 text-sm">{{ __('messages.dashboard_no_activities') }}</p>
     @endif
-</div>
+</x-card>

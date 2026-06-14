@@ -1,4 +1,4 @@
-<div class="bg-white rounded-lg shadow p-6">
+<x-card padding="lg">
     <h2 class="text-lg font-semibold text-gray-800 mb-4">{{ __('messages.dashboard_overview_title') }}</h2>
 
     @if ($stats['total_activities'] === 0)
@@ -62,4 +62,4 @@
 
         </div>
     @endif
-</div>
+</x-card>

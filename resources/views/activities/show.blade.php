@@ -92,37 +92,37 @@
     @endphp
 
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div class="bg-white rounded-lg shadow p-4">
+        <x-card padding="sm">
             <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Distanza</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ $distanceKm }}</p>
-        </div>
+        </x-card>
 
-        <div class="bg-white rounded-lg shadow p-4">
+        <x-card padding="sm">
             <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Durata</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ $duration }}</p>
-        </div>
+        </x-card>
 
-        <div class="bg-white rounded-lg shadow p-4">
+        <x-card padding="sm">
             <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Dislivello</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ $elevation }}</p>
-        </div>
+        </x-card>
 
-        <div class="bg-white rounded-lg shadow p-4">
+        <x-card padding="sm">
             <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Velocità media</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ $avgSpeedKmh }}</p>
-        </div>
+        </x-card>
 
         @if ($avgHr !== null)
-        <div class="bg-white rounded-lg shadow p-4">
+        <x-card padding="sm">
             <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">FC media</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ $avgHr }}</p>
-        </div>
+        </x-card>
         @endif
     </div>
 
     {{-- Metriche secondarie --}}
     @if ($movingDuration !== '—' || $maxHr !== null || $avgWatts !== null || $calories !== null)
-    <div class="bg-white rounded-lg shadow p-4">
+    <x-card padding="sm">
         <h2 class="text-sm font-semibold text-gray-700 mb-3">Dettagli aggiuntivi</h2>
         <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             @if ($movingDuration !== '—')
@@ -150,15 +150,15 @@
             </div>
             @endif
         </dl>
-    </div>
+    </x-card>
     @endif
 
     {{-- Mappa percorso --}}
     @if ($activity->polyline)
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <x-card padding="none">
         <h2 class="text-sm font-semibold text-gray-700 px-4 pt-4 pb-2">Percorso</h2>
         <div id="activity-map" style="height: 400px;"></div>
-    </div>
+    </x-card>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (!window.L || !window.PolylineDecoder) return;
@@ -174,9 +174,9 @@
         });
     </script>
     @else
-    <div class="bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center" style="height: 400px;">
+    <x-card padding="none" class="flex items-center justify-center" style="height: 400px;">
         <p class="text-gray-500 text-sm">Mappa non disponibile</p>
-    </div>
+    </x-card>
     @endif
 
 </div>

@@ -1,4 +1,4 @@
-<div class="bg-white rounded-lg shadow p-6">
+<x-card padding="lg">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.trend_chart_title') }}</h2>
 
@@ -119,4 +119,4 @@
     @else
         <p class="text-gray-500 text-sm">{{ __('messages.trend_no_data') }}</p>
     @endif
-</div>
+</x-card>
