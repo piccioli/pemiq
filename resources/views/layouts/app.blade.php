@@ -213,94 +213,25 @@
             <div style="padding: 1rem 1.5rem 0; display: flex; flex-direction: column; gap: 0.5rem; max-width: 1280px; width: 100%; margin: 0 auto; box-sizing: border-box;">
 
                 @if(session('status') || session('success'))
-                <div
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100"
-                    x-transition:leave-end="opacity-0"
-                    style="
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: space-between;
-                        gap: 1rem;
-                        padding: 12px 16px;
-                        background: var(--success-soft);
-                        border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
-                        border-radius: var(--radius-md);
-                        color: var(--success);
-                        font-size: var(--fs-sm);
-                    "
-                >
-                    <span>{{ session('status') ?? session('success') }}</span>
-                    <x-button variant="ghost" size="sm" @click="show = false" aria-label="Chiudi" style="padding: 2px 4px; color: inherit;">
-                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </x-button>
-                </div>
+                <x-alert variant="success" dismissible>
+                    {{ session('status') ?? session('success') }}
+                </x-alert>
                 @endif
 
                 @if(session('error'))
-                <div
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100"
-                    x-transition:leave-end="opacity-0"
-                    style="
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: space-between;
-                        gap: 1rem;
-                        padding: 12px 16px;
-                        background: var(--danger-soft);
-                        border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
-                        border-radius: var(--radius-md);
-                        color: var(--danger);
-                        font-size: var(--fs-sm);
-                    "
-                >
-                    <span>{{ session('error') }}</span>
-                    <x-button variant="ghost" size="sm" @click="show = false" aria-label="Chiudi" style="padding: 2px 4px; color: inherit;">
-                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </x-button>
-                </div>
+                <x-alert variant="danger" dismissible>
+                    {{ session('error') }}
+                </x-alert>
                 @endif
 
                 @if($errors->any())
-                <div
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100"
-                    x-transition:leave-end="opacity-0"
-                    style="
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: space-between;
-                        gap: 1rem;
-                        padding: 12px 16px;
-                        background: var(--danger-soft);
-                        border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
-                        border-radius: var(--radius-md);
-                        color: var(--danger);
-                        font-size: var(--fs-sm);
-                    "
-                >
+                <x-alert variant="danger" dismissible>
                     <ul style="list-style: disc; list-style-position: inside; display: flex; flex-direction: column; gap: 2px;">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
-                    <x-button variant="ghost" size="sm" @click="show = false" aria-label="Chiudi" style="padding: 2px 4px; color: inherit;">
-                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </x-button>
-                </div>
+                </x-alert>
                 @endif
 
             </div>

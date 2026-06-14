@@ -5,25 +5,23 @@
     <h2 class="text-lg font-semibold text-gray-800 mb-4">Connessione Strava</h2>
 
     @if ($syncStatus === 'running')
-        <div class="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm flex items-center gap-2">
-            <svg class="animate-spin h-4 w-4 text-blue-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-            </svg>
-            Sincronizzazione in corso ({{ $syncActivitiesImported }} attività importate)
-        </div>
+        <x-alert variant="info" style="margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <svg class="animate-spin" style="width: 14px; height: 14px; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Sincronizzazione in corso ({{ $syncActivitiesImported }} attività importate)
+            </div>
+        </x-alert>
     @elseif ($syncStatus === 'completed')
-        <div class="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-800 rounded-lg text-sm">
-            Sincronizzazione completata
-        </div>
+        <x-alert variant="success" style="margin-bottom: 1rem;">Sincronizzazione completata</x-alert>
     @elseif ($syncStatus === 'failed')
-        <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
+        <x-alert variant="danger" style="margin-bottom: 1rem;">
             Sincronizzazione fallita — {{ \Illuminate\Support\Str::limit($syncErrorMessage, 100) }}
-        </div>
+        </x-alert>
     @elseif ($syncMessage)
-        <div class="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-800 rounded-lg text-sm">
-            {{ $syncMessage }}
-        </div>
+        <x-alert variant="success" style="margin-bottom: 1rem;">{{ $syncMessage }}</x-alert>
     @endif
 
     @if ($stravaAccount)
@@ -82,20 +80,19 @@
             </div>
         </div>
     @else
-        <div class="flex items-center gap-4">
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             @if ($connectionStatus === 'error')
-                <div class="flex items-center gap-2 text-amber-700">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                    </svg>
-                    <p>Il token Strava è scaduto — riconnetti il tuo account per riprendere la sincronizzazione.</p>
-                </div>
+                <x-alert variant="warning">
+                    Il token Strava è scaduto — riconnetti il tuo account per riprendere la sincronizzazione.
+                </x-alert>
             @else
                 <p style="color: var(--text-muted); font-size: var(--fs-sm);">Collega il tuo account Strava per importare le attività.</p>
             @endif
-            <x-button href="{{ route('strava.redirect') }}">
-                {{ $connectionStatus === 'error' ? 'Riconnetti Strava' : 'Collega Strava' }}
-            </x-button>
+            <div>
+                <x-button href="{{ route('strava.redirect') }}">
+                    {{ $connectionStatus === 'error' ? 'Riconnetti Strava' : 'Collega Strava' }}
+                </x-button>
+            </div>
         </div>
     @endif
 </x-card>
