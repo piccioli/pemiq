@@ -1,1 +1,436 @@
-{}
+{
+  "project": "PEMIQ",
+  "branchName": "ralph/pemiq-fase-2-5-design-system",
+  "description": "PEMIQ Fase 2.5 — Design System: token CSS dark-theme, 16 componenti Blade (button, card, badge, tag, form-input, form-select, switch, metric-tile, zone-bar, progress-bar, tabs, segmented-control, alert, page-header), refactor di tutte le view esistenti e dark/light mode toggle.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Token CSS, font e icone",
+      "description": "As a developer, I want to import all design system CSS tokens and brand fonts so that every component can use the design language consistently.",
+      "acceptanceCriteria": [
+        "File public/css/pemiq-ds.css creato con tutti i token del design system: colors (ink-*, teal-*, ember-*, zone-1..5, semantic aliases), typography (font-family vars, text-scale vars, .pq-eyebrow e .pq-metric utility classes), spacing (--space-1..32), effects (radii xs/sm/md/lg/xl/pill, shadows, edge-top, glow-brand, ring-focus), base (:root dark theme defaults)",
+        "Font Google Fonts caricati via <link rel=preconnect> + <link rel=stylesheet> in resources/views/layouts/app.blade.php prima degli stylesheet locali",
+        "Lucide Icons caricato via <script src=https://unpkg.com/lucide@latest></script> con lucide.createIcons() su DOMContentLoaded e su livewire:navigated in layouts/app.blade.php",
+        "resources/css/app.css importa pemiq-ds.css o i token sono inline nel file",
+        "tailwind.config.js esteso con colori semantici DS mappati a CSS custom properties: brand, brand-strong, brand-soft, zone-1..5, zone-1-soft..zone-5-soft, success, warning, danger, info, surface, surface-2, surface-3, bg, bg-elevated, border, border-strong, accent, accent-soft",
+        "<html> in layouts/app.blade.php ha attributo data-theme=\"dark\" di default",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Layout shell — dark topbar e sidebar",
+      "description": "As a user, I want the app shell (topbar and sidebar) to reflect the dark cockpit aesthetic of the design system so that PEMIQ looks and feels like a performance platform.",
+      "acceptanceCriteria": [
+        "resources/views/layouts/app.blade.php aggiornato: body/wrapper con background: var(--bg) (#0A0E16)",
+        "Topbar (h=60px) con background: color-mix(in srgb, var(--bg) 80%, transparent) + backdrop-filter: blur(16px) + border-bottom: 1px solid var(--border)",
+        "Logo PEMIQ in topbar: wordmark in Space Grotesk 700 con colore var(--brand) oppure SVG logo copiato in public/assets/",
+        "Sidebar (256px) con background: var(--bg-elevated) e nav link che usano var(--text-muted) / var(--text-strong) con stato active var(--accent)",
+        "Badge Premium in navbar usa colore --zone-4 (amber) per utenti premium, e var(--accent) per il link Passa a Premium degli utenti Free",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Componente x-button",
+      "description": "As a developer, I want a reusable Button Blade component so that all actions in the app use a consistent, branded control.",
+      "acceptanceCriteria": [
+        "File resources/views/components/button.blade.php creato",
+        "Props: variant (primary|secondary|ghost|danger, default: primary), size (sm|md|lg, default: md), href (se passato usa <a>, altrimenti <button>), disabled (bool), fullWidth (bool), slot icon sinistro, slot iconRight destro",
+        "primary: background: var(--brand) + color: var(--text-on-brand) + hover box-shadow var(--glow-brand) + press translateY(1px)",
+        "secondary: background: var(--surface-2) + border: 1px solid var(--border-strong) + hover background: var(--surface-3)",
+        "ghost: nessun background + hover background: var(--accent-soft)",
+        "danger: background: var(--danger-soft) + color: var(--danger) + hover background: var(--danger) + color: white",
+        "Size sm: padding 6px 12px font-size 13px; md: 10px 18px 15px; lg: 13px 24px 17px",
+        "border-radius: var(--radius-md); transition: var(--dur-fast) var(--ease-out)",
+        "View refactorate: tutti i pulsanti in layouts/app.blade.php, strava/connection-status.blade.php, activities/index.blade.php, activities/show.blade.php, premium/index.blade.php aggiornati a <x-button>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Componente x-card",
+      "description": "As a developer, I want a reusable Card component so that all panels and tiles use consistent surface styling.",
+      "acceptanceCriteria": [
+        "File resources/views/components/card.blade.php creato",
+        "Props: eyebrow (string opzionale), title (string opzionale), padding (none|sm|md|lg, default: md), interactive (bool, default: false), accent (bool, default: false)",
+        "Base: background: var(--surface) + border: 1px solid var(--border) + border-radius: var(--radius-lg) + box-shadow: var(--shadow-sm), var(--edge-top)",
+        "accent=true: border-top: 2px solid var(--brand) in sostituzione del border standard",
+        "interactive=true: hover background: var(--surface-hover) + translateY(-1px) + shadow-md, cursor pointer, transizione var(--dur-fast)",
+        "padding map: none=0, sm=12px, md=16px, lg=24px",
+        "Slot action per icone/pulsanti nell'header della card, slot default per body",
+        "eyebrow renderizzato con classe .pq-eyebrow",
+        "View refactorate: tutti i pannelli in livewire/dashboard/, livewire/strava/connection-status.blade.php, livewire/premium/, activities/show.blade.php aggiornati a <x-card>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Componente x-badge",
+      "description": "As a developer, I want a reusable Badge component for status, sport type, zones, and Premium labels.",
+      "acceptanceCriteria": [
+        "File resources/views/components/badge.blade.php creato",
+        "Props: variant (success|warning|danger|info|brand|outline|zone1|zone2|zone3|zone4|zone5, default: outline), size (sm|md, default: sm), dot (bool)",
+        "Zone variants: zone1 usa background: var(--zone-1-soft) + color: var(--zone-1); idem zone2..5 con rispettivi token",
+        "Status variants: success usa --success-soft bg + --success text; warning, danger, info idem",
+        "brand: --brand-soft bg + --brand text",
+        "outline: transparent bg + border: 1px solid var(--border-strong) + color: var(--text-muted)",
+        "dot=true: cerchio 8px colorato (stesso colore del testo) a sinistra del label",
+        "border-radius: var(--radius-pill)",
+        "View refactorate: badge sport type nelle activity views, badge Connesso/Premium/Sincronizzazione in navbar e connection-status.blade.php aggiornati a <x-badge>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Componente x-tag",
+      "description": "As a developer, I want a reusable Tag component for interactive filter chips in the activities list.",
+      "acceptanceCriteria": [
+        "File resources/views/components/tag.blade.php creato",
+        "Props: selected (bool), removable (bool), interactive (bool, default: true), slot icon opzionale",
+        "Default: background: var(--surface-2) + border: 1px solid var(--border) + color: var(--text-muted)",
+        "selected=true: background: var(--accent-soft) + border-color: var(--brand) + color: var(--accent)",
+        "removable=true: × button a destra con hover color: var(--danger)",
+        "border-radius: var(--radius-pill)",
+        "View refactorate: filtri sport/anno/mese in activities/index.blade.php aggiornati a <x-tag>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Componente x-form-input",
+      "description": "As a developer, I want a reusable Input component so that all text fields use the design system styling consistently.",
+      "acceptanceCriteria": [
+        "File resources/views/components/form/input.blade.php creato",
+        "Props: label (string), type (default: text), hint (string opzionale), error (string opzionale), required (bool), slot leadingIcon opzionale",
+        "Input: background: var(--surface-2) + border: 1px solid var(--border-strong) + color: var(--text-strong) + border-radius: var(--radius-md) + padding: 10px 14px",
+        "Focus: border-color: var(--border-focus) + box-shadow: var(--ring-focus)",
+        "Error state: border-color: var(--danger) + messaggio error sotto in color: var(--danger) font var(--text-caption)",
+        "Label: font: var(--text-label) + color: var(--text-muted)",
+        "Hint: font: var(--text-caption) + color: var(--text-faint)",
+        "::placeholder color: var(--text-faint)",
+        "View refactorate: tutti i campi input in resources/views/auth/ e profile/show.blade.php aggiornati a <x-form.input>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Componente x-form-select",
+      "description": "As a developer, I want a reusable Select component so that all dropdowns use design system styling.",
+      "acceptanceCriteria": [
+        "File resources/views/components/form/select.blade.php creato",
+        "Props: label (string opzionale), size (sm|md, default: md), hint (string opzionale), error (string opzionale)",
+        "Stesso stile base di x-form.input (background, border, border-radius, focus ring)",
+        "Freccia custom via background-image SVG inline + appearance: none; freccia colore var(--text-faint)",
+        "View refactorate: tutti i <select> in filtri attività e nei selettori Livewire (anno, mese, sport in livewire/dashboard/ e livewire/premium/) aggiornati a <x-form.select>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Componente x-switch",
+      "description": "As a developer, I want a reusable Switch toggle for boolean settings.",
+      "acceptanceCriteria": [
+        "File resources/views/components/switch.blade.php creato",
+        "Props: label (string), name, checked (bool)",
+        "Track 40×22px: background: var(--surface-3) non-checked, var(--brand) checked, transizione background var(--dur-base)",
+        "Thumb cerchio bianco 18px: translateX(0) → translateX(18px) con transizione var(--ease-spring)",
+        "Label a destra: font var(--text-label) color var(--text)",
+        "Implementato senza JS custom: usa Alpine.js x-data con toggle nativo o checkbox hidden",
+        "View refactorate: toggle preferenze in profile/show.blade.php aggiornati a <x-switch>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Componente x-metric-tile",
+      "description": "As a developer, I want a KPI MetricTile component so that dashboard stats use the signature data-display style of the design system.",
+      "acceptanceCriteria": [
+        "File resources/views/components/metric-tile.blade.php creato",
+        "Props: label (string), value (string|number), unit (string opzionale), delta (string opzionale es. +12%), deltaDir (up|down|flat), deltaContext (string opzionale es. vs sett.), accent (zone-1..5|brand|info|success|warning|danger)",
+        "Value renderizzato con classe .pq-metric e font-size 32px minimo",
+        "deltaDir=up: color: var(--success) + ▲ prima del delta; down: var(--danger) + ▼; flat: var(--text-faint) + —",
+        "Slot icon per icona Lucide tintata con colore accent",
+        "Usa <x-card> internamente con padding=md",
+        "View refactorate: le 4 KPI cards in livewire/dashboard/overview-stats.blade.php aggiornate a <x-metric-tile>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Componente x-zone-bar",
+      "description": "As a developer, I want a ZoneBar component to display time-in-zone distribution — the signature PEMIQ visual.",
+      "acceptanceCriteria": [
+        "File resources/views/components/zone-bar.blade.php creato",
+        "Prop data: array PHP di {zone: 1..5, pct: float (0-100), seconds: int}",
+        "Barra stacked: 5 segmenti con width proporzionali a pct, colori --zone-1..5, nessun gap, border-radius var(--radius-pill) sull'intero container",
+        "Altezza barra: 12px",
+        "Legenda sotto (se showLegend=true, default): 5 voci con pallino colorato, codice Z1..Z5, percentuale, tempo formattato (1h 12m)",
+        "showLegend=false: solo la barra senza legenda per usi inline",
+        "Animazione su mount: width da 0 al valore con transition var(--dur-slow) var(--ease-out) via Alpine.js x-init",
+        "View refactorate: sezione Tempo in zona in livewire/dashboard/ aggiornata a <x-zone-bar> se presente; aggiunto placeholder <x-zone-bar> con mock data se non ancora implementato",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Componente x-progress-bar",
+      "description": "As a developer, I want a ProgressBar component for goal meters and weekly volume indicators.",
+      "acceptanceCriteria": [
+        "File resources/views/components/progress-bar.blade.php creato",
+        "Props: label (string opzionale), value (0-100), color (brand|success|warning|danger|zone-1|zone-2|zone-3|zone-4|zone-5, default: brand), height (px, default: 8), showValue (bool, default: false), valueText (string opzionale es. 6:43 / 8:00 h)",
+        "Track: background: var(--surface-3) + border-radius: var(--radius-pill) + overflow hidden",
+        "Fill: colore determinato dalla prop color via CSS variable corrispondente + transizione width su mount via Alpine.js x-init",
+        "showValue=true + valueText: testo a destra della barra in font var(--text-caption) color var(--text-muted)",
+        "View refactorate: indicatori volume/carico in livewire/dashboard/ aggiornati a <x-progress-bar>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Componente x-tabs",
+      "description": "As a developer, I want a Tabs component for switching between views within a page.",
+      "acceptanceCriteria": [
+        "File resources/views/components/tabs.blade.php creato",
+        "Props: items (array di {id, label, icon?: string (Lucide name), badge?: int}), active (id del tab attivo), route (bool: se true i tab sono <a href>, se false usano Alpine.js @click con $dispatch)",
+        "Underline tab style: tab attivo ha border-bottom: 2px solid var(--accent) color: var(--text-strong); inattivo color: var(--text-muted) hover: var(--text-strong)",
+        "badge numerico: piccolo <x-badge variant=info> con il numero a fianco del label",
+        "Slot per contenuto tab se non route-based (pannello mostrato/nascosto con Alpine.js x-show)",
+        "View refactorate: tab in activities/show.blade.php (Panoramica/Grafici/Mappa/Giri se presenti) aggiornati a <x-tabs>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Componente x-segmented-control",
+      "description": "As a developer, I want a SegmentedControl component for 2–4 mutually exclusive toggle choices (granularity, unit, range).",
+      "acceptanceCriteria": [
+        "File resources/views/components/segmented-control.blade.php creato",
+        "Props: options (array di string o {value, label}), name (per wire:model binding), size (sm|md, default: md), selected (valore attivo — usato quando non in contesto Livewire)",
+        "Container: background: var(--surface-2) + border-radius: var(--radius-md) + padding: 3px + display flex",
+        "Opzione attiva: background: var(--surface-3) + color: var(--text-strong) + border-radius: calc(var(--radius-md) - 2px) + transizione background var(--dur-fast)",
+        "Opzione inattiva: color: var(--text-muted) + hover color: var(--text)",
+        "Compatibile con wire:model Livewire tramite $wire.set() via Alpine.js @click",
+        "View refactorate: toggle Mese/Settimana e Linee/Barre in livewire/premium/period-comparison.blade.php, toggle distanza/ore nei chart Livewire aggiornati a <x-segmented-control>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Componente x-alert",
+      "description": "As a developer, I want an Alert component for flash messages, sync status notifications, and inline warnings.",
+      "acceptanceCriteria": [
+        "File resources/views/components/alert.blade.php creato",
+        "Props: variant (info|success|warning|danger, default: info), dismissible (bool, default: false), icon (bool, default: true)",
+        "Background: var(--{variant}-soft) + border: 1px solid color-mix(in srgb, var(--{variant}) 30%, transparent) + border-radius: var(--radius-md) + padding: 12px 16px",
+        "Icon Lucide automatica per variant: info → info, success → check-circle, warning → alert-triangle, danger → alert-circle; colore var(--{variant})",
+        "dismissible=true: × button (x-button variant=ghost size=sm) in alto a destra che rimuove il componente via Alpine.js x-data x-show con x-transition",
+        "Slot default per il testo del messaggio",
+        "View refactorate: flash message in layouts/app.blade.php e banner stato sync in connection-status.blade.php aggiornati a <x-alert>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Componente x-page-header",
+      "description": "As a developer, I want a PageHeader component for consistent page titles and action areas across all views.",
+      "acceptanceCriteria": [
+        "File resources/views/components/page-header.blade.php creato",
+        "Props: eyebrow (string opzionale), title (string), subtitle (string opzionale)",
+        "Slot actions per i pulsanti dell'header (float right o flex end)",
+        "title: font-family var(--font-display) font-weight 700 color: var(--text-strong) font-size var(--fs-2xl)",
+        "eyebrow: classe .pq-eyebrow (mono uppercase 11px)",
+        "subtitle: font: var(--text-body) color: var(--text-muted)",
+        "View refactorate: header di activities/index.blade.php, activities/show.blade.php, premium/index.blade.php, premium/trends.blade.php, premium/compare.blade.php, premium/year-over-year.blade.php aggiornati a <x-page-header>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Refactor Dashboard con Design System",
+      "description": "As a user, I want the dashboard to use the new design system components so that the analytics view feels like a professional performance platform.",
+      "acceptanceCriteria": [
+        "livewire/dashboard/overview-stats.blade.php: 4 KPI card aggiornate a <x-metric-tile> con label, value, unit, delta, deltaDir, deltaContext e accent appropriati",
+        "livewire/dashboard/annual-analysis-chart.blade.php: container wrappato in <x-card eyebrow=Analisi annuale>, selettore anno → <x-form.select size=sm>, toggle km/ore → <x-segmented-control>",
+        "livewire/dashboard/monthly-analysis-chart.blade.php: stesso pattern di annual (card, select, segmented-control)",
+        "livewire/dashboard/sport-distribution-chart.blade.php: wrappato in <x-card>",
+        "livewire/strava/connection-status.blade.php: stato Connesso → <x-badge variant=success dot>, pulsanti Sincronizza/Riconnetti → <x-button>, alert sync → <x-alert>, banner token scaduto → <x-alert variant=warning>",
+        "Colori ApexCharts aggiornati a hex dei token DS: #16D4B4 per serie primaria (brand), #4F8DF5 per serie secondaria (zone-2)",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Refactor pagine Attività con Design System",
+      "description": "As a user, I want the activities list and detail pages to use design system components for a cohesive experience.",
+      "acceptanceCriteria": [
+        "activities/index.blade.php: header → <x-page-header title=Attività>, righe attività con hover background: var(--surface-hover), badge sport → <x-badge variant=zone{N}> (Run=zone3, Ride=zone2, Swim=zone1, altri=outline), filtri sport/anno → <x-form.select>",
+        "activities/show.blade.php: header → <x-page-header>, KPI metriche chiave → <x-metric-tile>, container mappa Leaflet → <x-card>, link Strava → <x-button variant=ghost href=...>",
+        "Badge sport usa zona coerente col colore DS: Run→zone3 (verde), Ride→zone2 (blu), Swim→zone1 (grigio), altri→outline",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Refactor pagine Premium con Design System",
+      "description": "As a premium user, I want all premium analytics pages to use the design system for a consistent high-end experience.",
+      "acceptanceCriteria": [
+        "livewire/premium/period-comparison.blade.php: 4 KPI card → <x-metric-tile>, container grafico → <x-card eyebrow=Distanza mensile (km)>, toggle Mese/Settimana → <x-segmented-control>, toggle Linee/Barre → <x-segmented-control>, tabella dettaglio → <x-card>, pulsante Esporta → <x-button variant=secondary disabled>",
+        "livewire/premium/trend-chart.blade.php: container → <x-card>, selettori metriche → <x-form.select>, toggle unità → <x-segmented-control>",
+        "livewire/premium/year-over-year-chart.blade.php: container → <x-card>, selettori anno base/confronto → <x-form.select size=sm>, filtro sport → <x-form.select size=sm>",
+        "premium/index.blade.php: header → <x-page-header eyebrow=Premium>, card Free → <x-card>, card Premium → <x-card accent=true>, CTA → <x-button variant=primary size=lg>",
+        "premium/trends.blade.php, compare.blade.php, year-over-year.blade.php: header → <x-page-header>",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Refactor Landing page con Design System",
+      "description": "As a visitor, I want the public landing page to use the dark performance-lab aesthetic to immediately communicate PEMIQ's brand.",
+      "acceptanceCriteria": [
+        "landing.blade.php o layout pubblico ha data-theme=dark sul tag <html>",
+        "Hero section: gradient radiale var(--brand-glow) come sfondo + titolo in font-family var(--font-display) bold",
+        "Feature highlight cards → <x-card> con eyebrow per ogni sezione",
+        "CTA principale → <x-button variant=primary size=lg>",
+        "CTA secondaria (login) → <x-button variant=ghost>",
+        "Badge Free e Premium nelle feature list → <x-badge>",
+        "Topbar pubblica trasparente + backdrop-blur su dark bg",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Dark mode toggle e persistenza tema",
+      "description": "As a user, I want to switch between dark and light mode so that I can use PEMIQ in different lighting conditions.",
+      "acceptanceCriteria": [
+        "Pulsante toggle tema in navbar: icona sun (tema light attivo) o moon (tema dark attivo), implementato con <button> Alpine.js",
+        "@click del toggle: commuta data-theme=dark/light su document.documentElement e salva in localStorage chiave pemiq-theme",
+        "Script inline in <head> (prima del CSS) legge localStorage e imposta data-theme prima che il browser esegua il layout — nessun flash di tema sbagliato al caricamento",
+        "Light theme: [data-theme=light] ridefinisce le variabili semantiche (--bg: var(--paper-50), --surface: var(--paper-100), --text: var(--ink-900), ecc.) come da tokens/colors.css del design system",
+        "Tutti i 14 componenti Blade creati in US-003..016 funzionano in entrambi i temi senza classi hardcoded light/dark",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser usando dev-browser skill"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Documentazione componenti",
+      "description": "As a developer, I want a components reference document so that future contributors know how to use the design system correctly.",
+      "acceptanceCriteria": [
+        "File docs/design/components.md creato (creare la directory docs/design/ se non esiste)",
+        "Per ogni componente Blade (button, card, badge, tag, form/input, form/select, switch, metric-tile, zone-bar, progress-bar, tabs, segmented-control, alert, page-header): nome, props con tipo e default, esempio d'uso Blade minimo",
+        "Sezione Token di riferimento: lista dei 10 alias semantici più usati (--bg, --surface, --text, --border, --accent, --brand, --danger, --success, --zone-1..5) con descrizione quando usarli",
+        "Sezione Anti-pattern con 3 esempi: classi Tailwind hardcoded per colori brand (NO bg-teal-500 → SI background: var(--brand)), uso dei raw token invece degli alias semantici, emoji nel product UI",
+        "Link al progetto Claude Design nella sezione introduttiva",
+        "Typecheck passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
