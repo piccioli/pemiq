@@ -6,6 +6,7 @@ use App\Exceptions\Strava\StravaAuthException;
 use App\Exceptions\Strava\StravaRateLimitException;
 use App\Exceptions\Strava\StravaTokenExpiredException;
 use App\Mail\SyncFailedNotification;
+use App\Mail\StravaTokenExpiredNotification;
 use App\Models\StravaAccount;
 use App\Services\Strava\StravaApiService;
 use App\Services\Strava\StravaTokenService;
@@ -47,8 +48,11 @@ class SyncStravaHistoricalActivities implements ShouldQueue
             // Force token refresh before Laravel retries the job
             try {
                 $tokenService->ensureValidToken($this->account->fresh());
+            } catch (StravaAuthException) {
+                // Token refresh permanently failed — notify user once
+                $this->sendTokenExpiredNotification();
             } catch (\Exception) {
-                // Refresh failed — next retry will attempt again
+                // Transient refresh failure — next retry will attempt again
             }
             $syncService->failSyncLog($syncLog, 'Token scaduto, verrà riprovato');
             throw $e;
@@ -71,6 +75,19 @@ class SyncStravaHistoricalActivities implements ShouldQueue
 
         $user = $account->user;
         Mail::to($user->email)->send(new SyncFailedNotification($account));
+        $account->update(['notified_at' => now()]);
+    }
+
+    private function sendTokenExpiredNotification(): void
+    {
+        $account = $this->account->fresh();
+
+        if ($account->notified_at !== null) {
+            return;
+        }
+
+        $user = $account->user;
+        Mail::to($user->email)->send(new StravaTokenExpiredNotification($account));
         $account->update(['notified_at' => now()]);
     }
 }
