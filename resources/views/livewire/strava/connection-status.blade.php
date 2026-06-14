@@ -49,37 +49,32 @@
                         Sincronizzazione in corso...
                     </span>
                 @else
-                    <button wire:click="startHistoricalSync"
-                            wire:loading.attr="disabled"
-                            class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                    <x-button wire:click="startHistoricalSync" wire:loading.attr="disabled">
                         Sincronizza attività storiche
-                    </button>
+                    </x-button>
                 @endif
 
-                <button @click="confirmDisconnect = true"
-                        class="inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition text-sm">
+                <x-button variant="danger" @click="confirmDisconnect = true">
                     Scollega Strava
-                </button>
+                </x-button>
 
                 {{-- Alpine.js confirmation dialog --}}
                 <div x-show="confirmDisconnect"
                      x-cloak
                      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Sei sicuro?</h3>
-                        <p class="text-gray-600 mb-6">Le attività importate rimarranno.</p>
+                    <div style="background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 1.5rem; max-width: 24rem; width: 100%; margin: 0 1rem;">
+                        <h3 style="font-size: var(--fs-lg); font-weight: 600; color: var(--text-strong); margin-bottom: 0.5rem;">Sei sicuro?</h3>
+                        <p style="color: var(--text-muted); font-size: var(--fs-sm); margin-bottom: 1.5rem;">Le attività importate rimarranno.</p>
                         <div class="flex gap-3 justify-end">
-                            <button @click="confirmDisconnect = false"
-                                    class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition">
+                            <x-button variant="secondary" @click="confirmDisconnect = false">
                                 Annulla
-                            </button>
+                            </x-button>
                             <form action="{{ route('strava.disconnect') }}" method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit"
-                                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition">
+                                <x-button type="submit" variant="danger">
                                     Scollega
-                                </button>
+                                </x-button>
                             </form>
                         </div>
                     </div>
@@ -96,12 +91,11 @@
                     <p>Il token Strava è scaduto — riconnetti il tuo account per riprendere la sincronizzazione.</p>
                 </div>
             @else
-                <p class="text-gray-600">Collega il tuo account Strava per importare le attività.</p>
+                <p style="color: var(--text-muted); font-size: var(--fs-sm);">Collega il tuo account Strava per importare le attività.</p>
             @endif
-            <a href="{{ route('strava.redirect') }}"
-               class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition whitespace-nowrap">
+            <x-button href="{{ route('strava.redirect') }}">
                 {{ $connectionStatus === 'error' ? 'Riconnetti Strava' : 'Collega Strava' }}
-            </a>
+            </x-button>
         </div>
     @endif
 </div>

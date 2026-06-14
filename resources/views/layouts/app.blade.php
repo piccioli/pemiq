@@ -155,7 +155,7 @@
                         <div style="height: 1px; background: var(--border); margin: 4px 0;"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="pq-dropdown-item">Esci</button>
+                            <x-button type="submit" variant="ghost" fullWidth style="text-align: left; justify-content: flex-start; padding: 8px 12px; font-size: var(--fs-sm); color: var(--text-muted); border-radius: var(--radius-md);">Esci</x-button>
                         </form>
                     </div>
                 </div>
@@ -244,11 +244,11 @@
                     "
                 >
                     <span>{{ session('status') ?? session('success') }}</span>
-                    <button @click="show = false" style="color: inherit; background: none; border: none; cursor: pointer; flex-shrink: 0; padding: 0;" aria-label="Chiudi">
-                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <x-button variant="ghost" size="sm" @click="show = false" aria-label="Chiudi" style="padding: 2px 4px; color: inherit;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                    </button>
+                    </x-button>
                 </div>
                 @endif
 
@@ -273,11 +273,11 @@
                     "
                 >
                     <span>{{ session('error') }}</span>
-                    <button @click="show = false" style="color: inherit; background: none; border: none; cursor: pointer; flex-shrink: 0; padding: 0;" aria-label="Chiudi">
-                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <x-button variant="ghost" size="sm" @click="show = false" aria-label="Chiudi" style="padding: 2px 4px; color: inherit;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                    </button>
+                    </x-button>
                 </div>
                 @endif
 
@@ -306,11 +306,11 @@
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
-                    <button @click="show = false" style="color: inherit; background: none; border: none; cursor: pointer; flex-shrink: 0; padding: 0;" aria-label="Chiudi">
-                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <x-button variant="ghost" size="sm" @click="show = false" aria-label="Chiudi" style="padding: 2px 4px; color: inherit;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                    </button>
+                    </x-button>
                 </div>
                 @endif
 

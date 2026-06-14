@@ -258,6 +258,81 @@ body {
     background: var(--surface-3);
 }
 
+/* ─── Button component ────────────────────────────────────────── */
+.pq-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: background var(--dur-fast) var(--ease-out),
+                color var(--dur-fast) var(--ease-out),
+                box-shadow var(--dur-fast) var(--ease-out),
+                transform var(--dur-fast) var(--ease-out);
+    white-space: nowrap;
+    user-select: none;
+    line-height: 1.4;
+}
+
+.pq-btn:disabled,
+.pq-btn[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.pq-btn-full { width: 100%; justify-content: center; }
+
+.pq-btn-sm { padding: 6px 12px;  font-size: 13px; }
+.pq-btn-md { padding: 10px 18px; font-size: 15px; }
+.pq-btn-lg { padding: 13px 24px; font-size: 17px; }
+
+.pq-btn-primary {
+    background: var(--brand);
+    color: var(--text-on-brand);
+    border-color: transparent;
+}
+.pq-btn-primary:hover:not(:disabled):not([aria-disabled="true"]) {
+    box-shadow: var(--glow-brand);
+}
+.pq-btn-primary:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(1px);
+}
+
+.pq-btn-secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--border-strong);
+}
+.pq-btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--surface-3);
+}
+
+.pq-btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: transparent;
+}
+.pq-btn-ghost:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--accent-soft);
+    color: var(--text-strong);
+}
+
+.pq-btn-danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: transparent;
+}
+.pq-btn-danger:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--danger);
+    color: #fff;
+}
+
 /* ─── Tailwind v4 theme extension ─────────────────────────────── */
 @theme inline {
     --font-sans: var(--font-body);

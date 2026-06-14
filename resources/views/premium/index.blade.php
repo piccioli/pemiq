@@ -95,12 +95,12 @@
     <div class="bg-white border border-gray-200 rounded-xl p-8 text-center shadow-sm">
         <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ __('messages.premium_cta_title') }}</h2>
         <p class="text-gray-600 mb-4">{{ __('messages.premium_cta_body') }}</p>
-        <a
+        <x-button
             href="mailto:{{ config('app.admin_email', 'admin@pemiq.com') }}?subject={{ urlencode(__('messages.premium_email_subject')) }}"
-            class="inline-block bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            size="lg"
         >
             {{ __('messages.premium_cta_button') }}
-        </a>
+        </x-button>
         <p class="mt-4 text-xs text-gray-400">{{ __('messages.premium_self_service_note') }}</p>
     </div>
 

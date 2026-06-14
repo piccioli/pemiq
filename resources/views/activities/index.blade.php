@@ -46,14 +46,10 @@
                 </select>
             </div>
 
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                Filtra
-            </button>
+            <x-button type="submit">Filtra</x-button>
 
             @if ($sport || $year || $month)
-                <a href="{{ route('activities.index') }}" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200">
-                    Reset
-                </a>
+                <x-button href="{{ route('activities.index') }}" variant="secondary">Reset</x-button>
             @endif
         </form>
     </div>
