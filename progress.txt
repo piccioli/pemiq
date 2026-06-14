@@ -1,3 +1,17 @@
+## 2026-06-14 - US-007
+- Audited all POST forms in resources/views/ — all forms already contained @csrf (register, login, forgot-password, reset-password, verify-email, profile/show, profile/password, livewire/strava/connection-status, partials/impersonation-banner, layouts/app logout).
+- Created tests/Feature/Auth/CsrfProtectionTest.php with 3 tests:
+  - test_post_register_without_csrf_token_returns_419: overrides env to 'production' to disable the testing bypass in PreventRequestForgery, sends POST /register without _token, asserts 419.
+  - test_post_login_without_csrf_token_returns_419: same pattern for POST /login.
+  - test_all_post_forms_have_csrf_directive: reads each form view file and asserts @csrf is present.
+- All 48 tests pass.
+- Files changed: tests/Feature/Auth/CsrfProtectionTest.php (new)
+- **Learnings for future iterations:**
+  - Laravel's PreventRequestForgery (CSRF) middleware skips verification when `$this->app->runningInConsole() && $this->app->runningUnitTests()`. To test for 419 in PHPUnit, override the env binding: `$this->app->instance('env', 'production')` — this makes `runningUnitTests()` return false and CSRF is enforced. Always restore with `$this->app->instance('env', 'testing')` in tearDown.
+  - The CSRF middleware class in Laravel 13 is `Illuminate\Foundation\Http\Middleware\PreventRequestForgery` (ValidateCsrfToken is deprecated, extends it).
+  - All POST forms in this project already had @csrf from initial implementation — no Blade changes were needed.
+---
+
 ## 2026-06-14 - US-005
 - Created database/factories/ActivityFactory.php: standard factory with sensible defaults for all Activity fields (nullable fields set to null by default).
 - Updated app/Services/Dashboard/DashboardStatsService.php: added private yearExpr() and monthExpr() helpers that return SQLite-compatible `CAST(strftime(...) AS INTEGER)` when the driver is 'sqlite', and MySQL-native `YEAR()`/`MONTH()` otherwise. Also replaced `->whereYear()` with `->whereRaw()` using the same helper to fix SQLite compatibility for getMonthlyStats.
@@ -511,4 +525,14 @@
 - **Learnings for future iterations:**
   - Laravel `encrypted` cast works transparently via $casts — no extra config needed, APP_KEY is used for encryption
   - For enum columns in migrations, use `$table->enum('col', ['a','b','c'])->default('a')` pattern
+---
+
+## 2026-06-14 - US-006
+- Audited DashboardStatsService: all 4 methods (getOverviewStats, getAnnualStats, getMonthlyStats, getSportDistribution) already had correct `where('user_id', $user->id)` scoping — no fixes needed.
+- Added `test_user_b_cannot_see_user_a_activities` to tests/Feature/Dashboard/DashboardStatsServiceTest.php: creates 5 activities for userA, verifies userB sees 0 activities across all 4 service methods, verifies userA still sees their own 5 activities.
+- All 45 tests pass.
+- Files changed: tests/Feature/Dashboard/DashboardStatsServiceTest.php
+- **Learnings for future iterations:**
+  - DashboardStatsService was already correctly scoped by user_id from the initial implementation — cross-user isolation was in place, only the test coverage was missing.
+  - Cross-user isolation tests should always create two independent User::factory() instances and assert that data created for one user is invisible to the other.
 ---
