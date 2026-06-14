@@ -262,8 +262,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/tabs.blade.php with props: items (array of {id, label, icon?, badge?, href?}), active (id of active tab), route (bool). route=false: wraps in Alpine x-data { activeTab: active }, tab buttons use :class { 'pq-tab-active': activeTab === id } and @click to update activeTab + dispatch tab-changed event. route=true: renders <a href> links with PHP @class pq-tab-active on the matching active tab. Badge: <x-badge variant=info size=sm> beside label when badge prop is set. Slot renders the panel content (user wraps each panel in x-show=\"activeTab === 'id'\"). Added .pq-tabs-wrapper, .pq-tabs-bar, .pq-tab, .pq-tab-active, .pq-tabs-panels CSS classes to app.css. Refactored activities/show.blade.php: restructured into two tabs (Panoramica/Mappa) using <x-tabs :items=... active=panoramica>. Panoramica panel: main metrics grid + secondary metrics card. Mappa panel: Leaflet map card (or no-map placeholder). Added Leaflet tab-changed event listener to call map.invalidateSize() when mappa tab becomes visible. Added tab_overview, tab_map, col_duration, col_avg_speed, col_avg_hr, col_moving_time, col_max_hr, col_avg_watts, col_calories, activity_additional_details, map_not_available translation keys to both lang files. All 80 tests pass. Vite build succeeds."
     },
     {
       "id": "US-014",
@@ -282,8 +282,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/components/segmented-control.blade.php with props: options (array of string or {value, label}), name (Livewire property name for $wire.set), size (sm|md, default md), selected (initial PHP value). Uses Alpine x-data { current: @js($selected) } for local state tracking. On click: updates current locally + calls $wire.set(name, value) when name is set. Options normalized via PHP array_map to always produce {value, label} pairs. Added .pq-segmented-control, .pq-segmented-option, .pq-segmented-option-active, .pq-segmented-sm CSS classes to app.css. Refactored: livewire/dashboard/annual-analysis-chart (Distanza/Ore toggle → x-segmented-control name=metric), livewire/dashboard/monthly-analysis-chart (same), livewire/premium/trend-chart (same), livewire/premium/period-comparison (Mese/Settimana → name=granularity, Linee/Barre → name=chartType — both use $wire.set() directly instead of calling setGranularity/setChartType methods, which is safe since granularity/chartType are public properties). All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available)."
     },
     {
       "id": "US-015",
