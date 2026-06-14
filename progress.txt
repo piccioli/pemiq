@@ -1,0 +1,450 @@
+## 2026-06-13 - US-035
+- Created app/Http/Middleware/EnsurePremium.php: blocks non-premium users (is_premium=false or premium_expires_at in the past), redirects to /dashboard with error flash.
+- Registered EnsurePremium with alias 'premium' in bootstrap/app.php.
+- Migration 2026_06_13_205729_make_strava_tokens_nullable: made access_token, refresh_token, token_expires_at nullable in strava_accounts (needed for disconnect flow).
+- Feature tests (all 23 pass):
+  - tests/Feature/Auth/RegistrationTest.php: 6 tests covering registration, email verification middleware, dashboard block.
+  - tests/Feature/Auth/LoginTest.php: 7 tests covering login, invalid credentials, throttling, unverified redirect, logout.
+  - tests/Feature/Auth/PasswordResetTest.php: 5 tests covering forgot password, reset link, invalid token.
+  - tests/Feature/Strava/StravaOAuthTest.php: 5 tests covering OAuth redirect, callback, denied permissions, token encryption, disconnect.
+- **Learnings for future iterations:**
+  - SQLite (used in phpunit.xml for tests) doesn't support MySQL-specific date functions (YEAR, MONTH). Workaround: mock DashboardStatsService in tests that render the dashboard.
+  - Http::fake() must be set up before any HTTP calls; mocks Strava deauthorize endpoint cleanly.
+  - `$this->mock(ServiceClass::class, fn($m) => ...)` registers mocks in Laravel service container.
+
+## 2026-06-13 - US-034
+- Created lang/it/auth.php, pagination.php, passwords.php, validation.php (full Italian translations), messages.php (app-specific keys: welcome, profile_updated, language, italian, english, etc.).
+- Created lang/en/messages.php (English equivalents of custom messages).
+- Created database/migrations/2026_06_13_204917_add_locale_to_users_table: varchar(5) 'locale' column, default 'it', after remember_token. Migrated successfully.
+- Updated app/Models/User.php: added 'locale' to $fillable.
+- Created app/Http/Middleware/SetLocale.php: if auth()->check() and user has locale, calls App::setLocale($user->locale).
+- Updated bootstrap/app.php: SetLocale middleware added to $middleware->web(append: [...]).
+- Updated resources/views/profile/show.blade.php: added locale dropdown (IT/EN) using __('messages.language'), __('messages.italian'), __('messages.english'). Old value preserved via old('locale', $user->locale).
+- Updated app/Http/Controllers/Auth/ProfileController.php: validates 'locale' in:it,en, fills locale on user update.
+- Files changed: 8 new files, 4 updated
+- **Learnings for future iterations:**
+  - Laravel 11 lang files are in `lang/` (project root), NOT `resources/lang/` — this changed from earlier Laravel versions
+  - `php artisan lang:publish` publishes default Laravel translations to `lang/en/`
+  - SetLocale middleware registered via `$middleware->web(append: [...])` in bootstrap/app.php — applies to all web routes
+  - Locale dropdown in profile uses `old('locale', auth()->user()->locale)` for correct pre-selection after failed validation
+  - Italian validation file needs `attributes` section to translate field names in error messages
+---
+
+## 2026-06-13 - US-033
+- Created docker/uat/docker-compose.yml: 7 services (app, nginx, mariadb, redis, mailpit, queue-worker, scheduler). Context builds from ../../ (project root).
+- Created docker/uat/nginx.conf: HTTP→HTTPS redirect + HTTPS server for uat.pemiq.com with Let's Encrypt SSL.
+- Created docker/uat/.env.uat.example: APP_ENV=staging, MAIL_HOST=mailpit, MAIL_PORT=1025.
+- Created docker/production/docker-compose.yml: 6 services (no mailpit). Production-safe.
+- Created docker/production/nginx.conf: HTTP→HTTPS + www→apex redirects + HTTPS server for pemiq.com.
+- Created docker/production/.env.production.example: APP_ENV=production, MAIL_MAILER=postmark, no mailpit.
+- Updated README.md: replaced default Laravel readme with PEMIQ-specific setup/update instructions for all 3 environments.
+- Files changed: 7 new files, README.md updated
+- **Learnings for future iterations:**
+  - Scheduler service uses `sh -c "while true; do php artisan schedule:run ...; sleep 60; done"` — simpler than a cron daemon
+  - Build context for UAT/production configs is `../..` (project root) since docker-compose.yml is in a subdirectory
+  - Use `env_file: .env.uat` in docker-compose to load environment from a file (NOT `--env-file` flag which sets Docker Compose vars, not container vars)
+  - Let's Encrypt cert paths: `/etc/letsencrypt/live/<domain>/fullchain.pem` and `privkey.pem`
+---
+
+## 2026-06-13 - US-032
+- Created app/Filament/Widgets/AdminStatsOverview.php: extends StatsOverviewWidget. 5 stats: Utenti Totali, Utenti Premium, Account Strava Collegati, Sync Completate 24h, Sync Fallite 24h. Sync Fallite uses dynamic ->color('danger'/'success') based on count.
+- Updated AdminPanelProvider: replaced FilamentInfoWidget with AdminStatsOverview in widgets[].
+- Files changed: app/Filament/Widgets/AdminStatsOverview.php (new), AdminPanelProvider.php
+- **Learnings for future iterations:**
+  - Filament v4 StatsOverviewWidget uses `Stat::make('Label', $value)` — NOT Card::make (Card doesn't exist in v4)
+  - `->color('danger')` / `->color('success')` on a Stat changes the stat's color — no separate method needed
+  - Widgets registered in AdminPanelProvider `->widgets([...])` are shown on the Filament dashboard page
+  - Filament auto-discovers widgets in app/Filament/Widgets/ (via discoverWidgets in PanelProvider) but you can also explicitly register them
+---
+
+## 2026-06-13 - US-031
+- Created app/Http/Controllers/ImpersonateController.php: stop() reads session('impersonating_admin_id'), creates AuditLog (impersonate_stop), Auth::loginUsingId($adminId), forgets session key, redirects to /admin/users.
+- Created resources/views/partials/impersonation-banner.blade.php: shown when session('impersonating_admin_id') is set — yellow banner showing impersonated user name + POST form to impersonate.stop route.
+- Updated resources/views/layouts/app.blade.php: @include('partials.impersonation-banner') before flash messages.
+- Updated app/Providers/Filament/AdminPanelProvider.php: added renderHook(PanelsRenderHook::BODY_START) that renders the impersonation banner view — visible on all Filament pages when impersonating.
+- Updated app/Filament/Resources/UserResource.php: added 'Impersona' table action — visible only for non-administrator users, requiresConfirmation, creates AuditLog (impersonate_start + IP + user_agent), sets session('impersonating_admin_id'), Auth::loginUsingId, redirects to dashboard.
+- Updated routes/web.php: POST /impersonate/stop (auth middleware, named impersonate.stop).
+- Files changed: ImpersonateController.php (new), impersonation-banner.blade.php (new), layouts/app.blade.php, AdminPanelProvider.php, UserResource.php, routes/web.php
+- **Learnings for future iterations:**
+  - Filament render hooks: `->renderHook(PanelsRenderHook::BODY_START, fn(): string => view('partials.x')->render())` injects HTML at the start of the body on ALL Filament pages
+  - Impersonation banner is a shared partial (@include) used in both app layout and Filament render hook
+  - UserResource table action can use `return redirect()->to(route('dashboard'))` inside `->action()` callback — Livewire 3 passes the redirect response through
+  - `->visible(fn (User $record) => !$record->hasRole('administrator'))` hides the action for admin-role users
+  - AuditLog requires explicit `created_at => now()` because `$timestamps = false` on the model
+---
+
+## 2026-06-13 - US-030
+- Created app/Filament/Resources/SyncLogResource.php: list-only in 'Sistema' group. Columns: user.name, sync_type (badge), status (badge with match colors), started_at (defaultSort desc), duration (diffForHumans or '—'), activities_imported, error_message (limit+tooltip). Filters: status/sync_type SelectFilter, user relationship SelectFilter.
+- Created app/Filament/Resources/SyncLogResource/Pages/ListSyncLogs.php
+- Created app/Filament/Resources/AuditLogResource.php: list-only in 'Sistema' group. Columns: adminUser.name, targetUser.name, action (badge), created_at (defaultSort desc), metadata (JSON pretty-printed, limit+tooltip). Filters: admin_user_id SelectFilter, action dynamic SelectFilter.
+- Created app/Filament/Resources/AuditLogResource/Pages/ListAuditLogs.php
+- Files changed: 4 new files
+- **Learnings for future iterations:**
+  - `->getStateUsing(fn (SyncLog $record) => ...)` on a TextColumn computes custom state from the full record — useful for derived values like duration
+  - `->diffForHumans($record->completed_at, true)` gives relative duration string between two Carbon dates (true = absolute, no "ago")
+  - `->tooltip(fn ($record) => ...)` on TextColumn shows full content on hover — good for truncated fields like error_message and JSON metadata
+  - AuditLog has `$timestamps = false` — the `created_at` column is NOT managed by Eloquent automatically; use `useCurrent()` in migration
+  - For read-only resources: set `form()` to return `$form->schema([])`, no 'create'/'edit'/'view' in getPages(), empty actions() and bulkActions()
+---
+
+## 2026-06-13 - US-029
+- Created app/Filament/Resources/StravaAccountResource.php: list-only resource in 'Strava' group. Columns: user.name, strava_athlete_id, connection_status (badge with match colors: connected=success, disconnected=gray, error=danger), last_sync_at. Filter: SelectFilter for connection_status. Action: 'Forza sincronizzazione' dispatches SyncStravaHistoricalActivities.
+- Created app/Filament/Resources/StravaAccountResource/Pages/ListStravaAccounts.php
+- Created app/Filament/Resources/ActivityResource.php: list-only resource in 'Strava' group. Columns: user.name (searchable+sortable), name (searchable, limit 40), sport_type (badge), started_at (defaultSort desc), distance (÷1000 km), elevation_gain. Filters: user (relationship), sport_type (dynamic options from distinct DB values), started_at date range.
+- Created app/Filament/Resources/ActivityResource/Pages/ListActivities.php
+- Files changed: 4 new files
+- **Learnings for future iterations:**
+  - For list-only resources (no create/edit), set `form()` to return `$form->schema([])` and `getPages()` to only include 'index'
+  - `TextColumn::make('connection_status')->badge()->color(fn (string $state) => match ($state) {...})` — the fn receives the raw string value
+  - Dynamic SelectFilter options: `->options(fn () => Activity::distinct()->pluck('sport_type', 'sport_type')->filter()->toArray())` — filter empty values
+  - `->defaultSort('started_at', 'desc')` on the table sets default ordering without user interaction
+---
+
+## 2026-06-13 - US-028
+- Created app/Filament/Resources/UserResource.php: list+edit resource for User model in 'Utenti' navigation group. Columns: Nome/Email (searchable+sortable), Ruolo (roles.name badge), Premium (TextColumn badge Sì/No, success/gray color), Registrato il, Email verificata (IconColumn boolean). Filters: SelectFilter role (relationship), TernaryFilter is_premium, date-range Filter for created_at. Actions: EditAction, 'Promuovi a Premium' (form modal for premium_expires_at), 'Revoca Premium' (requiresConfirmation). BulkActions: 'Promuovi selezionati', 'Revoca Premium selezionati'.
+- Created app/Filament/Resources/UserResource/Pages/ListUsers.php and EditUser.php page classes.
+- Files changed: app/Filament/Resources/UserResource.php (new), UserResource/Pages/ListUsers.php (new), UserResource/Pages/EditUser.php (new)
+- **Learnings for future iterations:**
+  - **CRITICAL Filament v4**: `Filament\Forms\Form` does NOT exist. Use `Filament\Schemas\Schema` for the `form()` method signature: `public static function form(Schema $form): Schema`
+  - **CRITICAL Filament v4**: `$navigationGroup` property type in parent is `UnitEnum|string|null`, incompatible with child `?string` declaration — MUST use `getNavigationGroup(): ?string` method override instead
+  - **CRITICAL Filament v4**: `$navigationIcon` property type in parent is `BackedEnum|string|null` — MUST use `getNavigationIcon()` method override
+  - Filament v4 `optimize:clear` (not just `filament:clear-cached-components`) is needed to fully refresh resource discovery after adding new resources
+  - `Tables\Filters\TernaryFilter::make('is_premium')` works as-is for boolean columns — no additional config needed
+  - `Tables\Actions\BulkAction` with `->action(fn ($records) => $records->each->update([...]))` works on Eloquent collection
+---
+
+## 2026-06-13 - US-027
+- Created resources/views/dashboard/index.blade.php: extends layouts.app, includes all 5 Livewire components in order: strava.connection-status, dashboard.overview-stats, dashboard.annual-analysis, dashboard.monthly-analysis, dashboard.sport-distribution. Page-level h1 'Dashboard' + welcome message at top.
+- Updated app/Http/Controllers/DashboardController.php: return view('dashboard.index') (was 'dashboard').
+- Deleted resources/views/dashboard.blade.php (superseded by dashboard/index.blade.php).
+- Updated routes/web.php: Route / now redirects to /dashboard (authenticated) or /login (unauthenticated) instead of returning the welcome view.
+- Files changed: resources/views/dashboard/index.blade.php (new), resources/views/dashboard.blade.php (deleted), app/Http/Controllers/DashboardController.php, routes/web.php
+- **Learnings for future iterations:**
+  - Dashboard view moved from `resources/views/dashboard.blade.php` → `resources/views/dashboard/index.blade.php` — DashboardController uses `view('dashboard.index')`
+  - Root route `/` redirects to /dashboard or /login based on `auth()->check()` — no welcome view needed for this MVP
+  - Each Livewire component already has its own h2 heading, so the dashboard page only needs a page-level h1 + space-y-6 wrapper
+---
+
+## 2026-06-13 - US-026
+- Created app/Livewire/Dashboard/SportDistribution.php: Livewire component with render(DashboardStatsService) method injection. Calls getSportDistribution(auth()->user()) and passes the collection to the view.
+- Created resources/views/livewire/dashboard/sport-distribution.blade.php: responsive table (overflow-x-auto) with columns Sport (badge), Attività, Distanza (km), Ore. @php block defines $sportColors map keyed by Strava sport_type strings; unknown sport types fall back to 'bg-gray-100 text-gray-700'. Empty state when collection isEmpty().
+- Files changed: app/Livewire/Dashboard/SportDistribution.php (new), resources/views/livewire/dashboard/sport-distribution.blade.php (new)
+- **Learnings for future iterations:**
+  - Strava sport_type values in the DB are the API's CamelCase strings (e.g. 'Run', 'TrailRun', 'Ride', 'MountainBikeRide', 'Hike', 'Walk') — badge color mapping must use these exact strings as keys
+  - Since CDN Tailwind is used (no purging), dynamic Tailwind class lookups via PHP array are safe — no need for safelist config
+  - Alias for SportDistribution: `dashboard.sport-distribution` (directory dot-notation convention)
+---
+
+## 2026-06-13 - US-025
+- Created app/Livewire/Dashboard/MonthlyAnalysis.php: Livewire component with public $year (default current year). mount() sets initial year. render(DashboardStatsService) fetches getAnnualStats() to build $availableYears list, then getMonthlyStats($user, $year). Guards against year not in available list.
+- Created resources/views/livewire/dashboard/monthly-analysis.blade.php: year selector dropdown (wire:model.live for reactive update without page reload), responsive table (overflow-x-auto) with 12 rows, Italian month names array, empty months show '—' instead of 0, hasData check triggers empty state message.
+- Files changed: app/Livewire/Dashboard/MonthlyAnalysis.php (new), resources/views/livewire/dashboard/monthly-analysis.blade.php (new)
+- **Learnings for future iterations:**
+  - `wire:model.live="year"` on a select triggers an immediate Livewire request on change (no need for wire:change or JS)
+  - Italian month names are a PHP array `['Gennaio',...,'Dicembre']` indexed by `$row->month - 1` (0-based)
+  - `getAnnualStats()` doubles as the source for available years — reuse it to avoid a second query
+  - Empty months (activities=0) from getMonthlyStats() are better shown as '—' than '0' for readability
+  - Alias for MonthlyAnalysis: `dashboard.monthly-analysis` (directory dot-notation convention)
+---
+
+## 2026-06-13 - US-024
+- Created app/Livewire/Dashboard/AnnualAnalysis.php: Livewire component with render(DashboardStatsService) method injection. getAnnualStats() is called with auth()->user() and passed to the view.
+- Created resources/views/livewire/dashboard/annual-analysis.blade.php: responsive table (overflow-x-auto) with columns Anno, Attività, Distanza (km), Dislivello (m), Ore. Rows ordered by year DESC (handled by DashboardStatsService). Empty state when collection isEmpty(). hover:bg-gray-50 on rows for UX.
+- Files changed: app/Livewire/Dashboard/AnnualAnalysis.php (new), resources/views/livewire/dashboard/annual-analysis.blade.php (new)
+- **Learnings for future iterations:**
+  - `overflow-x-auto` wrapper on the table div makes the table scroll horizontally on mobile without breaking layout
+  - Livewire render() DI with DashboardStatsService follows the same pattern as OverviewStats — no class-level property needed, just inject in render()
+  - Alias for AnnualAnalysis: `dashboard.annual-analysis` (follows directory dot-notation convention)
+---
+
+## 2026-06-13 - US-023
+- Created app/Livewire/Dashboard/OverviewStats.php: Livewire component with render(DashboardStatsService) method injection. Private formatSeconds(int): string converts seconds to "h:mm" format for Tempo Totale and Tempo in Movimento display.
+- Created resources/views/livewire/dashboard/overview-stats.blade.php: 5 stat cards in responsive grid (grid-cols-1 sm:grid-cols-2 xl:grid-cols-5). Each card has SVG icon, large numeric value, descriptive label. Cards: Attività Totali (orange), Distanza km (blue), Dislivello m (green), Tempo Totale h:mm (purple), Tempo in Movimento h:mm (yellow). Empty state when total_activities===0.
+- Files changed: app/Livewire/Dashboard/OverviewStats.php (new), resources/views/livewire/dashboard/overview-stats.blade.php (new)
+- **Learnings for future iterations:**
+  - Livewire render() method supports DI: `render(DashboardStatsService $service)` — Laravel container injects it on each render
+  - Seconds formatting (h:mm): `floor($s/3600) . ':' . str_pad(floor(($s%3600)/60), 2, '0', STR_PAD_LEFT)` — handles values > 99 hours correctly
+  - Livewire component alias for `App\Livewire\Dashboard\OverviewStats` is `dashboard.overview-stats` (directory separator → dot)
+  - `number_format($val, 0)` for integers, `number_format($val, 1)` for 1-decimal floats — adds thousands separator automatically
+---
+
+## 2026-06-13 - US-022
+- Created app/Services/Dashboard/DashboardStatsService.php with 4 methods:
+  - getOverviewStats(): single selectRaw aggregation → total_activities (int), total_distance_km (÷1000, 1dp), total_elevation_m (1dp), total_elapsed_seconds (int), total_moving_seconds (int)
+  - getAnnualStats(): groupByRaw YEAR(started_at) ordered DESC → year, activities, distance_km, elevation_m, hours (elapsed/3600)
+  - getMonthlyStats(year): whereYear filter + groupByRaw MONTH(started_at), fills all 12 months with collect(range(1,12)) + keyBy('month') so empty months show zeros
+  - getSportDistribution(): groupBy sport_type ordered by COUNT(*) DESC → sport_type, activities, distance_km, hours
+- Files changed: app/Services/Dashboard/DashboardStatsService.php (new)
+- **Learnings for future iterations:**
+  - Monthly stats must fill all 12 months even when empty — use `collect(range(1,12))->map(fn($m) => ...)` with `$rows->keyBy('month')` for O(1) lookup
+  - selectRaw aggregations return string values from PDO — cast explicitly (int), (float), round() where needed
+  - getMonthlyStats returns hours (float) not seconds, consistent with annual/sport — overview returns raw seconds for flexible view formatting
+---
+
+## 2026-06-13 - US-021
+- Created app/Livewire/Strava/ConnectionStatus.php: Livewire 3 component with #[Poll('5s')] attribute for 5-second auto-polling. startHistoricalSync() checks for connected account, no running sync, then dispatches SyncStravaHistoricalActivities and sets $syncMessage='Sincronizzazione avviata'. render() passes stravaAccount (or null) and syncRunning (bool from SyncLog WHERE status='running').
+- Created resources/views/livewire/strava/connection-status.blade.php: shows 'Collega Strava' link when no account; when connected shows badge, last sync date, disabled button with spinner when sync running, active 'Sincronizza attività storiche' button otherwise, disconnect button with Alpine.js confirm dialog.
+- Updated resources/views/dashboard.blade.php: replaced inline Strava HTML section with @livewire('strava.connection-status').
+- Updated app/Http/Controllers/DashboardController.php: removed $stravaAccount variable (no longer needed, component handles it).
+- Files changed: app/Livewire/Strava/ConnectionStatus.php (new), resources/views/livewire/strava/connection-status.blade.php (new), resources/views/dashboard.blade.php, app/Http/Controllers/DashboardController.php
+- **Learnings for future iterations:**
+  - Livewire 3 polling uses #[Poll('5s')] attribute on the component class (not wire:poll in the view, though that also works)
+  - Livewire components in app/Livewire/ are auto-discovered — no registration needed
+  - Component alias for @livewire() follows directory structure: App\Livewire\Strava\ConnectionStatus → 'strava.connection-status'
+  - wire:loading.attr="disabled" on a button disables it during any Livewire request (prevents double-click)
+  - Alpine.js x-data works normally inside Livewire component views — they coexist without conflict
+---
+
+## 2026-06-13 - US-020
+- Created app/Jobs/SyncStravaIncrementalActivities.php: implements ShouldQueue, $tries=3, $backoff=[5,30,60]. handle() checks account->last_sync_at — if set, passes it as the 'after' Carbon to fetchActivities (incremental sync); if null, full historical sync (fallback). Creates SyncLog with type 'incremental'/'historical', completes/fails log, updates last_sync_at on success. Same token refresh/retry pattern as SyncStravaHistoricalActivities.
+- Created app/Console/Commands/SyncAllStravaAccounts.php: signature 'strava:sync-all', queries all StravaAccount with connection_status='connected', dispatches SyncStravaIncrementalActivities for each.
+- Updated routes/console.php: added Schedule::command('strava:sync-all')->hourly() — verified via php artisan schedule:list showing cron '0 * * * *'.
+- Files changed: app/Jobs/SyncStravaIncrementalActivities.php (new), app/Console/Commands/SyncAllStravaAccounts.php (new), routes/console.php
+- **Learnings for future iterations:**
+  - Laravel scheduler in routes/console.php uses `Schedule::command('artisan:command')->hourly()` pattern — no kernel bootstrap/app.php registration needed in Laravel 11
+  - Console commands are auto-discovered in app/Console/Commands/ — no manual registration in Kernel required (Laravel 11 convention)
+  - The scheduler cron expression `0 * * * *` = hourly — confirmed via `php artisan schedule:list`
+---
+
+## 2026-06-13 - US-019
+- Created app/Jobs/SyncStravaHistoricalActivities.php: implements ShouldQueue, $tries=3, $backoff=[5,30,60]
+- handle() injects StravaApiService/ActivitySyncService/StravaTokenService via Laravel container
+- Creates SyncLog (pending), fetches all activities via fetchActivities() (no 'after' filter), upserts via sync(), completeSyncLog() on success, sets last_sync_at on StravaAccount
+- StravaTokenExpiredException: forces ensureValidToken refresh then re-throws for Laravel retry mechanism (fetchActivities already calls ensureValidToken internally, so next retry refreshes automatically)
+- General exceptions: failSyncLog with error message then re-throws
+- Added syncHistorical() to StravaController: checks connected account, dispatches job, redirects with success flash
+- Added route POST /strava/sync-historical (auth+verified, named strava.sync-historical)
+- Updated dashboard.blade.php: 'Sincronizza attività storiche' orange button next to 'Scollega Strava' in connected state
+- Files changed: app/Jobs/SyncStravaHistoricalActivities.php (new), StravaController.php, routes/web.php, resources/views/dashboard.blade.php
+- **Learnings for future iterations:**
+  - Laravel jobs use `handle(Service $svc, ...)` method injection from the container — no constructor injection needed for services (constructor is for job payload data)
+  - `$tries` and `$backoff` are public properties on the job class (not constants) — `$backoff` is an array for staged delays
+  - `SerializesModels` trait serializes Eloquent models in job payload by ID and re-fetches on deserialization — model state is fresh on each retry
+  - Jobs directory app/Jobs/ is not created by default in Laravel 11 — must create manually when first job is added
+---
+
+## 2026-06-13 - US-018
+- Created app/Services/Sync/ActivitySyncService.php with 4 public methods: sync(), createSyncLog(), completeSyncLog(), failSyncLog()
+- sync() sets SyncLog status='running', iterates Collection of Strava activity arrays, calls Activity::updateOrCreate(['strava_activity_id'=>id], mappedData()), updates activities_imported count
+- createSyncLog() creates SyncLog with status='pending', started_at=Carbon::now()
+- completeSyncLog() sets status='completed', completed_at=now(), activities_imported
+- failSyncLog() sets status='failed', error_message
+- Private mapActivityData() handles all field mappings: strava `id`→strava_activity_id, `start_date`→started_at (Carbon::parse), `total_elevation_gain`→elevation_gain, `map.summary_polyline`→polyline, `kilojoules*0.239`→calories (int, rounded; fallback to data['calories']), raw_data=full Strava array
+- Files changed: app/Services/Sync/ActivitySyncService.php (new)
+- **Learnings for future iterations:**
+  - ActivitySyncService is in App\Services\Sync namespace (separate from App\Services\Strava) — follow this directory structure for future sync-related services
+  - Strava calories conversion: `kilojoules * 0.239` gives kilocalories (food calories) — always prefer `kilojoules` field over `calories` field in Strava response
+  - Activity::updateOrCreate uses strava_activity_id as the unique key — safe to run multiple times on same data (idempotent)
+---
+
+## 2026-06-13 - US-017
+- Created app/Services/Strava/StravaTokenService.php: ensureValidToken(StravaAccount) checks if token_expires_at <= now()+5min; if so, calls refreshToken() which POSTs to https://www.strava.com/oauth/token with client_id/client_secret/grant_type=refresh_token/refresh_token. Updates StravaAccount with new access_token, refresh_token, token_expires_at. On failure (network or HTTP error): sets connection_status='error', throws StravaTokenRefreshException.
+- Created app/Exceptions/Strava/StravaTokenRefreshException.php
+- Updated app/Services/Strava/StravaApiService.php: added constructor injection of StravaTokenService; calls $this->tokenService->ensureValidToken($account) at start of fetchActivities()
+- Files changed: app/Services/Strava/StravaTokenService.php (new), app/Exceptions/Strava/StravaTokenRefreshException.php (new), app/Services/Strava/StravaApiService.php (updated)
+- **Learnings for future iterations:**
+  - StravaTokenService is auto-injected by Laravel container into StravaApiService constructor — no service provider binding needed
+  - `$account->refresh()` after update() is needed to reload encrypted casts (access_token/refresh_token) from DB after save
+  - Carbon::createFromTimestamp($data['expires_at']) converts Strava's Unix timestamp response to a Carbon datetime for token_expires_at
+  - config('services.strava.client_id') and config('services.strava.client_secret') are already set up from US-014
+---
+
+## 2026-06-13 - US-016
+- Created app/Services/Strava/StravaApiService.php: fetchActivities(StravaAccount, ?Carbon) → Collection. Paginates GET /athlete/activities with per_page=100, increments page until empty response or <100 items. 1s sleep between pages for rate limiting. Private requestWithRetry() handles HTTP 429 with exponential backoff (1s/2s/4s, max 3 retries). Throws StravaTokenExpiredException on 401, StravaApiException on 5xx or network exceptions.
+- Created app/Exceptions/Strava/StravaTokenExpiredException.php
+- Created app/Exceptions/Strava/StravaApiException.php
+- Files changed: app/Services/Strava/StravaApiService.php (new), app/Exceptions/Strava/StravaTokenExpiredException.php (new), app/Exceptions/Strava/StravaApiException.php (new)
+- **Learnings for future iterations:**
+  - Exception namespace: App\Exceptions\Strava — use consistent namespace for Strava-related exceptions
+  - Http::withToken($token)->get($url, $params) is the Laravel HTTP client pattern for bearer auth
+  - The `sleep()` between pages is intentional and required by Strava rate limits — do not remove
+---
+
+## 2026-06-13 - US-015
+- Added `disconnect()` method to StravaController: reads decrypted access_token, calls POST https://www.strava.com/oauth/deauthorize, swallows exceptions (always proceeds with local disconnect), updates StravaAccount (connection_status='disconnected', access_token=null, refresh_token=null), redirects to /dashboard with success flash
+- Added route DELETE /strava/disconnect (auth+verified middleware, named strava.disconnect) to routes/web.php
+- Updated resources/views/dashboard.blade.php: added 'Scollega Strava' button in the connected section, wrapped in `x-data="{ confirmDisconnect: false }"`, Alpine.js dialog (x-show/x-cloak) with cancel button + DELETE form confirmation
+- Files changed: app/Http/Controllers/StravaController.php, routes/web.php, resources/views/dashboard.blade.php
+- **Learnings for future iterations:**
+  - Alpine.js `x-cloak` requires a CSS rule `[x-cloak] { display: none; }` in the layout to prevent FOUC — the app.blade.php layout should include this in the `<style>` block if not already present
+  - DELETE forms in Laravel Blade use `@method('DELETE')` inside a POST form — browser only supports GET/POST natively
+  - StravaAccount encrypted cast handles null values correctly in Laravel 11 — setting access_token/refresh_token to null via update() works without removing the cast
+  - Strava deauthorize API call is best-effort; always proceed with local disconnect even on network/API failure
+---
+
+## 2026-06-13 - US-014
+- Created app/Http/Controllers/StravaController.php: redirect() uses Socialite driver 'strava' with scope 'activity:read_all'; callback() checks request 'error' param (denied permissions → redirect dashboard with error), fetches Socialite user, calls StravaAccount::updateOrCreate with encrypted tokens and connection_status='connected'
+- Updated app/Providers/AppServiceProvider.php: registered SocialiteProviders\Strava\StravaExtendSocialite via Event::listen(SocialiteWasCalled) to activate the community Strava provider
+- Updated config/services.php: added 'strava' key with client_id, client_secret, redirect from env vars
+- Updated app/Http/Controllers/DashboardController.php: passes $stravaAccount = auth()->user()->stravaAccount to the view
+- Updated resources/views/dashboard.blade.php: shows 'Collega Strava' button (orange, links to strava.redirect route) when no connected account; shows green 'Connesso' badge with last sync date when connected
+- Updated routes/web.php: GET /strava/redirect and GET /strava/callback with auth+verified middleware
+- Files changed: app/Http/Controllers/StravaController.php (new), DashboardController.php, app/Providers/AppServiceProvider.php, config/services.php, resources/views/dashboard.blade.php, routes/web.php
+- **Learnings for future iterations:**
+  - socialiteproviders/strava requires Event::listen(SocialiteWasCalled::class, StravaExtendSocialite::class) in AppServiceProvider — the provider uses the community manager pattern, not the standard Socialite extension
+  - Strava callback sends 'error' query param when user denies — check request()->has('error') before calling Socialite::driver('strava')->user()
+  - StravaAccount already uses encrypted cast for access_token/refresh_token (from US-004) — no extra work needed for token encryption
+  - config/services.php must have the 'strava' key for Socialite to find credentials; env var STRAVA_REDIRECT_URI defaults to APP_URL/strava/callback
+---
+
+## 2026-06-13 - US-013
+- Created resources/views/layouts/app.blade.php: responsive authenticated layout with navbar (PEMIQ logo left, Dashboard link center, user dropdown right with Profilo/Logout), hamburger mobile menu (Alpine.js x-show toggle), Alpine.js dismissable flash messages (session status/success/error + $errors), <main class="flex-1"> with max-w-7xl padding, footer with app name and year
+- Updated resources/views/dashboard.blade.php to extend layouts.app (was standalone HTML)
+- Updated resources/views/profile/show.blade.php to extend layouts.app (was extending layouts.auth)
+- Updated resources/views/profile/password.blade.php to extend layouts.app (was extending layouts.auth)
+- All Blade views compiled without errors via php artisan view:cache
+- Files changed: resources/views/layouts/app.blade.php (new), dashboard.blade.php, profile/show.blade.php, profile/password.blade.php
+- **Learnings for future iterations:**
+  - Alpine.js CDN must use `defer` attribute to avoid blocking render: `<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">`
+  - `x-click.outside="userOpen = false"` (note: correct syntax is `@click.outside`) closes dropdown when clicking outside — Alpine.js 3.x magic directive
+  - Flash messages use session('status') OR session('success') — the auth layout used 'status', so both are supported in app layout
+  - Profile pages previously extended layouts.auth (centered card), now extend layouts.app for full navbar experience
+---
+
+## 2026-06-13 - US-012
+- Created ProfileController (app/Http/Controllers/Auth/ProfileController.php): show() returns profile/show view, update() validates name (required) + email (unique except current user), detects email change → sets email_verified_at=null + calls sendEmailVerificationNotification(), redirects back with 'Profilo aggiornato.' status
+- Created resources/views/profile/show.blade.php: form with nome/email fields, old() input preservation, separate section with link to /profile/password
+- Updated routes/web.php: GET+PUT /profile (auth+verified), named profile.show and profile.update
+- Files changed: app/Http/Controllers/Auth/ProfileController.php (new), resources/views/profile/show.blade.php (new), routes/web.php
+- **Learnings for future iterations:**
+  - Email uniqueness rule excluding current user: `'unique:users,email,' . $user->id` (3rd param is the ignored ID)
+  - On email change: set `email_verified_at = null` then call `$user->sendEmailVerificationNotification()` — the User model's MustVerifyEmail interface provides this method
+  - old() helper in views needs a default for authenticated pages: `old('name', auth()->user()->name)` to repopulate after failed validation
+---
+
+## 2026-06-13 - US-011
+- Created PasswordResetController (app/Http/Controllers/Auth/PasswordResetController.php): showForgotForm() returns forgot-password view, sendResetLink() validates email + calls Password::sendResetLink(), showResetForm() passes token+email to reset-password view, resetPassword() calls Password::reset() with forceFill password + fires PasswordReset event, redirects to login with status
+- Created ProfilePasswordController (app/Http/Controllers/Auth/ProfilePasswordController.php): show() returns profile/password view, update() validates current_password (using built-in 'current_password' rule) + min:8 confirmed + updates hashed password, redirects back with 'Password aggiornata con successo.' status
+- Created views: auth/forgot-password.blade.php, auth/reset-password.blade.php, profile/password.blade.php (all extend layouts.auth)
+- Updated routes/web.php: 6 new routes (GET+POST /forgot-password with guest middleware, GET /reset-password/{token} + POST /reset-password with guest middleware, GET+PUT /profile/password with auth+verified middleware)
+- Updated auth/login.blade.php: added 'Password dimenticata?' link to /forgot-password
+- Reset email confirmed captured by Mailpit (Password::sendResetLink returned 'passwords.sent', Mailpit shows 'Reset your password' email)
+- Files changed: app/Http/Controllers/Auth/PasswordResetController.php (new), ProfilePasswordController.php (new), resources/views/auth/forgot-password.blade.php (new), auth/reset-password.blade.php (new), profile/password.blade.php (new), login.blade.php, routes/web.php
+- **Learnings for future iterations:**
+  - Laravel's built-in Password facade handles token creation, email sending, and validation — no manual token management needed
+  - `Password::RESET_LINK_SENT` and `Password::PASSWORD_RESET` are translation keys (e.g. 'passwords.sent', 'passwords.reset') — use `__($status)` to translate them in flash messages
+  - `current_password` validation rule verifies the user's current password against `Auth::user()` — no need to Hash::check() manually
+  - Password reset routes must use `guest` middleware (not `auth`) — the user is not logged in during reset flow
+  - The `PasswordReset` event should be fired after reset to trigger logout of other devices (handled by the framework's `resetUsingToken`)
+---
+
+## 2026-06-13 - US-010
+- Created LoginController (app/Http/Controllers/Auth/LoginController.php): show() returns login form, store() validates email/password, checks RateLimiter (5 attempts per IP, 60s decay), attempts Auth::attempt(), on fail increments rate limiter + returns generic error, on success clears rate limiter + regenerates session + checks email verification
+- If email not verified: logs out user, redirects to /email/verify with error message
+- If email verified: redirects to intended route or /dashboard
+- Updated resources/views/auth/login.blade.php: full form with email, password, remember checkbox, styled with Tailwind
+- Updated routes/web.php: replaced stub GET /login closure with LoginController@show + added POST /login → LoginController@store
+- Logout already handled in routes/web.php as a closure (POST /logout, invalidates session, redirects to /)
+- Files changed: app/Http/Controllers/Auth/LoginController.php (new), resources/views/auth/login.blade.php, routes/web.php
+- **Learnings for future iterations:**
+  - Use `RateLimiter::tooManyAttempts($key, 5)` + `RateLimiter::hit($key, 60)` + `RateLimiter::clear($key)` pattern for manual throttling — no need for ThrottlesLogins trait (it's in laravel/ui which isn't installed)
+  - After successful Auth::attempt(), always call `$request->session()->regenerate()` to prevent session fixation
+  - For unverified email on login: must explicitly Auth::logout() + invalidate session before redirecting to verification.notice
+  - `Auth::attempt()` third param is remember-me boolean — cast with `(bool)` since checkbox sends '1' or null
+---
+
+## 2026-06-13 - US-009
+- Created RegisterController (app/Http/Controllers/Auth/RegisterController.php): show() returns register form, store() validates (name required, email unique, password min:8 confirmed), creates User, fires Registered event, logs in user, redirects to /email/verify with flash message
+- Created EmailVerificationController: notice() returns verify-email view, verify() handles signed URL verification (redirects to /login after success), resend() resends verification email
+- Created DashboardController (stub): index() returns dashboard view
+- Registered `Registered::class → SendEmailVerificationNotification::class` listener in AppServiceProvider::boot() (not auto-wired in Laravel 11 without explicit registration)
+- Updated routes/web.php: stub GET /login, GET+POST /register, GET /email/verify (auth), GET /email/verify/{id}/{hash} (auth+signed), POST /email/verification-notification (auth+throttle:1,1), POST /logout (auth), GET /dashboard (auth+verified)
+- Created views: layouts/auth.blade.php (Tailwind CDN), auth/register.blade.php, auth/verify-email.blade.php, auth/login.blade.php (stub), dashboard.blade.php (placeholder)
+- Files changed: app/Http/Controllers/Auth/RegisterController.php, EmailVerificationController.php, DashboardController.php, AppServiceProvider.php, routes/web.php, 5 Blade views
+- **Learnings for future iterations:**
+  - In Laravel 11, the `Registered → SendEmailVerificationNotification` event listener is NOT auto-wired — must be explicitly registered in AppServiceProvider::boot() via `Event::listen(Registered::class, SendEmailVerificationNotification::class)`
+  - Route named 'login' must exist for `auth` middleware to redirect properly (otherwise route exception on unauthenticated access)
+  - The `throttle:1,1` rate limiter format means 1 request per 1 minute — correct for resend verification
+  - Verification URL uses sha1($user->email) as hash, generated by the framework via `EmailVerificationRequest`
+  - `pemiq.local` hostname is not set in /etc/hosts; test via localhost; CSRF curl testing has cookie-domain quirks but functionality verified via tinker
+---
+
+## 2026-06-13 - US-008
+- Ran `php artisan filament:install --panels` in container — generated app/Providers/Filament/AdminPanelProvider.php and published JS/CSS assets to public/
+- Updated AdminPanelProvider: path='/admin', Color::hex('#E85D04') brand color, navigationGroups for 'Utenti'/'Strava'/'Sistema'
+- Updated User model: implements FilamentUser interface with `canAccessPanel()` returning `$this->hasRole('administrator')` (Spatie)
+- bootstrap/providers.php auto-updated by Filament installer to include AdminPanelProvider
+- Verified: /admin returns 302 → /admin/login for unauthenticated users
+- **Learnings for future iterations:**
+  - Use `Color::hex('#rrggbb')` (not `Color::fromHex()`) for custom brand colors in Filament v4
+  - User model must implement `Filament\Models\Contracts\FilamentUser` with `canAccessPanel(Panel $panel): bool` to restrict panel access — without this, all authenticated users can access in non-local environments
+  - `filament:install --panels` publishes JS/CSS assets to public/ and adds `@php artisan filament:upgrade` to composer.json post-autoload-dump
+  - NavigationGroups defined in PanelProvider are just labels; each Resource sets its own `navigationGroup()` to one of these labels
+---
+
+## 2026-06-13 - US-007
+- Published Spatie Permission migrations via `vendor:publish` — created config/permission.php and migration 2026_06_13_195239_create_permission_tables
+- Ran migration successfully in container (creates roles, permissions, model_has_roles, model_has_permissions, role_has_permissions tables)
+- Created database/seeders/RolesAndPermissionsSeeder.php: clears permission cache, creates 'administrator' and 'user' roles with guard 'web' using firstOrCreate
+- Created database/seeders/AdminUserSeeder.php: creates admin@pemiq.com (PEMIQ Admin, password hashed, email_verified_at=now()), assigns 'administrator' role
+- Updated DatabaseSeeder to call RolesAndPermissionsSeeder then AdminUserSeeder (removed default test user creation)
+- `php artisan db:seed` ran without errors
+- **Learnings for future iterations:**
+  - Always call `app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions()` at start of roles seeder to avoid stale cache issues
+  - Use `firstOrCreate` in seeders so they are idempotent (safe to run multiple times)
+  - RolesAndPermissionsSeeder must run before AdminUserSeeder (roles must exist before assigning)
+---
+
+## 2026-06-13 - US-006
+- Created migration `create_sync_logs_table`: id, user_id (FK cascadeOnDelete), strava_account_id (FK cascadeOnDelete), sync_type (enum: historical/incremental), status (enum: pending/running/completed/failed), started_at (timestamp), completed_at (timestamp nullable), activities_imported (int default 0), error_message (text nullable), timestamps
+- Created migration `create_audit_logs_table`: id, admin_user_id (FK users cascadeOnDelete), target_user_id (FK users cascadeOnDelete), action (varchar 255), metadata (json nullable), created_at (timestamp, useCurrent) — no updated_at, $timestamps=false on model
+- Created app/Models/SyncLog.php with $fillable, string casts for sync_type/status, datetime casts for started_at/completed_at, belongsTo(User) and belongsTo(StravaAccount)
+- Created app/Models/AuditLog.php with $fillable, array cast for metadata, datetime cast for created_at, $timestamps=false, belongsTo(User, 'admin_user_id') and belongsTo(User, 'target_user_id')
+- Both migrations ran successfully in container
+- **Learnings for future iterations:**
+  - AuditLog has only `created_at` (no `updated_at`) — set `$timestamps = false` on model and use `->useCurrent()` in migration for created_at
+  - For FK columns referencing a non-default table (e.g. admin_user_id → users), use `->constrained('users')` with explicit table name
+---
+
+## Codebase Patterns
+- .env must use Docker service names as hostnames: DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit (not 127.0.0.1)
+- MariaDB Docker credentials: user=pemiq, password=pemiq, database=pemiq
+- User model uses traditional $fillable/$hidden/$casts properties (not PHP 8.4 #[Fillable] attribute syntax)
+- Run migrations via: docker compose exec app php artisan migrate
+- PHP version: 8.4.22, Laravel: 13.15.0, Filament: v4.11.7
+- Filament Color API: use `Color::hex('#rrggbb')` for custom hex colors (not `Color::fromHex()`)
+- User model implements FilamentUser interface for panel access control; `canAccessPanel()` checks Spatie role
+- Laravel 11: `Registered → SendEmailVerificationNotification` must be explicitly registered in AppServiceProvider::boot()
+- Auth views use `resources/views/layouts/auth.blade.php` with Tailwind CDN (no compiled assets needed for auth pages)
+- Authenticated app views use `resources/views/layouts/app.blade.php` (navbar + Alpine.js + flash messages)
+- Named route 'login' must exist before any auth middleware is applied (redirect target for unauthenticated users)
+- Alpine.js CDN: `<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">` (defer is required)
+- Flash messages: app layout checks session('status'), session('success'), session('error') and $errors
+- **Filament v4 BREAKING**: `Filament\Forms\Form` does NOT exist — use `Filament\Schemas\Schema` for form() method
+- **Filament v4 BREAKING**: `$navigationGroup` is typed `UnitEnum|string|null` in parent — use `getNavigationGroup(): ?string` method instead of static property
+- **Filament v4 BREAKING**: `$navigationIcon` is typed `BackedEnum|string|null` in parent — use `getNavigationIcon()` method instead
+- Filament resource discovery needs `php artisan optimize:clear` to pick up newly created resources (not just filament:clear-cached-components)
+
+---
+
+## 2026-06-13 - US-003
+- Implemented premium fields migration (is_premium boolean, premium_started_at timestamp, premium_expires_at timestamp)
+- Updated User model: added MustVerifyEmail interface, HasRoles trait (Spatie), $fillable/$hidden/$casts properties
+- Also fixed .env Docker hostnames (was 127.0.0.1, needed mariadb/redis/mailpit for container networking)
+- Files changed: app/Models/User.php, database/migrations/2026_06_13_194603_add_premium_fields_to_users_table.php, .env
+- **Learnings for future iterations:**
+  - The original User model used PHP 8.4 attribute syntax (#[Fillable], #[Hidden]) — switched to traditional properties per PRD spec
+  - .env was not updated with Docker hostnames in US-002 despite being in acceptance criteria — had to fix here
+  - Migration runs successfully in container; all premium fields confirmed in DB
+---
+
+## 2026-06-13 - US-005
+- Created migration `create_activities_table` with all fields: id, user_id (FK cascadeOnDelete), strava_activity_id (bigint unique), name (varchar 255), sport_type (varchar 100), started_at (timestamp), distance/elapsed_time/moving_time/elevation_gain/average_speed/max_speed/average_heartrate/max_heartrate/average_watts/calories all nullable, polyline (text nullable), raw_data (json), timestamps
+- Added 3 composite indexes: [user_id, started_at], [user_id, sport_type], [user_id, started_at, sport_type]
+- Created app/Models/Activity.php with full $fillable, $casts (started_at=>datetime, raw_data=>array), belongsTo(User) relation
+- Updated app/Models/User.php: added HasMany import and activities() relation
+- Migration ran successfully in container
+- **Learnings for future iterations:**
+  - Composite indexes in Laravel migrations: `$table->index(['col1', 'col2', 'col3'])` syntax
+  - `json` column type for raw_data cast to `array` in model $casts
+---
+
+## 2026-06-13 - US-004
+- Created migration create_strava_accounts_table with: user_id (FK, cascadeOnDelete), strava_athlete_id (bigint unique), access_token (text), refresh_token (text), token_expires_at (timestamp), last_sync_at (timestamp nullable), connection_status (enum: connected/disconnected/error, default connected), timestamps
+- Created app/Models/StravaAccount.php with $fillable, encrypted casts for access_token/refresh_token, datetime casts for token_expires_at/last_sync_at, and belongsTo(User) relation
+- Updated app/Models/User.php: added HasOne import and stravaAccount() relation
+- Migration ran successfully in container
+- **Learnings for future iterations:**
+  - Laravel `encrypted` cast works transparently via $casts — no extra config needed, APP_KEY is used for encryption
+  - For enum columns in migrations, use `$table->enum('col', ['a','b','c'])->default('a')` pattern
+---

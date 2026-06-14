@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'welcome'                 => 'Benvenuto in PEMIQ',
+    'profile_updated'         => 'Profilo aggiornato.',
+    'password_updated'        => 'Password aggiornata con successo.',
+    'strava_connected'        => 'Account Strava collegato con successo.',
+    'strava_disconnected'     => 'Account Strava scollegato.',
+    'strava_connect_denied'   => 'Hai negato l\'accesso a Strava.',
+    'sync_started'            => 'Sincronizzazione avviata.',
+    'verify_email'            => 'Controlla la tua casella email per verificare il tuo account.',
+    'email_verified'          => 'Email verificata con successo. Puoi ora effettuare il login.',
+    'credentials_invalid'     => 'Credenziali non valide.',
+    'register'                => 'Registrati',
+    'login'                   => 'Accedi',
+    'logout'                  => 'Esci',
+    'dashboard'               => 'Dashboard',
+    'profile'                 => 'Profilo',
+    'save'                    => 'Salva',
+    'cancel'                  => 'Annulla',
+    'confirm'                 => 'Conferma',
+    'language'                => 'Lingua',
+    'italian'                 => 'Italiano',
+    'english'                 => 'English',
+];

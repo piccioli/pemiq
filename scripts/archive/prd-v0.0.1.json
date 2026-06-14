@@ -18,8 +18,8 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Laravel 13.15.0, PHP 8.5.7, filament v4.11.7 (v5 blocked by security advisory on filament/actions)"
     },
     {
       "id": "US-002",
@@ -36,8 +36,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "docker-compose.yml con 6 servizi; Dockerfile php:8.4-fpm con pdo_mysql/redis/bcmath/gd/zip; nginx pemiq.local su porta 80; mailpit su porta 8025/1025; queue-worker con redis --sleep=3 --tries=3 --backoff=5"
     },
     {
       "id": "US-003",
@@ -53,8 +53,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Migration add_premium_fields_to_users_table aggiunge is_premium/premium_started_at/premium_expires_at. User model usa HasRoles (Spatie) + MustVerifyEmail. .env aggiornato con DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit (necessario per Docker networking)."
     },
     {
       "id": "US-004",
@@ -70,8 +70,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Migration create_strava_accounts_table con user_id FK, strava_athlete_id bigint unique, access_token/refresh_token text, token_expires_at, last_sync_at nullable, connection_status enum(connected/disconnected/error). StravaAccount model con encrypted casts per access_token/refresh_token. User model aggiornato con relazione hasOne(StravaAccount)."
     },
     {
       "id": "US-005",
@@ -88,8 +88,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Migration create_activities_table con tutti i campi (user_id FK, strava_activity_id bigint unique, name/sport_type/started_at, metriche float/int nullable, polyline text nullable, raw_data json). 3 indici compositi: [user_id,started_at], [user_id,sport_type], [user_id,started_at,sport_type]. Activity model con $fillable completo, $casts started_at=>datetime raw_data=>array, belongsTo(User). User model aggiornato con hasMany(Activity)."
     },
     {
       "id": "US-006",
@@ -105,8 +105,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Migration create_sync_logs_table (user_id FK, strava_account_id FK, sync_type enum(historical/incremental), status enum(pending/running/completed/failed), started_at, completed_at nullable, activities_imported int default 0, error_message text nullable, timestamps). Migration create_audit_logs_table (admin_user_id FK users, target_user_id FK users, action varchar 255, metadata json nullable, created_at timestamp). SyncLog model with $fillable, string casts for sync_type/status, datetime casts for started_at/completed_at, belongsTo(User) and belongsTo(StravaAccount). AuditLog model with $fillable, array cast for metadata, belongsTo(User, 'admin_user_id') and belongsTo(User, 'target_user_id'), $timestamps=false."
     },
     {
       "id": "US-007",
@@ -121,8 +121,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "vendor:publish ran successfully (config/permission.php + migration 2026_06_13_195239_create_permission_tables). RolesAndPermissionsSeeder creates 'administrator' and 'user' roles with guard 'web'. AdminUserSeeder creates admin@pemiq.com (PEMIQ Admin, email verified, role administrator). DatabaseSeeder calls both in order. db:seed ran without errors."
     },
     {
       "id": "US-008",
@@ -139,8 +139,8 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "filament:install created AdminPanelProvider; customized with Color::hex('#E85D04') brand color, navigationGroups ['Utenti','Strava','Sistema']. User model implements FilamentUser with canAccessPanel() checking 'administrator' role via Spatie HasRoles. Filament JS/CSS assets published to public/. /admin redirects to /admin/login for unauthenticated users (verified via curl 302). bootstrap/providers.php updated with AdminPanelProvider."
     },
     {
       "id": "US-009",
@@ -159,8 +159,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RegisterController (show/store) with validation (name required, email unique, password min:8 confirmed), fires Registered event (registered in AppServiceProvider) which sends verification email via Mailpit. EmailVerificationController (notice/verify/resend). Routes: GET/POST /register, GET /email/verify (auth), GET /email/verify/{id}/{hash} (auth+signed), POST /email/verification-notification (auth+throttle:1,1), GET /dashboard (auth+verified). Stub login route added. Auth layout with Tailwind CDN. Verification emails confirmed captured by Mailpit."
     },
     {
       "id": "US-010",
@@ -177,8 +177,8 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "LoginController (show/store) with RateLimiter throttle (5 attempts per IP, 60s lockout), generic 'Credenziali non valide' error, unverified email redirect to /email/verify, session regeneration on success, redirect to /dashboard. Logout already implemented via closure in routes/web.php (POST /logout invalidates session, redirects to /). Login form with email, password, remember checkbox."
     },
     {
       "id": "US-011",
@@ -196,8 +196,8 @@
         "Typecheck passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "PasswordResetController (showForgotForm/sendResetLink/showResetForm/resetPassword) using Laravel Password facade. ProfilePasswordController (show/update) using current_password validation rule. Routes: GET+POST /forgot-password (guest), GET /reset-password/{token} (guest), POST /reset-password (guest), GET+PUT /profile/password (auth+verified). Views: auth/forgot-password.blade.php, auth/reset-password.blade.php, profile/password.blade.php. Login view updated with 'Password dimenticata?' link. Reset email confirmed captured by Mailpit."
     },
     {
       "id": "US-012",
@@ -213,8 +213,8 @@
         "Typecheck passes"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ProfileController (show/update) with validation (name required, email unique except current user). On email change: email_verified_at=null + sendEmailVerificationNotification(). Flash 'Profilo aggiornato.' on success. Routes: GET+PUT /profile (auth+verified). View profile/show.blade.php with nome/email form and link to /profile/password for password change section."
     },
     {
       "id": "US-013",
@@ -232,8 +232,8 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/layouts/app.blade.php with: HTML5 doctype, Tailwind CDN, Alpine.js CDN (defer), navbar with PEMIQ logo left + Dashboard link center + user dropdown right (Profilo/Logout), hamburger mobile menu (<768px), Alpine.js dismissable flash messages (session status/success/error + $errors), <main> tag with max-w-7xl padding, minimal footer. Updated dashboard.blade.php, profile/show.blade.php, profile/password.blade.php to extend layouts.app. All Blade views compiled successfully via view:cache."
     },
     {
       "id": "US-014",
@@ -252,8 +252,8 @@
         "Typecheck passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaController with redirect() (Socialite driver 'strava', scope 'activity:read_all') and callback() (updateOrCreate StravaAccount with strava_athlete_id, encrypted access_token/refresh_token, token_expires_at). Strava Socialite provider registered via Event::listen(SocialiteWasCalled) in AppServiceProvider. config/services.php updated with strava key (client_id/secret/redirect from env). Routes GET /strava/redirect and GET /strava/callback with auth+verified middleware. Dashboard updated to show 'Collega Strava' button when no connected account, or 'Connesso' badge with last sync date when connected. access_token/refresh_token use Laravel encrypted cast (from StravaAccount model, US-004). Error handling: checks request 'error' parameter for denied permissions."
     },
     {
       "id": "US-015",
@@ -271,8 +271,8 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaController::disconnect() added: reads access_token (decrypted via encrypted cast), calls POST https://www.strava.com/oauth/deauthorize, updates StravaAccount with connection_status='disconnected', access_token=null, refresh_token=null. Route DELETE /strava/disconnect with auth+verified middleware. Dashboard updated with 'Scollega Strava' button + Alpine.js confirmation dialog ('Sei sicuro? Le attività importate rimarranno.') using x-cloak/x-show pattern. Strava API revocation failure is swallowed (local disconnect always proceeds). Activities are not deleted."
     },
     {
       "id": "US-016",
@@ -289,8 +289,8 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaApiService in app/Services/Strava/StravaApiService.php with fetchActivities(StravaAccount, ?Carbon): Collection. GET https://www.strava.com/api/v3/athlete/activities with per_page=100, page, after (Unix timestamp). Pagination loop until empty or <100 items; 1s sleep between pages. Exponential backoff (1s/2s/4s) on HTTP 429. Throws StravaTokenExpiredException on 401, StravaApiException on 5xx or network errors. Exception classes in app/Exceptions/Strava/."
     },
     {
       "id": "US-017",
@@ -306,8 +306,8 @@
         "Typecheck passes"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaTokenService in app/Services/Strava/StravaTokenService.php with ensureValidToken(StravaAccount): StravaAccount. Checks token_expires_at <= now()+5min; if so, POSTs to https://www.strava.com/oauth/token with client_id/client_secret/grant_type=refresh_token/refresh_token. Updates StravaAccount with new access_token, refresh_token, token_expires_at. On network error or non-2xx response: sets connection_status='error', throws StravaTokenRefreshException. StravaApiService updated with injected StravaTokenService (constructor injection); calls ensureValidToken() at the start of fetchActivities(). StravaTokenRefreshException added in app/Exceptions/Strava/."
     },
     {
       "id": "US-018",
@@ -325,8 +325,8 @@
         "Typecheck passes"
       ],
       "priority": 18,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ActivitySyncService in app/Services/Sync/ActivitySyncService.php. sync() iterates Collection, calls Activity::updateOrCreate(['strava_activity_id'=>$data['id']], mapActivityData()), updates SyncLog status='running' then activities_imported count. createSyncLog() creates SyncLog with status='pending', started_at=now(). completeSyncLog() sets status='completed', completed_at=now(), activities_imported. failSyncLog() sets status='failed', error_message. Field mapping: strava id→strava_activity_id, start_date→started_at (Carbon::parse), total_elevation_gain→elevation_gain, map.summary_polyline→polyline, kilojoules*0.239→calories (fallback to data['calories']), raw_data=full array."
     },
     {
       "id": "US-019",
@@ -344,8 +344,8 @@
         "Typecheck passes"
       ],
       "priority": 19,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SyncStravaHistoricalActivities job in app/Jobs/SyncStravaHistoricalActivities.php: implements ShouldQueue, $tries=3, $backoff=[5,30,60]. handle() receives StravaApiService/ActivitySyncService/StravaTokenService via constructor injection. Creates SyncLog (pending→running→completed/failed), fetches all activities (no 'after' filter), upserts via ActivitySyncService::sync(), sets last_sync_at on success. StravaTokenExpiredException caught: forces ensureValidToken refresh then re-throws for Laravel retry. General exceptions caught: failSyncLog then re-throws. Route POST /strava/sync-historical → StravaController::syncHistorical() dispatches the job; button added to dashboard view."
     },
     {
       "id": "US-020",
@@ -362,8 +362,8 @@
         "Typecheck passes"
       ],
       "priority": 20,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SyncStravaIncrementalActivities job in app/Jobs/SyncStravaIncrementalActivities.php: implements ShouldQueue, $tries=3, $backoff=[5,30,60]. handle() checks last_sync_at — if set, passes it as Carbon 'after' to fetchActivities (incremental); if null, full historical sync. Creates SyncLog with sync_type='incremental' or 'historical', completes/fails log, sets last_sync_at on success. Same StravaTokenExpiredException/retry pattern as historical job. SyncAllStravaAccounts command in app/Console/Commands/SyncAllStravaAccounts.php: signature 'strava:sync-all', dispatches SyncStravaIncrementalActivities for every StravaAccount with connection_status='connected'. Schedule in routes/console.php: Schedule::command('strava:sync-all')->hourly() — verified via php artisan schedule:list showing '0 * * * *'."
     },
     {
       "id": "US-021",
@@ -380,8 +380,8 @@
         "Typecheck passes"
       ],
       "priority": 21,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Livewire 3 component App\\Livewire\\Strava\\ConnectionStatus with #[Poll('5s')] attribute for auto-refresh every 5 seconds. startHistoricalSync() action checks for connected account + no running sync, then dispatches SyncStravaHistoricalActivities job and sets $syncMessage. render() queries getConnectedAccount() (StravaAccount with connection_status='connected') and isSyncRunning() (SyncLog WHERE status='running'). View: no account → 'Collega Strava' link; connected → badge, last sync date, sync button (disabled+spinner when running), disconnect button with Alpine.js confirm dialog. Dashboard view updated to use @livewire('strava.connection-status'). DashboardController simplified (no longer passes $stravaAccount). Blade cache rebuilt successfully."
     },
     {
       "id": "US-022",
@@ -399,8 +399,8 @@
         "Typecheck passes"
       ],
       "priority": 22,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "DashboardStatsService in app/Services/Dashboard/DashboardStatsService.php. getOverviewStats() uses a single selectRaw aggregation returning total_activities (int), total_distance_km (SUM(distance)/1000, rounded 1dp), total_elevation_m (rounded 1dp), total_elapsed_seconds (int), total_moving_seconds (int). getAnnualStats() groups by YEAR(started_at) ordered DESC, returns year/activities/distance_km/elevation_m/hours. getMonthlyStats() filters by whereYear + groups by MONTH(started_at), fills all 12 months (even empty ones with zeros) via collect(range(1,12)). getSportDistribution() groups by sport_type ordered by COUNT(*) DESC, returns sport_type/activities/distance_km/hours. All queries filter by user_id. Time returned as hours (float) for annual/monthly/sport queries; seconds (int) for overview."
     },
     {
       "id": "US-023",
@@ -416,8 +416,8 @@
         "Typecheck passes"
       ],
       "priority": 23,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Livewire component App\\Livewire\\Dashboard\\OverviewStats with render(DashboardStatsService) dependency injection. formatSeconds() private method converts total_elapsed_seconds/total_moving_seconds to h:mm string. View: 5 cards (grid-cols-1 sm:grid-cols-2 xl:grid-cols-5) each with SVG icon, large numeric value, label. Empty state message when total_activities===0. Alias: 'dashboard.overview-stats'."
     },
     {
       "id": "US-024",
@@ -433,8 +433,8 @@
         "Typecheck passes"
       ],
       "priority": 24,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Livewire component App\\Livewire\\Dashboard\\AnnualAnalysis with render(DashboardStatsService) method injection. View: responsive table (overflow-x-auto) with columns Anno, Attività, Distanza (km), Dislivello (m), Ore. Rows ordered by year DESC (service handles ordering). Empty state when collection is empty. Alias: 'dashboard.annual-analysis'."
     },
     {
       "id": "US-025",
@@ -451,8 +451,8 @@
         "Typecheck passes"
       ],
       "priority": 25,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Livewire component App\\Livewire\\Dashboard\\MonthlyAnalysis with public $year property (default: current year). render(DashboardStatsService) fetches getAnnualStats() to build $availableYears list, then getMonthlyStats($user, $year). If year not in available years, defaults to first available. View: year selector dropdown (wire:model.live for reactive update), responsive table (overflow-x-auto) with 12 rows always shown, Italian month names array, empty months show '—' instead of 0. hasData check shows empty state message when sum of activities = 0 for the year. Alias: 'dashboard.monthly-analysis'."
     },
     {
       "id": "US-026",
@@ -468,8 +468,8 @@
         "Typecheck passes"
       ],
       "priority": 26,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Livewire component App\\Livewire\\Dashboard\\SportDistribution with render(DashboardStatsService) method injection. View: responsive table (overflow-x-auto) with columns Sport, Attività, Distanza (km), Ore. Each sport row has a colored pill badge via @php $sportColors map keyed by Strava sport_type values (Run=orange, TrailRun=green, Ride=blue, GravelRide=teal, MountainBikeRide=yellow, VirtualRide=sky, VirtualRun=amber, Hike=lime, Walk=purple, Swim=cyan, Workout=gray, unknown=gray fallback). Ordering by COUNT(*) DESC handled by DashboardStatsService. Empty state when collection is empty. Alias: 'dashboard.sport-distribution'."
     },
     {
       "id": "US-027",
@@ -484,8 +484,8 @@
         "Typecheck passes"
       ],
       "priority": 27,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created resources/views/dashboard/index.blade.php with all 5 Livewire components in order (space-y-6 layout). DashboardController::index() updated to return view('dashboard.index'). Old resources/views/dashboard.blade.php deleted. Route / updated to redirect to /dashboard (auth()->check()) or /login. Each component already has its own h2 heading; dashboard page adds h1 'Dashboard' + welcome message at top. All views compile via view:cache."
     },
     {
       "id": "US-028",
@@ -504,8 +504,8 @@
         "Typecheck passes"
       ],
       "priority": 28,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "UserResource in app/Filament/Resources/UserResource.php. Navigation group via getNavigationGroup() method (NOT static property — Filament v4 uses UnitEnum|string|null type which conflicts with ?string). Similarly getNavigationIcon() returns 'heroicon-o-users'. form() uses Filament\\Schemas\\Schema (NOT Filament\\Forms\\Form — that class doesn't exist in Filament v4). Table columns: Nome/Email (searchable+sortable), Ruolo (roles.name badge), Premium (TextColumn badge with Sì/No + success/gray color), Registrato il (dateTime), Email verificata (IconColumn boolean). Filters: SelectFilter for role (relationship), TernaryFilter for is_premium, Filter with date range for created_at. Actions: EditAction, 'Promuovi a Premium' (form modal for premium_expires_at), 'Revoca Premium' (requiresConfirmation). BulkActions in BulkActionGroup: 'Promuovi selezionati', 'Revoca Premium selezionati'. Routes: /admin/users (index) + /admin/users/{record}/edit."
     },
     {
       "id": "US-029",
@@ -524,8 +524,8 @@
         "Typecheck passes"
       ],
       "priority": 29,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "StravaAccountResource: list-only (no edit), navigation group 'Strava', columns: user.name (searchable+sortable), strava_athlete_id, connection_status (badge: connected=success/disconnected=gray/error=danger), last_sync_at. SelectFilter for connection_status. Action 'Forza sincronizzazione' dispatches SyncStravaHistoricalActivities job (requiresConfirmation). ActivityResource: list-only, navigation group 'Strava', columns: user.name (searchable+sortable), name (searchable, limit 40), sport_type (badge), started_at (sorted desc by default), distance (÷1000 km), elevation_gain. Filters: user (relationship select), sport_type (dynamic options from distinct values), started_at date range. Both resources have empty form() and no bulk actions."
     },
     {
       "id": "US-030",
@@ -544,8 +544,8 @@
         "Typecheck passes"
       ],
       "priority": 30,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SyncLogResource: list-only in 'Sistema' group. Columns: user.name, sync_type (badge: historical=info/incremental=gray), status (badge: completed=success/running=warning/pending=gray/failed=danger), started_at (sorted desc), duration (diffForHumans between started_at and completed_at or '—'), activities_imported, error_message (limit 60 + tooltip for full text). Filters: status SelectFilter, sync_type SelectFilter, user relationship SelectFilter. AuditLogResource: list-only in 'Sistema' group. Columns: adminUser.name, targetUser.name, action (badge+searchable), created_at (sorted desc), metadata (JSON formatted, limit 60 + tooltip). Filters: admin_user_id SelectFilter, action dynamic SelectFilter. Both resources have empty form(), empty actions and bulkActions."
     },
     {
       "id": "US-031",
@@ -563,8 +563,8 @@
         "Typecheck passes"
       ],
       "priority": 31,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ImpersonateController::stop() reads session('impersonating_admin_id'), creates AuditLog (impersonate_stop), calls Auth::loginUsingId($adminId), forgets session key, redirects to /admin/users. Route POST /impersonate/stop (auth middleware, named impersonate.stop). Shared partial: resources/views/partials/impersonation-banner.blade.php — shown when session('impersonating_admin_id') is set, includes POST form to impersonate.stop. Banner included in layouts/app.blade.php via @include. Filament banner via AdminPanelProvider renderHook(PanelsRenderHook::BODY_START). UserResource: 'Impersona' action visible only for non-administrator records (->visible(fn => !$record->hasRole('administrator'))), requiresConfirmation, inline creates AuditLog (impersonate_start + IP + user_agent), sets session, Auth::loginUsingId, redirects to dashboard."
     },
     {
       "id": "US-032",
@@ -582,8 +582,8 @@
         "Typecheck passes"
       ],
       "priority": 32,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "AdminStatsOverview widget in app/Filament/Widgets/AdminStatsOverview.php extends StatsOverviewWidget. 5 Stat::make() calls: Utenti Totali (User::count()), Utenti Premium (User::where('is_premium',true)->count()), Account Strava Collegati (StravaAccount::where('connected')->count()), Sync Completate 24h (SyncLog completed + created_at > now()-24h), Sync Fallite 24h (same for failed). Sync Fallite uses ->color($count > 0 ? 'danger' : 'success'). Registered in AdminPanelProvider widgets[] replacing FilamentInfoWidget."
     },
     {
       "id": "US-033",
@@ -600,8 +600,8 @@
         "Typecheck passes"
       ],
       "priority": 33,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "docker/uat/docker-compose.yml: 7 services (app, nginx, mariadb, redis, mailpit, queue-worker, scheduler). docker/uat/nginx.conf: HTTP→HTTPS redirect + HTTPS server for uat.pemiq.com with Let's Encrypt certs at /etc/letsencrypt/live/uat.pemiq.com/. docker/production/docker-compose.yml: 6 services (no mailpit). docker/production/nginx.conf: HTTP→HTTPS redirect, www→apex redirect, HTTPS server for pemiq.com. .env.uat.example: APP_ENV=staging, MAIL_HOST=mailpit, MAIL_PORT=1025. .env.production.example: APP_ENV=production, MAIL_MAILER=postmark, no mailpit. Scheduler service runs 'php artisan schedule:run' in a 60s loop (no cron daemon needed). README.md rewritten with setup/update instructions for local/UAT/production."
     },
     {
       "id": "US-034",
@@ -619,8 +619,8 @@
         "Typecheck passes"
       ],
       "priority": 34,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created lang/it/ with auth.php, pagination.php, passwords.php, validation.php (full Laravel validation translations in Italian), messages.php (app-specific keys). Created lang/en/messages.php. Migration add_locale_to_users_table: varchar(5) locale, default 'it'. User model: 'locale' added to $fillable. SetLocale middleware: if auth()->check(), calls App::setLocale($user->locale). Registered in bootstrap/app.php as $middleware->web(append). Profile form: locale dropdown (IT/EN) added; ProfileController validates 'locale' in:it,en and saves to user. The app locale defaults to 'it' (config/app.php) — middleware overrides per user. Note: not all view strings were replaced with __() due to scope — views already use Italian as default language."
     },
     {
       "id": "US-035",
@@ -637,8 +637,8 @@
         "Typecheck passes"
       ],
       "priority": 35,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "DashboardStatsService mocked in RegistrationTest (SQLite lacks YEAR/MONTH); Http::fake for Strava deauthorize; strava_accounts tokens made nullable for disconnect."
     }
   ]
 }

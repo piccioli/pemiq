@@ -1,0 +1,35 @@
+# Ralph Progress Log
+Started: Sab 13 Giu 2026 19:36:23 CEST
+---
+
+## Codebase Patterns
+- Composer is not in PATH; install fresh each session: `php -r "copy('https://getcomposer.org/installer', '/tmp/cs.php');" && php /tmp/cs.php --install-dir=/tmp --filename=composer2`
+- PHP 8.5.7 installed via brew (upgraded from 8.5.0 for intl extension required by Filament)
+- Filament v4.11.7 installed (v5 blocked by security advisory PKSA-ndkp-2znf-9m7c on filament/actions)
+- Docker is now set up (US-002 done) — `docker compose up -d` starts all services; MariaDB on port 3306, Redis 6379, Mailpit 8025/1025, nginx on 80
+- .env.example uses Docker service hostnames: DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit; copy docker/.env.local.example to .env for Docker dev
+- `artisan key:generate` already run; .env has APP_KEY set
+- vendor/ and node_modules/ are gitignored — run `composer install` and `npm install` after checkout
+- Migration stories (US-003+) can now run inside Docker: `docker compose exec app php artisan migrate`
+
+---
+
+## 2026-06-13T19:40 - US-001
+- What was implemented: Laravel 13.15.0 project bootstrapped with PHP 8.5.7. Installed all required PHP packages (spatie/laravel-permission v8, filament v4.11.7, livewire v3.8.1, laravel/socialite v5.27, socialiteproviders/strava v4.1) and npm packages (alpinejs, @tailwindcss/forms). Configured locale=it, timezone=Europe/Rome, queue default=redis, DB=mysql, Strava vars in .env.example.
+- Files changed: All Laravel base files, composer.json, composer.lock, package.json, package-lock.json, config/app.php, config/queue.php, .env.example
+- **Learnings for future iterations:**
+  - Filament v5 blocked by security advisory on filament/actions — use v4 API for all Filament stories
+  - PHP needs the intl extension for Filament; brew install php upgrades it and includes intl
+  - Composer must be downloaded fresh each session (not in PATH, no write access to /usr/local/bin)
+  - DB migration stories (US-003+) require Docker (US-002) to be set up first for MySQL
+---
+
+## 2026-06-13 - US-002
+- What was implemented: Docker Compose local environment with 6 services (app, nginx, mariadb, redis, mailpit, queue-worker). PHP-FPM 8.4 Dockerfile with extensions pdo_mysql, redis, bcmath, gd, zip. Nginx configured for pemiq.local with PHP-FPM passthrough. Named volumes for mariadb_data and redis_data. Queue worker running redis driver with --sleep=3 --tries=3 --backoff=5.
+- Files changed: docker-compose.yml, docker/php/Dockerfile, docker/nginx/default.conf, docker/.env.local.example, .env.example (DB_HOST=mariadb, REDIS_HOST=redis, MAIL_HOST=mailpit, MAIL_PORT=1025)
+- **Learnings for future iterations:**
+  - All migration stories (US-003+) should run via `docker compose exec app php artisan migrate` — no local MySQL needed
+  - Mailpit web UI is at http://localhost:8025; SMTP port is 1025 inside Docker network
+  - MariaDB credentials: pemiq/pemiq, database: pemiq (matching docker-compose and .env.local.example)
+  - Add pemiq.local to /etc/hosts pointing to 127.0.0.1 for browser access
+---

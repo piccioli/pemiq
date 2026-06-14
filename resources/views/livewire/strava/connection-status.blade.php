@@ -1,0 +1,81 @@
+<div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Connessione Strava</h2>
+
+    @if ($syncMessage)
+        <div class="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-800 rounded-lg text-sm">
+            {{ $syncMessage }}
+        </div>
+    @endif
+
+    @if ($stravaAccount)
+        <div class="flex items-center justify-between flex-wrap gap-3" x-data="{ confirmDisconnect: false }">
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    Connesso
+                </span>
+                @if ($stravaAccount->last_sync_at)
+                    <span class="text-sm text-gray-500">
+                        Ultima sync: {{ $stravaAccount->last_sync_at->format('d/m/Y H:i') }}
+                    </span>
+                @else
+                    <span class="text-sm text-gray-500">Nessuna sincronizzazione ancora</span>
+                @endif
+            </div>
+
+            <div class="flex items-center gap-3">
+                @if ($syncRunning)
+                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-500 font-medium rounded-lg text-sm cursor-not-allowed">
+                        <svg class="animate-spin h-4 w-4 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Sincronizzazione in corso...
+                    </span>
+                @else
+                    <button wire:click="startHistoricalSync"
+                            wire:loading.attr="disabled"
+                            class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        Sincronizza attività storiche
+                    </button>
+                @endif
+
+                <button @click="confirmDisconnect = true"
+                        class="inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition text-sm">
+                    Scollega Strava
+                </button>
+
+                {{-- Alpine.js confirmation dialog --}}
+                <div x-show="confirmDisconnect"
+                     x-cloak
+                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Sei sicuro?</h3>
+                        <p class="text-gray-600 mb-6">Le attività importate rimarranno.</p>
+                        <div class="flex gap-3 justify-end">
+                            <button @click="confirmDisconnect = false"
+                                    class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition">
+                                Annulla
+                            </button>
+                            <form action="{{ route('strava.disconnect') }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition">
+                                    Scollega
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @else
+        <div class="flex items-center gap-4">
+            <p class="text-gray-600">Collega il tuo account Strava per importare le attività.</p>
+            <a href="{{ route('strava.redirect') }}"
+               class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition">
+                Collega Strava
+            </a>
+        </div>
+    @endif
+</div>
