@@ -1,3 +1,18 @@
+## 2026-06-14 - US-004
+- Created tests/Feature/Middleware/EnsurePremiumTest.php: 3 feature tests for EnsurePremium middleware.
+- Registered a test route with `['auth', 'premium']` middleware in setUp() to test against real route behaviour.
+- test_unauthenticated_user_is_redirected_to_login: GET without actingAs → auth middleware redirects to /login (not 500).
+- test_non_premium_user_is_redirected_to_dashboard_with_flash: user(is_premium=false) → redirect /dashboard, session has 'error' flash.
+- test_premium_user_can_access_protected_route: user(is_premium=true, premium_expires_at=future) → 200 OK.
+- Confirmed 'premium' alias already registered in bootstrap/app.php — no changes needed.
+- Full test suite: 41 tests pass.
+- Files changed: tests/Feature/Middleware/EnsurePremiumTest.php (new)
+- **Learnings for future iterations:**
+  - To test a specific middleware in isolation, register a disposable test route in setUp() using `Route::middleware([...])->get('/test-route', fn() => response('OK'))` — no need to wait for real premium routes to exist
+  - The `auth` middleware must be included on the test route so that unauthenticated requests get redirected to /login rather than hitting the EnsurePremium middleware which redirects to /dashboard
+  - `assertSessionHas('error', '...')` checks the flashed session value on the redirect response directly
+---
+
 ## 2026-06-14 - US-003
 - Added `start(User $user)` method to ImpersonateController: checks admin role (403 if not), creates AuditLog (impersonate_start), sets session('impersonating_admin_id'), logs in as target user, redirects to dashboard.
 - Added `POST /impersonate/start/{user}` route (auth middleware, named impersonate.start) in routes/web.php.
