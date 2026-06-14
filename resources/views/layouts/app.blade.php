@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PEMIQ — @yield('title', 'App')</title>
 
+    {{-- Anti-flash: read theme from localStorage before CSS renders --}}
+    <script>(function(){var t=localStorage.getItem('pemiq-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+
     {{-- Google Fonts: Space Grotesk (display), Inter (body), DM Mono (mono) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,6 +75,30 @@
                 @php
                     $isPremiumActive = auth()->user()->is_premium && (!auth()->user()->premium_expires_at || auth()->user()->premium_expires_at->isFuture());
                 @endphp
+
+                {{-- Theme toggle (sun = dark mode active, moon = light mode active) --}}
+                <button
+                    onclick="(function(){var h=document.documentElement;var next=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',next);localStorage.setItem('pemiq-theme',next);})()"
+                    aria-label="Commuta tema chiaro/scuro"
+                    style="background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 6px; border-radius: var(--radius-md); display: flex; align-items: center; line-height: 0; transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);"
+                    onmouseover="this.style.color='var(--text-strong)'; this.style.background='var(--surface-2)'"
+                    onmouseout="this.style.color='var(--text-muted)'; this.style.background='none'"
+                >
+                    <svg class="theme-toggle-sun" style="width: 18px; height: 18px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                    <svg class="theme-toggle-moon" style="width: 18px; height: 18px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </button>
 
                 {{-- Premium badge (zone-4 amber) or upgrade link (accent teal) --}}
                 @if($isPremiumActive)
