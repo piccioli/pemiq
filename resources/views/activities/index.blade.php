@@ -13,38 +13,29 @@
     {{-- Filtri --}}
     <div class="bg-white rounded-lg shadow p-4">
         <form method="GET" action="{{ route('activities.index') }}" class="flex flex-wrap gap-3 items-end">
-            <div class="flex flex-col gap-1">
-                <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Sport</label>
-                <select name="sport" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Tutti gli sport</option>
-                    @foreach ($sportTypes as $type)
-                        <option value="{{ $type }}" @selected($sport === $type)>{{ $type }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-form.select :label="__('messages.col_sport')" name="sport">
+                <option value="">Tutti gli sport</option>
+                @foreach ($sportTypes as $type)
+                    <option value="{{ $type }}" @selected($sport === $type)>{{ $type }}</option>
+                @endforeach
+            </x-form.select>
 
-            <div class="flex flex-col gap-1">
-                <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Anno</label>
-                <select name="year" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Tutti gli anni</option>
-                    @foreach ($availableYears as $y)
-                        <option value="{{ $y }}" @selected((string) $year === (string) $y)>{{ $y }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-form.select :label="__('messages.col_year')" name="year">
+                <option value="">Tutti gli anni</option>
+                @foreach ($availableYears as $y)
+                    <option value="{{ $y }}" @selected((string) $year === (string) $y)>{{ $y }}</option>
+                @endforeach
+            </x-form.select>
 
-            <div class="flex flex-col gap-1">
-                @php
-                    $monthNames = trans('messages.months');
-                @endphp
-                <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Mese</label>
-                <select name="month" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Tutti i mesi</option>
-                    @foreach ($monthNames as $idx => $name)
-                        <option value="{{ $idx + 1 }}" @selected((string) $month === (string) ($idx + 1))>{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
+            @php
+                $monthNames = trans('messages.months');
+            @endphp
+            <x-form.select :label="__('messages.col_month')" name="month">
+                <option value="">Tutti i mesi</option>
+                @foreach ($monthNames as $idx => $name)
+                    <option value="{{ $idx + 1 }}" @selected((string) $month === (string) ($idx + 1))>{{ $name }}</option>
+                @endforeach
+            </x-form.select>
 
             <x-button type="submit">Filtra</x-button>
         </form>

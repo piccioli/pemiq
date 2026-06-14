@@ -2,18 +2,11 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.dashboard_monthly_analysis_title') }}</h2>
 
-        <div>
-            <label for="year-select" class="sr-only">{{ __('messages.col_year') }}</label>
-            <select
-                id="year-select"
-                wire:model.live="year"
-                class="border border-gray-300 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                @foreach ($availableYears as $y)
-                    <option value="{{ $y }}">{{ $y }}</option>
-                @endforeach
-            </select>
-        </div>
+        <x-form.select size="sm" id="year-select" wire:model.live="year">
+            @foreach ($availableYears as $y)
+                <option value="{{ $y }}">{{ $y }}</option>
+            @endforeach
+        </x-form.select>
     </div>
 
     @php

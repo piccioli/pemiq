@@ -4,26 +4,20 @@
 
         <div class="flex flex-wrap items-center gap-3">
             {{-- Range selector --}}
-            <select
-                wire:model.live="range"
-                class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-violet-500 focus:border-violet-500"
-            >
+            <x-form.select size="sm" wire:model.live="range">
                 <option value="3months">{{ __('messages.trend_range_3months') }}</option>
                 <option value="6months">{{ __('messages.trend_range_6months') }}</option>
                 <option value="1year">{{ __('messages.trend_range_1year') }}</option>
                 <option value="custom">{{ __('messages.trend_range_custom') }}</option>
-            </select>
+            </x-form.select>
 
             {{-- Sport filter --}}
-            <select
-                wire:model.live="sportType"
-                class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-violet-500 focus:border-violet-500"
-            >
+            <x-form.select size="sm" wire:model.live="sportType">
                 <option value="">{{ __('messages.trend_all_sports') }}</option>
                 @foreach ($sportTypes as $type)
                     <option value="{{ $type }}">{{ $type }}</option>
                 @endforeach
-            </select>
+            </x-form.select>
 
             {{-- Metric toggle --}}
             <div class="flex rounded-md border border-gray-300 overflow-hidden text-sm">

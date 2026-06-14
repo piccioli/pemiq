@@ -53,16 +53,12 @@
 
             {{-- Sport filter --}}
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.trend_all_sports') }}</label>
-                <select
-                    wire:model="sportType"
-                    class="w-full text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-violet-500 focus:border-violet-500"
-                >
+                <x-form.select :label="__('messages.col_sport')" wire:model="sportType">
                     <option value="">{{ __('messages.trend_all_sports') }}</option>
                     @foreach ($sportTypes as $type)
                         <option value="{{ $type }}">{{ $type }}</option>
                     @endforeach
-                </select>
+                </x-form.select>
             </div>
 
             {{-- Update button --}}

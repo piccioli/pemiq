@@ -4,14 +4,11 @@
 
         @if ($hasData)
         <div class="flex items-center gap-3">
-            <select
-                wire:model.live="year"
-                class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-orange-500 focus:border-orange-500"
-            >
+            <x-form.select size="sm" wire:model.live="year">
                 @foreach ($availableYears as $y)
                     <option value="{{ $y }}">{{ $y }}</option>
                 @endforeach
-            </select>
+            </x-form.select>
 
             <div class="flex rounded-md border border-gray-300 overflow-hidden text-sm">
                 <button

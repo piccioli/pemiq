@@ -556,6 +556,46 @@ body {
     padding-left: 38px;
 }
 
+.pq-select {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-strong);
+    border-radius: var(--radius-md);
+    padding: 10px 36px 10px 14px;
+    font: var(--text-body);
+    font-family: var(--font-body);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+    transition: border-color var(--dur-fast) var(--ease-out),
+                box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.pq-select:focus {
+    border-color: var(--border-focus);
+    box-shadow: var(--ring-focus);
+}
+
+.pq-select-sm {
+    padding: 6px 30px 6px 10px;
+    font-size: var(--fs-sm);
+    background-position: right 8px center;
+}
+
+.pq-select-error {
+    border-color: var(--danger);
+}
+
+.pq-select-error:focus {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 20%, transparent);
+}
+
 /* ─── Tailwind v4 theme extension ─────────────────────────────── */
 @theme inline {
     --font-sans: var(--font-body);

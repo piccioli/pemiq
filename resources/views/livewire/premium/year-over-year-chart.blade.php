@@ -7,40 +7,31 @@
             <div class="flex items-center gap-2">
                 <span class="inline-block w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></span>
                 <label class="text-sm text-gray-600">{{ __('messages.yoy_year_a') }}</label>
-                <select
-                    wire:model.live="yearA"
-                    class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
-                >
+                <x-form.select size="sm" wire:model.live="yearA">
                     @foreach ($availableYears as $y)
                         <option value="{{ $y }}">{{ $y }}</option>
                     @endforeach
-                </select>
+                </x-form.select>
             </div>
 
             {{-- Year B selector --}}
             <div class="flex items-center gap-2">
                 <span class="inline-block w-3 h-3 rounded-full bg-orange-500 flex-shrink-0"></span>
                 <label class="text-sm text-gray-600">{{ __('messages.yoy_year_b') }}</label>
-                <select
-                    wire:model.live="yearB"
-                    class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-orange-500 focus:border-orange-500"
-                >
+                <x-form.select size="sm" wire:model.live="yearB">
                     @foreach ($availableYears as $y)
                         <option value="{{ $y }}">{{ $y }}</option>
                     @endforeach
-                </select>
+                </x-form.select>
             </div>
 
             {{-- Sport filter --}}
-            <select
-                wire:model.live="sportType"
-                class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-violet-500 focus:border-violet-500"
-            >
+            <x-form.select size="sm" wire:model.live="sportType">
                 <option value="">{{ __('messages.yoy_all_sports') }}</option>
                 @foreach ($sportTypes as $type)
                     <option value="{{ $type }}">{{ $type }}</option>
                 @endforeach
-            </select>
+            </x-form.select>
         </div>
     </div>
 
