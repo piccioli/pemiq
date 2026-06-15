@@ -1,48 +1,37 @@
-<div class="bg-white rounded-lg shadow p-6">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.yoy_chart_title') }}</h2>
-
+<x-card :eyebrow="__('messages.yoy_chart_title')" padding="lg">
+    <x-slot:action>
         <div class="flex flex-wrap items-center gap-3">
             {{-- Year A selector --}}
             <div class="flex items-center gap-2">
-                <span class="inline-block w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></span>
-                <label class="text-sm text-gray-600">{{ __('messages.yoy_year_a') }}</label>
-                <select
-                    wire:model.live="yearA"
-                    class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
-                >
+                <span class="inline-block w-3 h-3 rounded-full flex-shrink-0" style="background: var(--zone-2)"></span>
+                <label style="font-size: var(--fs-sm); color: var(--text-muted)">{{ __('messages.yoy_year_a') }}</label>
+                <x-form.select size="sm" wire:model.live="yearA">
                     @foreach ($availableYears as $y)
                         <option value="{{ $y }}">{{ $y }}</option>
                     @endforeach
-                </select>
+                </x-form.select>
             </div>
 
             {{-- Year B selector --}}
             <div class="flex items-center gap-2">
-                <span class="inline-block w-3 h-3 rounded-full bg-orange-500 flex-shrink-0"></span>
-                <label class="text-sm text-gray-600">{{ __('messages.yoy_year_b') }}</label>
-                <select
-                    wire:model.live="yearB"
-                    class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-orange-500 focus:border-orange-500"
-                >
+                <span class="inline-block w-3 h-3 rounded-full flex-shrink-0" style="background: var(--zone-4)"></span>
+                <label style="font-size: var(--fs-sm); color: var(--text-muted)">{{ __('messages.yoy_year_b') }}</label>
+                <x-form.select size="sm" wire:model.live="yearB">
                     @foreach ($availableYears as $y)
                         <option value="{{ $y }}">{{ $y }}</option>
                     @endforeach
-                </select>
+                </x-form.select>
             </div>
 
             {{-- Sport filter --}}
-            <select
-                wire:model.live="sportType"
-                class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-violet-500 focus:border-violet-500"
-            >
+            <x-form.select size="sm" wire:model.live="sportType">
                 <option value="">{{ __('messages.yoy_all_sports') }}</option>
                 @foreach ($sportTypes as $type)
                     <option value="{{ $type }}">{{ $type }}</option>
                 @endforeach
-            </select>
+            </x-form.select>
         </div>
-    </div>
+    </x-slot:action>
 
     @if ($hasData)
         <script>window.__yoyChartInitData = @json($chartData);</script>
@@ -78,7 +67,7 @@
                                 }
                             }
                         },
-                        colors: ['#3B82F6', '#F97316'],
+                        colors: ['#4F8DF5', '#F97316'],
                         stroke: { curve: 'smooth', width: 2 },
                         dataLabels: { enabled: false },
                         markers: { size: 4 },
@@ -95,7 +84,7 @@
                             horizontalAlign: 'right',
                             markers: { shape: 'circle' }
                         },
-                        grid: { borderColor: '#f1f5f9' },
+                        grid: { borderColor: 'var(--border)' },
                         noData: { text: data.noDataText }
                     };
                 },
@@ -115,6 +104,6 @@
             <div wire:ignore x-ref="chartEl" style="min-height: 360px;"></div>
         </div>
     @else
-        <p class="text-gray-500 text-sm">{{ __('messages.yoy_no_data') }}</p>
+        <p style="color: var(--text-muted); font-size: var(--fs-sm)">{{ __('messages.yoy_no_data') }}</p>
     @endif
-</div>
+</x-card>

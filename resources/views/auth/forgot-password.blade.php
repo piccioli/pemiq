@@ -9,26 +9,19 @@
 <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
     @csrf
 
-    <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input
-            type="email"
-            id="email"
-            name="email"
-            value="{{ old('email') }}"
-            required
-            autocomplete="email"
-            autofocus
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-        >
-    </div>
+    <x-form.input
+        label="Email"
+        type="email"
+        name="email"
+        id="email"
+        :value="old('email')"
+        required
+        autocomplete="email"
+        autofocus
+        :error="$errors->first('email')"
+    />
 
-    <button
-        type="submit"
-        class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
-    >
-        Invia link di reset
-    </button>
+    <x-button type="submit" fullWidth>Invia link di reset</x-button>
 </form>
 
 <div class="mt-6 text-center">

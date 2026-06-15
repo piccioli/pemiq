@@ -5,78 +5,86 @@
 @section('content')
 <div class="space-y-6">
 
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900">Attività</h1>
-        <span class="text-sm text-gray-500">{{ $activities->total() }} attività trovate</span>
-    </div>
+    <x-page-header title="Attività">
+        <x-slot:actions>
+            <span style="font-size: var(--fs-sm); color: var(--text-muted)">{{ $activities->total() }} attività trovate</span>
+        </x-slot:actions>
+    </x-page-header>
 
     {{-- Filtri --}}
-    <div class="bg-white rounded-lg shadow p-4">
+    <x-card>
         <form method="GET" action="{{ route('activities.index') }}" class="flex flex-wrap gap-3 items-end">
-            <div class="flex flex-col gap-1">
-                <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Sport</label>
-                <select name="sport" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Tutti gli sport</option>
-                    @foreach ($sportTypes as $type)
-                        <option value="{{ $type }}" @selected($sport === $type)>{{ $type }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-form.select :label="__('messages.col_sport')" name="sport">
+                <option value="">Tutti gli sport</option>
+                @foreach ($sportTypes as $type)
+                    <option value="{{ $type }}" @selected($sport === $type)>{{ $type }}</option>
+                @endforeach
+            </x-form.select>
 
-            <div class="flex flex-col gap-1">
-                <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Anno</label>
-                <select name="year" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Tutti gli anni</option>
-                    @foreach ($availableYears as $y)
-                        <option value="{{ $y }}" @selected((string) $year === (string) $y)>{{ $y }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-form.select :label="__('messages.col_year')" name="year">
+                <option value="">Tutti gli anni</option>
+                @foreach ($availableYears as $y)
+                    <option value="{{ $y }}" @selected((string) $year === (string) $y)>{{ $y }}</option>
+                @endforeach
+            </x-form.select>
 
-            <div class="flex flex-col gap-1">
-                @php
-                    $monthNames = trans('messages.months');
-                @endphp
-                <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Mese</label>
-                <select name="month" class="rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Tutti i mesi</option>
-                    @foreach ($monthNames as $idx => $name)
-                        <option value="{{ $idx + 1 }}" @selected((string) $month === (string) ($idx + 1))>{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
+            @php
+                $monthNames = trans('messages.months');
+            @endphp
+            <x-form.select :label="__('messages.col_month')" name="month">
+                <option value="">Tutti i mesi</option>
+                @foreach ($monthNames as $idx => $name)
+                    <option value="{{ $idx + 1 }}" @selected((string) $month === (string) ($idx + 1))>{{ $name }}</option>
+                @endforeach
+            </x-form.select>
 
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                Filtra
-            </button>
-
-            @if ($sport || $year || $month)
-                <a href="{{ route('activities.index') }}" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200">
-                    Reset
-                </a>
-            @endif
+            <x-button type="submit">Filtra</x-button>
         </form>
-    </div>
+
+        @if ($sport || $year || $month)
+            <div class="flex flex-wrap items-center gap-2 mt-3 pt-3" style="border-top: 1px solid var(--border)">
+                <span style="font-size: var(--fs-xs); color: var(--text-faint)">{{ __('messages.active_filters') }}</span>
+                @if ($sport)
+                    <x-tag selected removable
+                           :remove-href="route('activities.index', array_filter(['year' => $year, 'month' => $month]))">
+                        {{ $sport }}
+                    </x-tag>
+                @endif
+                @if ($year)
+                    <x-tag selected removable
+                           :remove-href="route('activities.index', array_filter(['sport' => $sport, 'month' => $month]))">
+                        {{ $year }}
+                    </x-tag>
+                @endif
+                @if ($month)
+                    <x-tag selected removable
+                           :remove-href="route('activities.index', array_filter(['sport' => $sport, 'year' => $year]))">
+                        {{ $monthNames[$month - 1] ?? '' }}
+                    </x-tag>
+                @endif
+            </div>
+        @endif
+    </x-card>
 
     @php
-        $sportColors = [
-            'Run'                => 'bg-orange-100 text-orange-800',
-            'TrailRun'           => 'bg-green-100 text-green-800',
-            'Ride'               => 'bg-blue-100 text-blue-800',
-            'GravelRide'         => 'bg-teal-100 text-teal-800',
-            'MountainBikeRide'   => 'bg-yellow-100 text-yellow-800',
-            'VirtualRide'        => 'bg-sky-100 text-sky-800',
-            'VirtualRun'         => 'bg-amber-100 text-amber-800',
-            'Hike'               => 'bg-lime-100 text-lime-800',
-            'Walk'               => 'bg-purple-100 text-purple-800',
-            'Swim'               => 'bg-cyan-100 text-cyan-800',
-            'Workout'            => 'bg-gray-100 text-gray-800',
+        $sportVariants = [
+            'Run'                => 'zone3',
+            'TrailRun'           => 'zone3',
+            'VirtualRun'         => 'zone3',
+            'Hike'               => 'zone3',
+            'Walk'               => 'zone3',
+            'Ride'               => 'zone2',
+            'GravelRide'         => 'zone2',
+            'MountainBikeRide'   => 'zone2',
+            'VirtualRide'        => 'zone2',
+            'Swim'               => 'zone1',
+            'Workout'            => 'outline',
         ];
     @endphp
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <x-card padding="none" style="overflow: hidden;">
         @if ($activities->isEmpty())
-            <div class="p-8 text-center text-gray-500 text-sm">
+            <div style="padding: 32px; text-align: center; font-size: var(--fs-sm); color: var(--text-muted)">
                 @if ($sport || $year || $month)
                     Nessuna attività trovata.
                 @else
@@ -85,21 +93,20 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="pq-table">
+                    <thead>
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sport</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titolo</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Distanza</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Durata</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Dislivello</th>
+                            <th>Data</th>
+                            <th>Sport</th>
+                            <th>Titolo</th>
+                            <th class="col-right">Distanza</th>
+                            <th class="col-right">Durata</th>
+                            <th class="col-right">Dislivello</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody>
                         @foreach ($activities as $activity)
                             @php
-                                $badgeClass = $sportColors[$activity->sport_type] ?? 'bg-gray-100 text-gray-700';
                                 $distanceKm = $activity->distance !== null
                                     ? fmt_number($activity->distance / 1000, 1) . ' km'
                                     : '—';
@@ -111,23 +118,19 @@
                                     ? fmt_number($activity->elevation_gain, 0) . ' m'
                                     : '—';
                             @endphp
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
-                                    {{ fmt_date($activity->started_at, 'd M Y') }}
+                            <tr>
+                                <td class="col-muted">{{ fmt_date($activity->started_at, 'd M Y') }}</td>
+                                <td>
+                                    <x-badge :variant="$sportVariants[$activity->sport_type] ?? 'outline'">{{ $activity->sport_type }}</x-badge>
                                 </td>
-                                <td class="px-4 py-3 text-sm">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}">
-                                        {{ $activity->sport_type }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
-                                    <a href="{{ route('activities.show', $activity) }}" class="hover:text-blue-600 hover:underline">
+                                <td class="col-truncate">
+                                    <a href="{{ route('activities.show', $activity) }}" style="color: var(--accent); text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                                         {{ $activity->name }}
                                     </a>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-700 text-right whitespace-nowrap">{{ $distanceKm }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700 text-right whitespace-nowrap">{{ $duration }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700 text-right whitespace-nowrap">{{ $elevation }}</td>
+                                <td class="col-right">{{ $distanceKm }}</td>
+                                <td class="col-right">{{ $duration }}</td>
+                                <td class="col-right">{{ $elevation }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -135,12 +138,12 @@
             </div>
 
             @if ($activities->hasPages())
-                <div class="px-4 py-3 border-t border-gray-200">
+                <div style="padding: 12px 16px; border-top: 1px solid var(--border)">
                     {{ $activities->links() }}
                 </div>
             @endif
         @endif
-    </div>
+    </x-card>
 
 </div>
 @endsection

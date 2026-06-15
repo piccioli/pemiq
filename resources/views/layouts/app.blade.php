@@ -1,226 +1,285 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PEMIQ — @yield('title', 'App')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    @vite(['resources/js/app.js'])
+
+    {{-- Anti-flash: read theme from localStorage before CSS renders --}}
+    <script>(function(){var t=localStorage.getItem('pemiq-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+
+    {{-- Google Fonts: Space Grotesk (display), Inter (body), DM Mono (mono) --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- Lucide Icons --}}
+    <script src="https://unpkg.com/lucide@latest"></script>
 
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="min-h-screen" x-data="{ sidebarOpen: false }">
 
-    {{-- Navigation --}}
-    <nav class="bg-white shadow-sm border-b border-gray-200" x-data="{ open: false }">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+    {{-- ─── Topbar ───────────────────────────────────────────────── --}}
+    <header
+        x-data="{ userOpen: false }"
+        style="
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            height: 60px;
+            background: color-mix(in srgb, var(--bg) 80%, transparent);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        "
+    >
+        <div style="max-width: 1280px; margin: 0 auto; height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; gap: 1rem;">
 
-                {{-- Logo --}}
-                <div class="flex-shrink-0">
-                    <a href="{{ route('dashboard') }}" class="text-2xl font-bold text-orange-600 tracking-tight">PEMIQ</a>
-                </div>
+            {{-- Left: hamburger (mobile) + logo --}}
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
 
-                {{-- Desktop center nav --}}
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="{{ route('dashboard') }}"
-                       class="text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-orange-600' : 'text-gray-600 hover:text-gray-900' }} transition-colors">
-                        Dashboard
-                    </a>
-                    <a href="{{ route('activities.index') }}"
-                       class="text-sm font-medium {{ request()->routeIs('activities.*') ? 'text-orange-600' : 'text-gray-600 hover:text-gray-900' }} transition-colors">
-                        Attività
-                    </a>
-                    @php
-                        $isPremiumActive = auth()->user()->is_premium && (!auth()->user()->premium_expires_at || auth()->user()->premium_expires_at->isFuture());
-                    @endphp
-                    @if($isPremiumActive)
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">
-                            ★ Premium
-                        </span>
-                    @else
-                        <a href="/premium"
-                           class="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors">
-                            Passa a Premium
-                        </a>
-                    @endif
-                </div>
+                {{-- Mobile sidebar toggle --}}
+                <button
+                    @click="sidebarOpen = !sidebarOpen"
+                    class="md:hidden"
+                    style="color: var(--text-muted); padding: 6px; border-radius: var(--radius-md); background: none; border: none; cursor: pointer;"
+                    aria-label="Menu"
+                >
+                    <svg x-show="!sidebarOpen" style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <svg x-show="sidebarOpen" x-cloak style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
 
-                {{-- Desktop user menu --}}
-                <div class="hidden md:flex items-center" x-data="{ userOpen: false }">
-                    <div class="relative">
-                        <button
-                            @click="userOpen = !userOpen"
-                            @click.outside="userOpen = false"
-                            class="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none"
-                        >
-                            <span class="max-w-[160px] truncate">{{ auth()->user()->name }}</span>
-                            <svg class="w-4 h-4 transition-transform" :class="userOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </button>
+                {{-- Logo: Space Grotesk 700, brand color --}}
+                <a
+                    href="{{ route('dashboard') }}"
+                    style="
+                        font-family: var(--font-display);
+                        font-weight: 700;
+                        font-size: 1.25rem;
+                        color: var(--brand);
+                        text-decoration: none;
+                        letter-spacing: -0.02em;
+                    "
+                >PEMIQ</a>
+            </div>
 
-                        <div
-                            x-show="userOpen"
-                            x-transition:enter="transition ease-out duration-100"
-                            x-transition:enter-start="opacity-0 scale-95"
-                            x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-75"
-                            x-transition:leave-start="opacity-100 scale-100"
-                            x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50 py-1"
-                            style="display: none;"
-                        >
-                            <a href="{{ route('profile.show') }}"
-                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                Profilo
-                            </a>
-                            <div class="my-1 border-t border-gray-100"></div>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit"
-                                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                    Esci
-                                </button>
-                            </form>
-                        </div>
+            {{-- Right: premium indicator + user menu --}}
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+
+                @php
+                    $isPremiumActive = auth()->user()->is_premium && (!auth()->user()->premium_expires_at || auth()->user()->premium_expires_at->isFuture());
+                @endphp
+
+                {{-- Theme toggle (sun = dark mode active, moon = light mode active) --}}
+                <button
+                    onclick="(function(){var h=document.documentElement;var next=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',next);localStorage.setItem('pemiq-theme',next);})()"
+                    aria-label="Commuta tema chiaro/scuro"
+                    style="background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 6px; border-radius: var(--radius-md); display: flex; align-items: center; line-height: 0; transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);"
+                    onmouseover="this.style.color='var(--text-strong)'; this.style.background='var(--surface-2)'"
+                    onmouseout="this.style.color='var(--text-muted)'; this.style.background='none'"
+                >
+                    <svg class="theme-toggle-sun" style="width: 18px; height: 18px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                    <svg class="theme-toggle-moon" style="width: 18px; height: 18px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </button>
+
+                {{-- Premium badge (zone-4 amber) or upgrade link (accent teal) --}}
+                @if($isPremiumActive)
+                    <x-badge variant="zone4">★ Premium</x-badge>
+                @else
+                    <a
+                        href="/premium"
+                        style="
+                            font-size: var(--fs-sm);
+                            font-weight: 500;
+                            color: var(--accent);
+                            text-decoration: none;
+                            transition: opacity var(--dur-fast) var(--ease-out);
+                        "
+                        onmouseover="this.style.opacity='0.8'"
+                        onmouseout="this.style.opacity='1'"
+                    >Passa a Premium</a>
+                @endif
+
+                {{-- User dropdown --}}
+                <div style="position: relative;">
+                    <button
+                        @click="userOpen = !userOpen"
+                        @click.outside="userOpen = false"
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                            color: var(--text-muted);
+                            font-size: var(--fs-sm);
+                            font-weight: 500;
+                            background: none;
+                            border: none;
+                            cursor: pointer;
+                            padding: 6px 10px;
+                            border-radius: var(--radius-md);
+                            transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+                        "
+                        :style="userOpen ? 'color: var(--text-strong); background: var(--surface-2);' : ''"
+                    >
+                        <span style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ auth()->user()->name }}</span>
+                        <svg style="width: 14px; height: 14px; transition: transform var(--dur-fast) var(--ease-out);" :style="userOpen ? 'transform: rotate(180deg)' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <div
+                        x-show="userOpen"
+                        x-cloak
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        style="
+                            position: absolute;
+                            right: 0;
+                            top: calc(100% + 6px);
+                            min-width: 180px;
+                            background: var(--surface-2);
+                            border: 1px solid var(--border-strong);
+                            border-radius: var(--radius-lg);
+                            box-shadow: var(--shadow-md);
+                            z-index: 60;
+                            padding: 4px;
+                        "
+                    >
+                        <a href="{{ route('profile.show') }}" class="pq-dropdown-item">Profilo</a>
+                        <div style="height: 1px; background: var(--border); margin: 4px 0;"></div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <x-button type="submit" variant="ghost" fullWidth style="text-align: left; justify-content: flex-start; padding: 8px 12px; font-size: var(--fs-sm); color: var(--text-muted); border-radius: var(--radius-md);">Esci</x-button>
+                        </form>
                     </div>
                 </div>
 
-                {{-- Mobile hamburger --}}
-                <div class="md:hidden">
-                    <button
-                        @click="open = !open"
-                        class="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none"
-                        aria-label="Menu"
-                    >
-                        <svg x-show="!open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                        <svg x-show="open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
             </div>
         </div>
+    </header>
 
-        {{-- Mobile menu --}}
-        <div x-show="open" class="md:hidden border-t border-gray-200 bg-white" style="display: none;">
-            <div class="px-4 py-3 space-y-1">
-                <a href="{{ route('dashboard') }}"
-                   class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-orange-600 bg-orange-50' : 'text-gray-700 hover:bg-gray-50' }}">
-                    Dashboard
-                </a>
-                <a href="{{ route('activities.index') }}"
-                   class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('activities.*') ? 'text-orange-600 bg-orange-50' : 'text-gray-700 hover:bg-gray-50' }}">
-                    Attività
-                </a>
-                @if($isPremiumActive)
-                    <span class="block px-3 py-2 text-sm font-semibold text-amber-800">★ Premium</span>
-                @else
-                    <a href="/premium"
-                       class="block px-3 py-2 rounded-md text-sm font-medium text-amber-600 hover:bg-amber-50">
-                        Passa a Premium
-                    </a>
+    {{-- ─── App shell: sidebar + content ────────────────────────── --}}
+    <div style="display: flex; min-height: calc(100vh - 60px);">
+
+        {{-- Desktop sidebar (hidden on mobile) --}}
+        <aside
+            class="hidden md:block"
+            style="
+                width: 256px;
+                flex-shrink: 0;
+                background: var(--bg-elevated);
+                border-right: 1px solid var(--border);
+                position: sticky;
+                top: 60px;
+                height: calc(100vh - 60px);
+                overflow-y: auto;
+            "
+        >
+            @include('partials.sidebar-nav')
+        </aside>
+
+        {{-- Mobile sidebar overlay --}}
+        <div
+            x-show="sidebarOpen"
+            x-cloak
+            @click="sidebarOpen = false"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40;"
+            class="md:hidden"
+        ></div>
+
+        {{-- Mobile sidebar drawer --}}
+        <aside
+            x-show="sidebarOpen"
+            x-cloak
+            style="
+                position: fixed;
+                top: 60px;
+                left: 0;
+                width: 256px;
+                height: calc(100vh - 60px);
+                background: var(--bg-elevated);
+                border-right: 1px solid var(--border);
+                overflow-y: auto;
+                z-index: 45;
+            "
+            class="md:hidden"
+        >
+            @include('partials.sidebar-nav')
+        </aside>
+
+        {{-- Main content area --}}
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+
+            {{-- Impersonation banner --}}
+            @include('partials.impersonation-banner')
+
+            {{-- Flash messages --}}
+            @if(session('status') || session('success') || session('error') || $errors->any())
+            <div style="padding: 1rem 1.5rem 0; display: flex; flex-direction: column; gap: 0.5rem; max-width: 1280px; width: 100%; margin: 0 auto; box-sizing: border-box;">
+
+                @if(session('status') || session('success'))
+                <x-alert variant="success" dismissible>
+                    {{ session('status') ?? session('success') }}
+                </x-alert>
                 @endif
-                <a href="{{ route('profile.show') }}"
-                   class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    Profilo
-                </a>
-                <div class="pt-2 border-t border-gray-100">
-                    <p class="px-3 py-1 text-xs text-gray-500 truncate">{{ auth()->user()->name }}</p>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                                class="w-full text-left block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                            Esci
-                        </button>
-                    </form>
-                </div>
+
+                @if(session('error'))
+                <x-alert variant="danger" dismissible>
+                    {{ session('error') }}
+                </x-alert>
+                @endif
+
+                @if($errors->any())
+                <x-alert variant="danger" dismissible>
+                    <ul style="list-style: disc; list-style-position: inside; display: flex; flex-direction: column; gap: 2px;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </x-alert>
+                @endif
+
             </div>
+            @endif
+
+            {{-- Main content --}}
+            <main style="flex: 1; padding: 2rem 1.5rem; max-width: 1280px; width: 100%; margin: 0 auto; box-sizing: border-box;">
+                @yield('content')
+            </main>
+
+            {{-- Footer --}}
+            <footer style="border-top: 1px solid var(--border); padding: 1rem 1.5rem; margin-top: auto;">
+                <p style="text-align: center; font-size: var(--fs-xs); color: var(--text-faint);">PEMIQ &copy; {{ date('Y') }}</p>
+            </footer>
+
         </div>
-    </nav>
-
-    {{-- Impersonation banner --}}
-    @include('partials.impersonation-banner')
-
-    {{-- Flash messages --}}
-    @if(session('status') || session('success') || session('error') || $errors->any())
-    <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4 space-y-2">
-
-        @if(session('status') || session('success'))
-        <div
-            x-data="{ show: true }"
-            x-show="show"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="flex items-start justify-between p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg text-sm"
-        >
-            <span>{{ session('status') ?? session('success') }}</span>
-            <button @click="show = false" class="ml-4 text-green-600 hover:text-green-800 flex-shrink-0" aria-label="Chiudi">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        @endif
-
-        @if(session('error'))
-        <div
-            x-data="{ show: true }"
-            x-show="show"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="flex items-start justify-between p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm"
-        >
-            <span>{{ session('error') }}</span>
-            <button @click="show = false" class="ml-4 text-red-600 hover:text-red-800 flex-shrink-0" aria-label="Chiudi">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        @endif
-
-        @if($errors->any())
-        <div
-            x-data="{ show: true }"
-            x-show="show"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="flex items-start justify-between p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm"
-        >
-            <ul class="list-disc list-inside space-y-1">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            <button @click="show = false" class="ml-4 text-red-600 hover:text-red-800 flex-shrink-0" aria-label="Chiudi">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        @endif
-
     </div>
-    @endif
 
-    {{-- Main content --}}
-    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        @yield('content')
-    </main>
-
-    {{-- Footer --}}
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <p class="text-center text-sm text-gray-400">PEMIQ &copy; {{ date('Y') }}</p>
-        </div>
-    </footer>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function () { lucide.createIcons(); });
+        document.addEventListener('livewire:navigated', function () { lucide.createIcons(); });
+    </script>
 </body>
 </html>

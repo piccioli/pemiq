@@ -1,5 +1,4 @@
-<div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-lg font-semibold text-gray-800 mb-4">{{ __('messages.dashboard_sport_dist_chart_title') }}</h2>
+<x-card padding="lg" :eyebrow="__('messages.dashboard_sport_dist_chart_title')">
 
     @if ($hasData)
         <script>window.__sportDistChartInitData = @json($chartData);</script>
@@ -60,4 +59,4 @@
     @else
         <p class="text-gray-500 text-sm">{{ __('messages.dashboard_no_activities') }}</p>
     @endif
-</div>
+</x-card>

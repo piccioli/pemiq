@@ -1,35 +1,25 @@
-<div class="bg-white rounded-lg shadow p-6">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">{{ __('messages.dashboard_annual_chart_title') }}</h2>
-
+<x-card padding="lg" :eyebrow="__('messages.dashboard_annual_chart_title')">
+    <x-slot:action>
         @if ($hasData)
         <div class="flex items-center gap-3">
-            <select
-                wire:model.live="year"
-                class="text-sm border border-gray-300 rounded-md px-3 py-1.5 text-gray-700 focus:ring-orange-500 focus:border-orange-500"
-            >
+            <x-form.select size="sm" wire:model.live="year">
                 @foreach ($availableYears as $y)
                     <option value="{{ $y }}">{{ $y }}</option>
                 @endforeach
-            </select>
+            </x-form.select>
 
-            <div class="flex rounded-md border border-gray-300 overflow-hidden text-sm">
-                <button
-                    wire:click="$set('metric', 'distance')"
-                    class="px-3 py-1.5 transition-colors {{ $metric === 'distance' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
-                >
-                    {{ __('messages.metric_distance') }}
-                </button>
-                <button
-                    wire:click="$set('metric', 'hours')"
-                    class="px-3 py-1.5 transition-colors border-l border-gray-300 {{ $metric === 'hours' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
-                >
-                    {{ __('messages.col_hours') }}
-                </button>
-            </div>
+            <x-segmented-control
+                name="metric"
+                :selected="$metric"
+                size="sm"
+                :options="[
+                    ['value' => 'distance', 'label' => __('messages.metric_distance')],
+                    ['value' => 'hours',    'label' => __('messages.col_hours')],
+                ]"
+            />
         </div>
         @endif
-    </div>
+    </x-slot:action>
 
     @if ($hasData)
         <script>window.__annualChartInitData = @json($chartData);</script>
@@ -43,7 +33,7 @@
                         series: [{ name: data.seriesName, data: data.seriesData }],
                         xaxis: { categories: data.categories },
                         yaxis: { title: { text: data.yAxisTitle }, labels: { formatter: function(val) { return val.toFixed(1); } } },
-                        colors: ['#E85D04'],
+                        colors: ['#16D4B4'],
                         plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
                         dataLabels: { enabled: false },
                         grid: { borderColor: '#f1f5f9' }
@@ -63,4 +53,4 @@
     @else
         <p class="text-gray-500 text-sm">{{ __('messages.dashboard_no_activities') }}</p>
     @endif
-</div>
+</x-card>

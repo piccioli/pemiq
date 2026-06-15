@@ -19,8 +19,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "public/css/pemiq-ds.css creato con tutti i token. app.css include token inline + @theme inline Tailwind v4. app.blade.php: data-theme=dark, Google Fonts (Space Grotesk, Inter, DM Mono), Lucide CDN + createIcons() su DOMContentLoaded e livewire:navigated."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-002",
@@ -37,8 +37,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Body background var(--bg). Sticky topbar 60px height with frosted glass (color-mix + backdrop-filter). Logo PEMIQ in Space Grotesk 700 var(--brand). Sidebar 256px bg-elevated with .pq-nav-link CSS class (text-muted default, text-strong hover, accent+accent-soft active). Extracted sidebar nav to partials/sidebar-nav.blade.php. Mobile sidebar drawer via Alpine.js sidebarOpen. Premium badge: zone-4 amber for premium users, accent teal for free users. Added .pq-nav-link and .pq-dropdown-item utility classes to app.css."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-003",
@@ -59,8 +59,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Created resources/views/components/button.blade.php with all 4 variants (primary/secondary/ghost/danger), 3 sizes (sm/md/lg), href→<a>/no-href→<button> rendering, disabled, fullWidth, named $icon/$iconRight slots. CSS classes (.pq-btn, .pq-btn-{variant}, .pq-btn-{size}) added to app.css. Refactored: layouts/app.blade.php (dismiss × buttons, Esci logout), strava/connection-status.blade.php (sync, disconnect, cancel, connect/reconnect buttons), activities/index.blade.php (Filtra, Reset), activities/show.blade.php (Vedi su Strava variant=ghost), premium/index.blade.php (CTA mailto size=lg). All 80 tests pass."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-004",
@@ -81,8 +81,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "Created resources/views/components/card.blade.php with all props (eyebrow, title, padding, interactive, accent). Added .pq-card, .pq-card-accent, .pq-card-interactive, .pq-card-pad-{sm|md|lg}, .pq-card-header, .pq-card-title CSS classes to app.css. Refactored: all 7 dashboard livewire panels, strava/connection-status (using inner <span wire:poll.5000ms hidden> since @if inside component tags is unsupported), all 3 premium livewire panels (trend-chart, year-over-year-chart, period-comparison with 4 KPI cards + chart section + detail table), activities/show metric cards + secondary metrics + map section. All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-005",
@@ -103,8 +103,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "Created resources/views/components/badge.blade.php with all 11 variants (success/warning/danger/info/brand/outline/zone1-5), 2 sizes (sm/md), dot indicator (8px circle). Added .pq-badge, .pq-badge-{variant}, .pq-badge-{size}, .pq-badge-dot-indicator CSS classes to app.css. Refactored: activities/index.blade.php (sport badge with zone variant mapping), activities/show.blade.php (sport badge), livewire/dashboard/sport-distribution.blade.php (sport badge), livewire/strava/connection-status.blade.php (Connesso → success dot, Sincronizzazione in corso → info with spinner), layouts/app.blade.php (★ Premium → zone4), profile/show.blade.php (★ Premium → zone4). Sport mapping: Run/TrailRun/VirtualRun/Hike/Walk→zone3, Ride/GravelRide/MountainBikeRide/VirtualRide→zone2, Swim→zone1, Workout→outline. All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-006",
@@ -123,8 +123,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "Created resources/views/components/tag.blade.php with props: selected (bool), removable (bool), interactive (bool, default: true), icon slot, removeHref (string optional). Renders as <span> with pq-tag CSS classes; removable=true adds an <a href> or <button> × element (pq-tag-remove) that links to removeHref or fires onclick. Added .pq-tag, .pq-tag-selected, .pq-tag-static, .pq-tag-label, .pq-tag-remove CSS classes to app.css. Refactored activities/index.blade.php: replaced the single Reset button with an active-filters chip strip that renders each active filter (sport/year/month) as <x-tag selected removable :remove-href='...'> chips — each chip links to the URL with only that filter removed. Added remove_filter and active_filters translation keys to both lang files. All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-007",
@@ -145,8 +145,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "Created resources/views/components/form/input.blade.php with props: label, type (default: text), hint, error, required, leadingIcon slot. Renders .pq-field wrapper with .pq-field-label, .pq-field-control (relative, for icon overlay), .pq-input (DS-styled), .pq-field-hint, .pq-field-error. Added .pq-field*, .pq-input, .pq-input-error, .pq-field-icon, .pq-field-icon-pad CSS classes to app.css. Refactored all input fields in auth/ (login, register, forgot-password, reset-password) and profile/show.blade.php to <x-form.input>. All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-008",
@@ -163,8 +163,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": "Created resources/views/components/form/select.blade.php with props: label (optional), size (sm|md, default md), hint, error. Renders .pq-field wrapper with optional label, .pq-select element (DS-styled), hint and error. Added .pq-select, .pq-select-sm, .pq-select-error CSS to app.css. Custom chevron-down arrow via background-image SVG (color #94a3b8, works in dark/light themes). Refactored: activities/index.blade.php (3 filter selects → x-form.select with col_sport/col_year/col_month labels), profile/show.blade.php (locale select → x-form.select with messages.language label), livewire/dashboard/annual-analysis-chart (year → size=sm), livewire/dashboard/monthly-analysis-chart (year+month → size=sm), livewire/dashboard/monthly-analysis (year → size=sm), livewire/premium/trend-chart (range+sport → size=sm), livewire/premium/year-over-year-chart (yearA+yearB+sport → size=sm), livewire/premium/period-comparison (sport). All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-009",
@@ -183,8 +183,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 9,
-      "passes": true,
-      "notes": "Created resources/views/components/switch.blade.php with props: label, name, checked (bool). Uses Alpine.js x-data { on: @js((bool)$checked) } as single source of truth; hidden input :value=\"on ? '1' : '0'\" for form submission; button with role=switch, @click toggles on, :class adds pq-switch-on. Added .pq-switch, .pq-switch-track, .pq-switch-thumb, .pq-switch-label CSS to app.css. Added email_notifications boolean column to users table (migration + model fillable + cast). Updated ProfileController to accept email_notifications as boolean input. Refactored profile/show.blade.php with <x-switch> for email_notifications preference. Added email_notifications_label translation key to both lang files. All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-010",
@@ -203,8 +203,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 10,
-      "passes": true,
-      "notes": "Created resources/views/components/metric-tile.blade.php with props: label, value, unit, delta, deltaDir (up|down|flat), deltaContext, accent (zone-1..5|brand|info|success|warning|danger). Uses <x-card padding=md> internally. Named $icon slot renders in an accent-colored container (accentColor + accentSoft inline styles). .pq-metric class for large value display. Delta: ▲/▼/— prefix with success/danger/faint color. Added .pq-metric-tile, .pq-metric-tile-icon, .pq-metric-tile-label, .pq-metric-tile-unit, .pq-metric-tile-delta, .pq-metric-tile-delta-ctx CSS to app.css. Refactored overview-stats: removed single outer x-card, replaced 5 inline stat divs with 5 <x-metric-tile> components using Lucide icons (activity/route/mountain-snow/clock/zap). Wrapped in root <div> for Livewire root-tag requirement. All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-011",
@@ -224,8 +224,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 11,
-      "passes": true,
-      "notes": "Created resources/views/components/zone-bar.blade.php with props: data (array of {zone:1-5, pct:float, seconds:int}), showLegend (bool, default: true). Stacked bar track (12px height, radius-pill, overflow hidden) with 5 segments colored by data-zone CSS attribute selectors (var(--zone-1..5)). Width animation via Alpine.js x-data { animated: false } x-init → $nextTick sets animated=true; each segment uses CSS custom property --pct (PHP-rendered) with :style binding { width: animated ? 'var(--pct)' : '0%' } for smooth transition. Legend shows colored dot (inline style background), Z1-Z5 label, percentage (fmt_number), formatted time (1h 12m). showLegend=false hides the legend. Created app/Livewire/Dashboard/ZoneDistribution.php with mock data (5 zones, realistic percentages). Created resources/views/livewire/dashboard/zone-distribution.blade.php using <x-card> + <x-badge variant=outline> 'Dati di esempio' label + <x-zone-bar>. Added @livewire('dashboard.zone-distribution') to dashboard/index.blade.php. Added zone_distribution_title and zone_distribution_mock translation keys to both lang files. All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available)."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-012",
@@ -243,8 +243,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 12,
-      "passes": true,
-      "notes": "Created resources/views/components/progress-bar.blade.php with props: label (optional), value (0-100), color (brand|success|warning|danger|zone-1..5, default: brand), height (px, default: 8), showValue (bool, default: false), valueText (string optional). Track: var(--surface-3) bg + radius-pill + overflow hidden. Fill: color resolved via PHP match on color prop → CSS var string inline style; width animated via Alpine.js x-data { animated: false } x-init → $nextTick + CSS transition var(--dur-slow). showValue+valueText: right-side span with text-caption/text-muted styles. Added .pq-progress-bar, .pq-progress-bar-label, .pq-progress-bar-row, .pq-progress-bar-track, .pq-progress-bar-fill, .pq-progress-bar-value CSS to app.css. Refactored livewire/dashboard/monthly-analysis.blade.php: distance/elevation/hours table cells now show <x-progress-bar> with relative value (col value / max col value * 100) as visual volume indicators. All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-013",
@@ -262,8 +262,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 13,
-      "passes": true,
-      "notes": "Created resources/views/components/tabs.blade.php with props: items (array of {id, label, icon?, badge?, href?}), active (id of active tab), route (bool). route=false: wraps in Alpine x-data { activeTab: active }, tab buttons use :class { 'pq-tab-active': activeTab === id } and @click to update activeTab + dispatch tab-changed event. route=true: renders <a href> links with PHP @class pq-tab-active on the matching active tab. Badge: <x-badge variant=info size=sm> beside label when badge prop is set. Slot renders the panel content (user wraps each panel in x-show=\"activeTab === 'id'\"). Added .pq-tabs-wrapper, .pq-tabs-bar, .pq-tab, .pq-tab-active, .pq-tabs-panels CSS classes to app.css. Refactored activities/show.blade.php: restructured into two tabs (Panoramica/Mappa) using <x-tabs :items=... active=panoramica>. Panoramica panel: main metrics grid + secondary metrics card. Mappa panel: Leaflet map card (or no-map placeholder). Added Leaflet tab-changed event listener to call map.invalidateSize() when mappa tab becomes visible. Added tab_overview, tab_map, col_duration, col_avg_speed, col_avg_hr, col_moving_time, col_max_hr, col_avg_watts, col_calories, activity_additional_details, map_not_available translation keys to both lang files. All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-014",
@@ -282,8 +282,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 14,
-      "passes": true,
-      "notes": "Created resources/views/components/segmented-control.blade.php with props: options (array of string or {value, label}), name (Livewire property name for $wire.set), size (sm|md, default md), selected (initial PHP value). Uses Alpine x-data { current: @js($selected) } for local state tracking. On click: updates current locally + calls $wire.set(name, value) when name is set. Options normalized via PHP array_map to always produce {value, label} pairs. Added .pq-segmented-control, .pq-segmented-option, .pq-segmented-option-active, .pq-segmented-sm CSS classes to app.css. Refactored: livewire/dashboard/annual-analysis-chart (Distanza/Ore toggle → x-segmented-control name=metric), livewire/dashboard/monthly-analysis-chart (same), livewire/premium/trend-chart (same), livewire/premium/period-comparison (Mese/Settimana → name=granularity, Linee/Barre → name=chartType — both use $wire.set() directly instead of calling setGranularity/setChartType methods, which is safe since granularity/chartType are public properties). All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available)."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-015",
@@ -302,8 +302,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 15,
-      "passes": true,
-      "notes": "Created resources/views/components/alert.blade.php with props: variant (info|success|warning|danger, default: info), dismissible (bool, default: false), icon (bool, default: true). Uses inline SVG paths for icons (info=circle-i, success=check-circle, warning=alert-triangle, danger=x-circle) — avoids Lucide re-initialization issues in Livewire re-renders. Alpine x-data { show: true } + x-show for dismissible behavior. $attributes->class() pass-through for custom classes/styles. Added .pq-alert, .pq-alert-{variant}, .pq-alert-icon, .pq-alert-content, .pq-alert-dismiss CSS classes to app.css. Refactored layouts/app.blade.php: 3 flash message blocks (status/success, error, validation errors) → <x-alert variant=success|danger dismissible>. Refactored livewire/strava/connection-status.blade.php: 4 sync status banners (running=info with spinner, completed=success, failed=danger, syncMessage=success) → <x-alert>; token-expired warning inline div → <x-alert variant=warning>. All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available)."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-016",
@@ -322,8 +322,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 16,
-      "passes": true,
-      "notes": "Created resources/views/components/page-header.blade.php with props: eyebrow (string optional), title (string), subtitle (string optional), and named slot 'actions' for header buttons. Added .pq-page-header, .pq-page-header-left, .pq-page-header-title, .pq-page-header-subtitle, .pq-page-header-actions CSS classes to app.css. Refactored: activities/index.blade.php (header div → x-page-header, count span in actions slot), activities/show.blade.php (back link before component, title/subtitle from activity, badge+Strava button in actions slot), premium/index.blade.php (centered header → x-page-header eyebrow=Premium), premium/trends.blade.php, premium/compare.blade.php, premium/year-over-year.blade.php (h1 tags → x-page-header with translated title). All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-017",
@@ -341,8 +341,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 17,
-      "passes": true,
-      "notes": "overview-stats: already using <x-metric-tile> (done in US-010). annual-analysis-chart: updated to use <x-card :eyebrow=...> prop (replacing h2), controls moved to <x-slot:action>, chart color updated #E85D04 → #16D4B4. monthly-analysis-chart: same pattern, color updated #3B82F6 → #16D4B4. sport-distribution-chart: updated to use <x-card :eyebrow=...> prop (removing h2). connection-status: already using <x-badge variant=success dot>, <x-button>, <x-alert>, <x-alert variant=warning> (done in US-003/005/015). All 80 tests pass."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-018",
@@ -357,8 +357,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 18,
-      "passes": true,
-      "notes": "activities/index.blade.php: filter form div → <x-card>, table wrapper → <x-card padding=none style=overflow:hidden>, table → .pq-table CSS class (added to app.css) with DS-token styled th/td/hover. Row hover uses var(--surface-hover) via .pq-table tbody tr:hover. Badge sport uses x-badge zone variants (already from US-005). activities/show.blade.php: 5 main metric <x-card padding=sm> blocks replaced with <x-metric-tile> (distance/zone-2/route, duration/brand/clock, elevation/zone-3/mountain-snow, avg-speed/zone-2/gauge, avg-hr/zone-5/heart-pulse). Secondary metrics card updated to use DS vars instead of Tailwind color classes. Leaflet polyline color updated to DS brand teal #16D4B4. All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available)."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-019",
@@ -375,8 +375,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 19,
-      "passes": true,
-      "notes": "period-comparison.blade.php: 4 KPI x-card blocks → <x-metric-tile> (zone-2/zone-3/brand/zone-5 accents with route/mountain-snow/clock/activity icons); export button → <x-button variant=secondary :disabled=true>; chart card → <x-card :eyebrow=$chartInitData['title']> with toggles in <x-slot:action>; detail table card → <x-card :eyebrow=compare_detail_title> using .pq-table class + DS token inline styles for delta colors. trend-chart.blade.php: h2 → card :eyebrow, controls in <x-slot:action>, date inputs → pq-input class, chart color #7C3AED → #16D4B4 (DS brand teal). year-over-year-chart.blade.php: h2 → card :eyebrow, controls in <x-slot:action>, color dots bg-blue-500/bg-orange-500 → var(--zone-2)/var(--zone-4). premium/index.blade.php: Free plan inline div → <x-card padding=lg>; Premium plan inline div → <x-card padding=lg :accent=true style=position:relative>; badge moved inside card; CTA inline div → <x-card padding=lg class=text-center>; SVG icon colors → DS token inline styles. All 80 tests pass. Vite build succeeds. Browser testing not performed."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-020",
@@ -395,8 +395,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 20,
-      "passes": true,
-      "notes": "Refactored landing.blade.php to dark DS aesthetic. Replaced Tailwind CDN with @vite(['resources/css/app.css']). Added Google Fonts (Space Grotesk, Inter, DM Mono), Lucide CDN + createIcons() on DOMContentLoaded, Alpine CDN. Added data-theme=dark on <html>. Topbar: sticky, transparent (color-mix + backdrop-filter blur(16px)) + border-bottom: 1px solid var(--border). Hero: radial-gradient brand glow background + font-display title + <x-badge variant=brand>. Feature section: 6 <x-card :eyebrow=...> cards with Lucide icons + DS typography. Stats bar: landing-stat-value class with font-display + brand color. Pricing: Free plan <x-card padding=lg> with <x-badge variant=outline>FREE</x-badge> + <x-button variant=secondary>; Premium plan <x-card padding=lg :accent=true> with <x-badge variant=zone4>PREMIUM</x-badge> + <x-button variant=primary>. CTA: <x-button variant=primary size=lg> + <x-button variant=ghost>. Footer: DS tokens. All 80 tests pass. Vite build succeeds."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-021",
@@ -413,8 +413,8 @@
         "Verify in browser usando dev-browser skill"
       ],
       "priority": 21,
-      "passes": true,
-      "notes": "Anti-flash inline script added to <head> (before CSS): reads localStorage.getItem('pemiq-theme') and sets data-theme on <html> before any rendering. Theme toggle button added to topbar (right side, before premium badge): sun icon (.theme-toggle-sun, visible in dark mode) + moon icon (.theme-toggle-moon, visible in light mode) — CSS-driven visibility via [data-theme=light] selectors, no Alpine timing dependency. Click handler toggles data-theme on documentElement and persists to localStorage. [data-theme=light] block already existed in app.css from design system tokens; added lighter shadow overrides (--shadow-sm/md/lg with rgba(0,0,0,0.10-0.15)) for better card appearance in light mode. All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available)."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-022",
@@ -429,8 +429,8 @@
         "Typecheck passes"
       ],
       "priority": 22,
-      "passes": true,
-      "notes": "Created docs/design/components.md (and docs/design/ directory). Documents all 14 Blade components: x-button, x-card, x-badge, x-tag, x-form.input, x-form.select, x-switch, x-metric-tile, x-zone-bar, x-progress-bar, x-tabs, x-segmented-control, x-alert, x-page-header — each with props table (type, default, notes) and minimal Blade usage example. Token reference section with 12 semantic aliases (--bg, --surface, --surface-2, --text, --text-strong, --text-muted, --border, --accent, --brand, --danger, --success, --zone-1..5) and usage descriptions. Anti-pattern section with 3 examples: hardcoded Tailwind colors → var() tokens; raw token values → semantic aliases; emoji → Lucide icons + x-badge. Intro links to Claude Design project URL. All 80 tests pass."
+      "passes": false,
+      "notes": ""
     }
   ]
 }

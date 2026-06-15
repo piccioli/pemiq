@@ -21,6 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'email',
         'password',
         'locale',
+        'email_notifications',
         'is_premium',
         'premium_started_at',
         'premium_expires_at',
@@ -36,6 +37,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'email_notifications' => 'boolean',
             'is_premium' => 'boolean',
             'premium_started_at' => 'datetime',
             'premium_expires_at' => 'datetime',

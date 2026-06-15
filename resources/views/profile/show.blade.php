@@ -11,60 +11,47 @@
             @csrf
             @method('PUT')
 
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value="{{ old('name', auth()->user()->name) }}"
-                    required
-                    autocomplete="name"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                >
-            </div>
+            <x-form.input
+                label="Nome"
+                type="text"
+                name="name"
+                id="name"
+                :value="old('name', auth()->user()->name)"
+                required
+                autocomplete="name"
+                :error="$errors->first('name')"
+            />
 
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value="{{ old('email', auth()->user()->email) }}"
-                    required
-                    autocomplete="email"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                >
-            </div>
+            <x-form.input
+                label="Email"
+                type="email"
+                name="email"
+                id="email"
+                :value="old('email', auth()->user()->email)"
+                required
+                autocomplete="email"
+                :error="$errors->first('email')"
+            />
 
-            <div>
-                <label for="locale" class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.language') }}</label>
-                <select
-                    id="locale"
-                    name="locale"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                >
-                    <option value="it" {{ old('locale', auth()->user()->locale) === 'it' ? 'selected' : '' }}>{{ __('messages.italian') }}</option>
-                    <option value="en" {{ old('locale', auth()->user()->locale) === 'en' ? 'selected' : '' }}>{{ __('messages.english') }}</option>
-                </select>
-            </div>
+            <x-form.select :label="__('messages.language')" name="locale" id="locale">
+                <option value="it" {{ old('locale', auth()->user()->locale) === 'it' ? 'selected' : '' }}>{{ __('messages.italian') }}</option>
+                <option value="en" {{ old('locale', auth()->user()->locale) === 'en' ? 'selected' : '' }}>{{ __('messages.english') }}</option>
+            </x-form.select>
 
-            <button
-                type="submit"
-                class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
-            >
-                Salva modifiche
-            </button>
+            <x-switch
+                name="email_notifications"
+                :label="__('messages.email_notifications_label')"
+                :checked="(bool) old('email_notifications', auth()->user()->email_notifications)"
+            />
+
+            <x-button type="submit" fullWidth>Salva modifiche</x-button>
         </form>
 
         <div class="mt-8 pt-6 border-t border-gray-200">
             <h2 class="text-base font-semibold text-gray-700 mb-3">Password</h2>
-            <a
-                href="{{ route('profile.password') }}"
-                class="inline-block w-full text-center border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-2 px-4 rounded-lg text-sm transition-colors"
-            >
+            <x-button href="{{ route('profile.password') }}" variant="secondary" fullWidth>
                 Cambia password
-            </a>
+            </x-button>
         </div>
 
         @php
@@ -74,9 +61,7 @@
             <h2 class="text-base font-semibold text-gray-700 mb-3">Account</h2>
             @if($isPremiumProfile)
                 <div class="flex items-center space-x-2">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-amber-100 text-amber-800 border border-amber-300">
-                        ★ Premium
-                    </span>
+                    <x-badge variant="zone4" size="md">★ Premium</x-badge>
                     @if(auth()->user()->premium_expires_at)
                         <span class="text-sm text-gray-500">scade il {{ fmt_date(auth()->user()->premium_expires_at, 'd M Y') }}</span>
                     @endif
@@ -84,10 +69,7 @@
             @else
                 <div class="flex flex-col space-y-2">
                     <p class="text-sm text-gray-500">Stai usando il piano <strong>Free</strong>.</p>
-                    <a href="/premium"
-                       class="inline-block w-full text-center bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors">
-                        Passa a Premium
-                    </a>
+                    <x-button href="/premium" fullWidth>Passa a Premium</x-button>
                 </div>
             @endif
         </div>

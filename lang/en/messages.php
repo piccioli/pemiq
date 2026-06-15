@@ -112,4 +112,29 @@ return [
     'yoy_year_b'      => 'Year B',
     'yoy_all_sports'  => 'All sports',
     'yoy_no_data'     => 'No activities for the selected periods.',
+
+    'remove_filter'   => 'Remove filter',
+    'active_filters'  => 'Active filters:',
+
+    // Switch preferences
+    'email_notifications_label' => 'Email notifications for sync errors',
+
+    // ZoneBar
+    'zone_distribution_title' => 'Time in Zone',
+    'zone_distribution_mock'  => 'Sample data',
+
+    // Tabs component — activity detail
+    'tab_overview'            => 'Overview',
+    'tab_map'                 => 'Map',
+
+    // Activity show — metric labels
+    'col_duration'            => 'Duration',
+    'col_avg_speed'           => 'Avg speed',
+    'col_avg_hr'              => 'Avg HR',
+    'col_moving_time'         => 'Moving time',
+    'col_max_hr'              => 'Max HR',
+    'col_avg_watts'           => 'Avg power',
+    'col_calories'            => 'Calories',
+    'activity_additional_details' => 'Additional details',
+    'map_not_available'       => 'Map not available',
 ];

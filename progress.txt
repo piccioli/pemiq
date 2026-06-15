@@ -1,3 +1,249 @@
+## 2026-06-14 - US-020
+- Refactored `resources/views/landing.blade.php`: replaced Tailwind CDN with `@vite(['resources/css/app.css'])` (DS tokens + compiled styles). Added `data-theme="dark"` on `<html>`. Added Google Fonts (Space Grotesk, Inter, DM Mono), Lucide CDN + `lucide.createIcons()` on DOMContentLoaded, Alpine CDN (no Livewire on public pages).
+- Topbar: `.landing-nav` class — sticky, 60px, `color-mix(in srgb, var(--bg) 75%, transparent)` background + `backdrop-filter: blur(16px)` + `border-bottom: 1px solid var(--border)`. Nav links replaced with `<x-button variant=ghost>` and `<x-button variant=primary>`.
+- Hero section: `.landing-hero` with `radial-gradient(ellipse 90% 60% at 50% 0%, rgba(22,212,180,0.14) 0%, transparent 70%), var(--bg)`. Title in `var(--font-display)` 700 with `var(--brand)` accent span. Strava badge → `<x-badge variant=brand>`. Primary CTA → `<x-button variant=primary size=lg>` with iconRight arrow. Secondary CTA → `<x-button variant=ghost>`.
+- Stats bar: `var(--surface)` background, `.landing-stat-value` using `font-family: var(--font-display); color: var(--brand)`.
+- Features section: 6 `<x-card :eyebrow=...>` cards (Dashboard, Mappa, Storico, Sport, Sync, Lingua) with Lucide icon in `.landing-feature-icon` (accent-soft bg + accent color), DS-token heading/body typography.
+- Pricing section: Free plan `<x-card padding=lg>` with `<x-badge variant=outline>FREE</x-badge>` + `<x-button variant=secondary fullWidth>`; Premium plan `<x-card padding=lg :accent=true>` with `<x-badge variant=zone4>PREMIUM</x-badge>` + `<x-button variant=primary fullWidth>`. Feature lists use `<i data-lucide="check">` icons.
+- CTA banner: `<x-button variant=primary size=lg>` + `<x-button variant=ghost>`.
+- Footer: `.landing-footer` with `var(--bg-elevated)` + `var(--border)` border.
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/landing.blade.php
+- **Learnings for future iterations:**
+  - Standalone pages (no `@extends('layouts.app')`) need Alpine CDN loaded separately — Alpine is bundled by Livewire (`@livewireScripts`), not by app.js. For public pages without Livewire, use the Alpine CDN script directly.
+  - `@vite(['resources/css/app.css'])` on a standalone page loads all DS tokens and component CSS classes — DS Blade components (`<x-card>`, `<x-button>`, `<x-badge>`) work in any Blade context, no Livewire or layout extension required.
+  - Radial gradient hero: use rgba hex literal instead of `color-mix()` for the gradient stop — `color-mix()` inside `radial-gradient()` is less well-supported as a background value. `rgba(22, 212, 180, 0.14)` is the DS brand teal at 14% opacity.
+  - Lucide `createIcons()` on a standalone page: call via `document.addEventListener('DOMContentLoaded', fn)` with `if (window.lucide)` guard — ensures the CDN script has loaded before calling.
+  - Landing page is standalone (no `@extends`) by design — `layouts/app.blade.php` calls `auth()->user()` and assumes authenticated context. Any public page must be self-contained.
+---
+
+## 2026-06-14 - US-019
+- Refactored `resources/views/livewire/premium/period-comparison.blade.php`: replaced 4 KPI `<x-card>` blocks with `<x-metric-tile>` (zone-2=distance/route, zone-3=elevation/mountain-snow, brand=time/clock, zone-5=activities/activity icons); replaced export inline `<button disabled>` with `<x-button variant=secondary :disabled=true>`; moved chart title h3 to `<x-card :eyebrow="$chartInitData['title']">` with segmented toggles in `<x-slot:action>`; moved detail table title h3 to `<x-card :eyebrow=...>` and applied `.pq-table` class + DS token inline styles for delta/delta-abs colors (`var(--success)`, `var(--danger)`, `var(--text-faint)`); replaced period label colors `text-blue-700`/`text-violet-700` with DS tokens; date inputs → `pq-input` class; update button → `<x-button wire:click=compare>`; period color dots → `var(--zone-2)`/`var(--accent)`; ApexCharts colors updated to DS palette (#4F8DF5, #16D4B4).
+- Refactored `resources/views/livewire/premium/trend-chart.blade.php`: moved h2 to `<x-card :eyebrow=...>`, controls moved to `<x-slot:action>`, date inputs → `pq-input` class, empty-state text → DS token inline style, chart color `#7C3AED` → `#16D4B4` (DS brand teal), grid border → `var(--border)`.
+- Refactored `resources/views/livewire/premium/year-over-year-chart.blade.php`: moved h2 to `<x-card :eyebrow=...>`, controls moved to `<x-slot:action>`, color dots `bg-blue-500`/`bg-orange-500` → `var(--zone-2)`/`var(--zone-4)` inline styles, label colors → DS tokens, chart color Anno A #3B82F6 → #4F8DF5 (DS zone-2), grid border → `var(--border)`.
+- Refactored `resources/views/premium/index.blade.php`: Free plan inline div → `<x-card padding=lg>`; Premium plan inline div → `<x-card padding=lg :accent=true style=position:relative>` with `<x-badge variant=zone-4>` replacing amber badge span; CTA inline div → `<x-card padding=lg class=text-center>`; all SVG icon color Tailwind classes (`text-green-500`, `text-gray-300`, `text-amber-500`) → DS token inline styles (`var(--success)`, `var(--text-faint)`, `var(--zone-4)`).
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/livewire/premium/period-comparison.blade.php, resources/views/livewire/premium/trend-chart.blade.php, resources/views/livewire/premium/year-over-year-chart.blade.php, resources/views/premium/index.blade.php
+- **Learnings for future iterations:**
+  - `<x-metric-tile>` delta props: pass `$deltaTxt` (just the number + %, no arrow prefix) as `delta` and `$deltaDir` (up/down/flat) separately — the component auto-prefixes ▲/▼/— and applies success/danger/faint color. Do NOT mix ↑/↓ prefix in the delta string since the tile adds its own prefix.
+  - `<x-card :accent="true">` card has `border-top: 2px solid var(--brand)` (DS teal, not amber). For amber/zone-4 accent cards, wrap with `style="position: relative"` and place an absolutely-positioned `<x-badge>` at `top: -12px; right: 24px` for the floating badge effect.
+  - `$loop->index` in Blade `@foreach` gives the 0-based iteration index — reliable for mapping KPI positions to accent/icon arrays when the collection is always in a fixed order.
+  - Period comparison color scheme: Period A = `var(--zone-2)` (DS blue #4F8DF5), Period B = `var(--accent)` (DS teal #16D4B4). ApexCharts `colors` array should match these hex values.
+  - `.pq-table` in period-comparison detail table: the class provides base table styling; column-specific colors (period A/B headers, delta positive/negative) must still use inline `style` attributes since they vary per-cell — not candidates for pq-table utility classes.
+---
+
+## 2026-06-14 - US-018
+- Refactored `resources/views/activities/index.blade.php`: replaced filter form `<div class="bg-white rounded-lg shadow p-4">` with `<x-card>`; replaced table wrapper `<div class="bg-white rounded-lg shadow overflow-hidden">` with `<x-card padding="none" style="overflow: hidden;">`; replaced entire `<table>` Tailwind styling with `.pq-table` DS class; replaced `hover:bg-gray-50` with `.pq-table tbody tr:hover { background: var(--surface-hover) }` via CSS; replaced Tailwind text-gray-* on cells/empty-state/pagination with DS token inline styles; replaced `border-t border-gray-200` dividers with `border-top: 1px solid var(--border)`.
+- Added `.pq-table` CSS block to `resources/css/app.css`: base table, thead th (DS token styled), tbody tr (border/hover), tbody td (DS font-size/color), col-right/col-muted/col-truncate utility classes.
+- Refactored `resources/views/activities/show.blade.php`: replaced 5 main metric `<x-card padding="sm">` blocks with `<x-metric-tile>` components (distance/zone-2/route, duration/brand/clock, elevation/zone-3/mountain-snow, avg-speed/zone-2/gauge, avg-hr/zone-5/heart-pulse — avg-hr tile only rendered when not null); updated secondary metrics card from Tailwind color classes to DS token inline styles; updated Leaflet polyline color from `#E85D04` to `#16D4B4` (DS brand teal).
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/css/app.css, resources/views/activities/index.blade.php, resources/views/activities/show.blade.php
+- **Learnings for future iterations:**
+  - `.pq-table` CSS class pattern: add DS-token styled table CSS to app.css, then apply class to `<table>` — no per-row/per-cell Tailwind needed. Col utility classes (col-right, col-muted, col-truncate) on `<td>` cover alignment and color variants.
+  - `<x-card padding="none" style="overflow: hidden;">` is the correct way to pass additional inline styles to a card that needs overflow hidden (e.g. for table containers) — `$attributes->class()` preserves the `style` attribute from callers.
+  - For non-Livewire Blade views, `<i data-lucide="name">` Lucide icons are safe and correct — they are replaced on DOMContentLoaded. Only avoid them inside Livewire component views where morphdom re-renders don't trigger createIcons().
+  - `<x-metric-tile>` value/unit split: pass the numeric string as `value` and the unit string separately as `unit` (e.g. value="6.43" unit="km"). For null/unavailable metrics, pass value="—" and omit unit (unit=null). The tile renders the unit inline after the value within `.pq-metric`.
+---
+
+## 2026-06-14 - US-017
+- Refactored `resources/views/livewire/dashboard/annual-analysis-chart.blade.php`: moved title from inline `<h2>` to `<x-card :eyebrow="...">` prop; moved year select + segmented-control into `<x-slot:action>` (renders in card header flex row via `.pq-card-header` justify-content: space-between); removed the `<div class="flex justify-between">` wrapper; updated ApexCharts color from `#E85D04` (orange) to `#16D4B4` (DS brand teal).
+- Refactored `resources/views/livewire/dashboard/monthly-analysis-chart.blade.php`: same pattern as annual chart; updated ApexCharts color from `#3B82F6` (blue) to `#16D4B4` (DS brand teal).
+- Refactored `resources/views/livewire/dashboard/sport-distribution-chart.blade.php`: moved title from inline `<h2>` to `<x-card :eyebrow="...">` prop; removed the `<h2>` tag. Colors remain dynamic (`d.colors` from PHP) as each sport has its own hex color.
+- All other US-017 criteria were already met by prior stories: overview-stats KPIs (US-010 x-metric-tile), annual/monthly chart selects and toggles (US-008/US-014 x-form.select + x-segmented-control), sport-distribution-chart x-card wrap (existing), connection-status badge/button/alert/warning (US-005/003/015).
+- All 80 tests pass. Vite build not needed (no JS changes). Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/livewire/dashboard/annual-analysis-chart.blade.php, resources/views/livewire/dashboard/monthly-analysis-chart.blade.php, resources/views/livewire/dashboard/sport-distribution-chart.blade.php
+- **Learnings for future iterations:**
+  - `<x-slot:action>` inside `<x-card>` maps to the `$action` named slot — the card header `.pq-card-header` renders as flex justify-content: space-between, so eyebrow/title go left and the action slot content goes right. Perfect for chart title + filter controls layout.
+  - If `<x-slot:action>` is provided but conditionally empty (`@if ($hasData) ... @endif`), `isset($action)` in the card component is still true — the action div renders but is empty. This is harmless and keeps the eyebrow always visible.
+  - DS brand teal hex: `#16D4B4` (primary series). DS zone-2 hex: `#4F8DF5` (secondary series). Use these in ApexCharts `colors` array for all primary/secondary time-series charts.
+  - Sport distribution donut chart uses `d.colors` from PHP (sport-specific hex values) — do NOT override with DS brand colors here; sport colors map to their visual identity, not to primary/secondary series semantics.
+---
+
+## 2026-06-14 - US-016
+- Created `resources/views/components/page-header.blade.php`: Blade component with `@props` for `eyebrow` (string optional), `title` (string, default ''), `subtitle` (string optional), and named `$actions` slot for header buttons. Title rendered with `.pq-page-header-title` (font-display 700, fs-2xl, text-strong). Eyebrow rendered with `.pq-eyebrow`. Subtitle rendered with `.pq-page-header-subtitle` (fs-sm, text-muted). `$attributes->class('pq-page-header')` pass-through.
+- Added `.pq-page-header`, `.pq-page-header-left`, `.pq-page-header-title`, `.pq-page-header-subtitle`, `.pq-page-header-actions` CSS classes to `resources/css/app.css`. Container: flex, align-items flex-start, justify-content space-between, gap 16px, margin-bottom 24px. Left: flex 1, min-width 0. Actions: flex items-center gap 8px flex-shrink 0.
+- Refactored `resources/views/activities/index.blade.php`: replaced `<div class="flex items-center justify-between">` header with `<x-page-header title="Attività">`. Activities count span moved to `actions` slot.
+- Refactored `resources/views/activities/show.blade.php`: replaced complex header div with back link (standalone `<a>` above component, styled with var(--accent)), `<x-page-header :title="..." :subtitle="fmt_date(...)">`. Moved `$sportVariants` @php block before the component. Sport badge and "Vedi su Strava" button moved to `actions` slot.
+- Refactored `resources/views/premium/index.blade.php`: replaced centered `<div>` header (amber badge span + h1 + p) with `<x-page-header eyebrow="Premium" :title="..." :subtitle="..."/>`.
+- Refactored `resources/views/premium/trends.blade.php`, `compare.blade.php`, `year-over-year.blade.php`: replaced `<h1 class="text-2xl font-bold text-gray-900 mb-6">` with `<x-page-header :title="__('messages.xxx_page_title')" />`.
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/components/page-header.blade.php (new), resources/css/app.css, resources/views/activities/index.blade.php, resources/views/activities/show.blade.php, resources/views/premium/index.blade.php, resources/views/premium/trends.blade.php, resources/views/premium/compare.blade.php, resources/views/premium/year-over-year.blade.php
+- **Learnings for future iterations:**
+  - `x-page-header` subtitle is a string prop only — for complex subtitle content (badges, inline components), put that content in the `actions` slot alongside action buttons.
+  - Back links (← navigation) on detail pages should be rendered as standalone `<a>` elements above the `<x-page-header>` component, not inside it — keeps the component layout clean and consistent.
+  - `@isset($actions)` correctly detects whether the named slot was provided — renders the `.pq-page-header-actions` div only when needed, avoiding empty flex containers.
+  - Named slot syntax in Blade: `<x-slot:actions>...</x-slot:actions>` inside the component tag is the correct Blade v3/Laravel 9+ syntax.
+---
+
+## 2026-06-14 - US-015
+- Created `resources/views/components/alert.blade.php`: Blade component with `@props` for `variant` (info|success|warning|danger, default: info), `dismissible` (bool, default: false), `icon` (bool, default: true). Uses inline SVG paths for icons (info=circle-i, success=check-circle, warning=alert-triangle, danger=x-circle) to avoid Lucide re-initialization issues in Livewire re-renders. Alpine `x-data="{ show: true }"` + `x-show="show"` + `x-transition:leave` for dismissible animation. `$attributes->class(['pq-alert', "pq-alert-{$variant}"])` pass-through for custom classes/styles from callers. Dismiss button: `@click="show = false"` within the component's own Alpine scope.
+- Added `.pq-alert`, `.pq-alert-{info,success,warning,danger}`, `.pq-alert-icon`, `.pq-alert-content`, `.pq-alert-dismiss` CSS classes to `resources/css/app.css`. Base: flex display, 12px/16px padding, radius-md, transparent border. Variant: `--{variant}-soft` bg + `color-mix(in srgb, var(--{variant}) 30%, transparent)` border + `var(--{variant})` text color. Dismiss button: opacity 0.7, hover 1.0, no background/border.
+- Refactored `resources/views/layouts/app.blade.php`: replaced 3 inline flash message divs (status/success, error, validation errors — each ~20 lines of inline styles + x-data + x-button dismiss) with `<x-alert variant="success" dismissible>`, `<x-alert variant="danger" dismissible>`, `<x-alert variant="danger" dismissible>`.
+- Refactored `resources/views/livewire/strava/connection-status.blade.php`: replaced 4 Tailwind-class sync status divs (running=blue, completed=green, failed=red, syncMessage=green) with `<x-alert variant="info|success|danger">` respectively. Running alert includes inline spinner SVG (animate-spin). Replaced token-expired inline warning div (amber with triangle SVG) with `<x-alert variant="warning">`. Restructured the not-connected section to a flex column layout.
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/components/alert.blade.php (new), resources/css/app.css, resources/views/layouts/app.blade.php, resources/views/livewire/strava/connection-status.blade.php
+- **Learnings for future iterations:**
+  - Use inline SVG paths (not `<i data-lucide="name">`) inside Blade components that are rendered inside Livewire components — Lucide's `createIcons()` only runs on `DOMContentLoaded` and `livewire:navigated`, not on Livewire partial re-renders (morphdom updates). Inline SVGs always render correctly.
+  - `$attributes->class(['pq-alert', "pq-alert-{$variant}"])` merges caller-provided classes while keeping the base class list — the `style` attribute (e.g. `style="margin-bottom: 1rem"`) is passed through automatically since `class()` only merges the class key.
+  - Alpine `x-data` on a component's root element creates an isolated scope — the dismiss button's `@click="show = false"` operates on its own parent component scope, not the wrapping Livewire/Alpine scope. No scope leaking.
+  - For Livewire re-renders (morphdom), Alpine preserves state on morphed elements (same DOM structure) but resets on replaced elements. Sync status alerts are conditional (`@if $syncStatus === 'running'`), so Livewire only includes the alert HTML when the condition is true — no stale state issue.
+---
+
+## 2026-06-14 - US-014
+- Created `resources/views/components/segmented-control.blade.php`: Blade component with `@props` for `options` (array of string or `{value, label}`), `name` (Livewire property name for `$wire.set()`), `size` (sm|md, default: md), `selected` (initial PHP value). Options normalized via `array_map` to always produce `{value, label}` pairs (handles both plain string and array options). Uses `x-data="{ current: @js($selected) }"` for local Alpine state. Active option detected via `:class="{ 'pq-segmented-option-active': current === @js($opt['value']) }"`. On click: `@click="current = @js($opt['value']); $wire.set(@js($name), @js($opt['value']))"` (when `$name` set) or `@click="current = @js($opt['value'])"` (standalone). `$attributes->class([...])` pass-through for external class/attribute injection.
+- Added `.pq-segmented-control`, `.pq-segmented-option`, `.pq-segmented-option-active`, `.pq-segmented-sm` CSS classes to `resources/css/app.css`. Container: `var(--surface-2)` bg + `var(--radius-md)` border-radius + 3px padding + inline-flex. Active option: `var(--surface-3)` bg + `var(--text-strong)` color + `calc(var(--radius-md) - 2px)` border-radius. Inactive: `var(--text-muted)` color, hover → `var(--text)`. Transition: `var(--dur-fast) var(--ease-out)`. `pq-segmented-sm`: smaller padding (4px 10px) and font (`var(--fs-xs)`).
+- Refactored `resources/views/livewire/dashboard/annual-analysis-chart.blade.php`: replaced Distanza/Ore inline toggle buttons with `<x-segmented-control name="metric" :selected="$metric" size="sm" :options="[...]">`.
+- Refactored `resources/views/livewire/dashboard/monthly-analysis-chart.blade.php`: same Distanza/Ore toggle replacement.
+- Refactored `resources/views/livewire/premium/trend-chart.blade.php`: same Distanza/Ore toggle replacement.
+- Refactored `resources/views/livewire/premium/period-comparison.blade.php`: replaced Mese/Settimana toggle with `<x-segmented-control name="granularity" :selected="$granularity" size="sm">` and Linee/Barre toggle with `<x-segmented-control name="chartType" :selected="$chartType" size="sm">`. Both use `$wire.set()` directly instead of calling `setGranularity()`/`setChartType()` methods — safe because `$granularity` and `$chartType` are public Livewire properties.
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/components/segmented-control.blade.php (new), resources/css/app.css, resources/views/livewire/dashboard/annual-analysis-chart.blade.php, resources/views/livewire/dashboard/monthly-analysis-chart.blade.php, resources/views/livewire/premium/trend-chart.blade.php, resources/views/livewire/premium/period-comparison.blade.php
+- **Learnings for future iterations:**
+  - Segmented control uses `@js($value)` for all PHP→Alpine value interpolation — avoids quote escaping issues with strings containing spaces or special chars.
+  - `$wire.set('propertyName', value)` in Alpine `@click` is equivalent to calling a Livewire setter method when the target is a plain public property — both trigger re-render. Prefer `$wire.set()` for DS components to avoid coupling to specific method names.
+  - `$attributes->class(['base-class', 'conditional-class' => $condition])` is the correct Blade attribute pass-through pattern — preserves all extra attributes (wire:*, @click, id, etc.) while merging the class list.
+  - Livewire re-renders update the `x-data` attribute string (because `@js($selected)` re-evaluates with the new PHP value), which causes Alpine to re-initialize `current`. This keeps local Alpine state in sync with Livewire state automatically.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-013
+- Created `resources/views/components/tabs.blade.php`: Blade component with `@props` for `items` (array of `{id, label, icon?, badge?, href?}`), `active` (string id of active tab), `route` (bool, default false). `route=false` mode: wrapper div has `x-data="{ activeTab: '{{ $active }}' }"`. Tab bar renders `<button>` elements; `:class="{ 'pq-tab-active': activeTab === 'id' }"` + `@click="activeTab = 'id'; $dispatch('tab-changed', { tab: 'id' })"`. `route=true` mode: tab bar renders `<a href>` links; active tab gets `pq-tab-active` class via PHP `@class`. Badge prop: renders `<x-badge variant=info size=sm>` beside the label. Slot renders panel content; user wraps each panel with `x-show="activeTab === 'id'"` to show/hide.
+- Added `.pq-tabs-wrapper`, `.pq-tabs-bar`, `.pq-tab`, `.pq-tab-active`, `.pq-tabs-panels` CSS classes to `resources/css/app.css`. Tab bar: `border-bottom: 1px solid var(--border)`; tab buttons: underline style with `border-bottom: 2px solid transparent` that transitions to `var(--accent)` when active; `color: var(--text-muted)` → `var(--text-strong)` on hover/active.
+- Refactored `resources/views/activities/show.blade.php`: restructured content into two tabs using `<x-tabs :items="$tabItems" active="panoramica">`. "Panoramica" tab (icon: layout-dashboard): main metrics grid (distanza, durata, dislivello, velocità media, FC media) + secondary metrics card (moving time, max HR, avg watts, calories). "Mappa" tab (icon: map): Leaflet map card (or placeholder when no polyline). Added `tab-changed` event listener to call Leaflet `invalidateSize()` when the map tab becomes visible.
+- Added 11 translation keys to `lang/it/messages.php` and `lang/en/messages.php`: `tab_overview`, `tab_map`, `col_duration`, `col_avg_speed`, `col_avg_hr`, `col_moving_time`, `col_max_hr`, `col_avg_watts`, `col_calories`, `activity_additional_details`, `map_not_available`.
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/components/tabs.blade.php (new), resources/css/app.css, resources/views/activities/show.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Alpine `x-show` on panels inside a component's `{{ $slot }}` inherits the component's `x-data` scope — no need to re-declare `x-data` on each panel. This is the standard pattern for Alpine-driven tab panels.
+  - Leaflet maps initialized inside `x-show="false"` containers (hidden by default) need `map.invalidateSize()` when the container first becomes visible — listen on the `tab-changed` browser event dispatched by the tabs component.
+  - For `route=true` tabs, PHP `@class(['pq-tab', 'pq-tab-active' => $active === $tabId])` is the cleanest way to conditionally add the active class — no Alpine needed.
+  - Reuse existing lang keys where available (e.g. `metric_distance` for "Distanza", `compare_kpi_elevation` for "Dislivello") rather than creating new keys with different names for the same concept.
+---
+
+## 2026-06-14 - US-012
+- Created `resources/views/components/progress-bar.blade.php`: Blade component with `@props` for `label` (optional), `value` (0-100, default 0), `color` (brand|success|warning|danger|zone-1..5, default brand), `height` (px integer, default 8), `showValue` (bool, default false), `valueText` (optional string). Color resolved via PHP `match($color)` to CSS var string, used in inline `style` attribute on fill div — same pattern as `metric-tile`. Track: `var(--surface-3)` background, `var(--radius-pill)`, `overflow: hidden`. Fill: animated width via Alpine `x-data="{ animated: false }"` + `x-init="$nextTick(() => animated = true)"` + `--pct` CSS custom property + `:style="{ width: animated ? 'var(--pct)' : '0%' }"`. `showValue + valueText`: right-side `<span class="pq-progress-bar-value">` (text-caption, text-muted, nowrap) inside `.pq-progress-bar-row` flex container.
+- Added `.pq-progress-bar`, `.pq-progress-bar-label`, `.pq-progress-bar-row`, `.pq-progress-bar-track`, `.pq-progress-bar-fill`, `.pq-progress-bar-value` CSS classes to `resources/css/app.css`.
+- Refactored `resources/views/livewire/dashboard/monthly-analysis.blade.php`: distance, elevation, and hours table cells updated to use `<x-progress-bar>` as visual volume indicators. Each bar's `value` is `(row_value / max_column_value) * 100` (relative to the month with highest value). Colors: brand (distance), zone-3 (elevation), zone-2 (hours). `showValue=true valueText=fmt_number(...)` shows the numeric value to the right of each bar. Computed `$maxDistance`, `$maxHours` in the `@php` block; elevation max computed inline.
+- Files changed: resources/views/components/progress-bar.blade.php (new), resources/css/app.css, resources/views/livewire/dashboard/monthly-analysis.blade.php
+- **Learnings for future iterations:**
+  - Progress bar color prop is resolved in PHP via `match($color)` to a CSS variable string, then set as inline `style="background: var(--xyz)"` — same pattern as metric-tile accent colors; avoids needing per-color CSS classes.
+  - Alpine `x-data`/`x-init` width animation works identically to zone-bar segments: `--pct` CSS custom property set inline, Alpine `:style` object binding animates to it. `:style` as an object preserves other inline properties (like `--pct`) while only updating `width`.
+  - For relative progress (value as % of max in a collection), compute `$max = $collection->max('col') ?: 1` in the `@php` block to avoid division by zero; then pass `($row->col / $max) * 100` as `:value`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-011
+- Created `resources/views/components/zone-bar.blade.php`: Blade component with `@props` for `data` (array of `{zone:1-5, pct:float 0-100, seconds:int}`) and `showLegend` (bool, default: true). Stacked bar track is 12px tall with `border-radius: var(--radius-pill)` and `overflow: hidden`. Each segment uses a `data-zone` attribute with CSS selectors (`[data-zone="N"]`) for zone colors (`var(--zone-1..5)`). Width animation: `x-data="{ animated: false }"` + `x-init="$nextTick(() => animated = true)"` on the outer div. Each segment stores its target width in a CSS custom property `--pct` (PHP-rendered inline) and uses `:style="{ width: animated ? 'var(--pct)' : '0%' }"` for the animated binding — avoids Blade/JS quote conflicts. `transition: width var(--dur-slow) var(--ease-out)` in CSS for smooth animation. Legend (when `showLegend=true`): 5 items with colored dot, Z1-Z5 code, percentage via `fmt_number()`, formatted time via PHP closure (`1h 12m` format).
+- Added `.pq-zone-bar`, `.pq-zone-bar-track`, `.pq-zone-bar-segment`, `.pq-zone-bar-segment[data-zone="N"]`, `.pq-zone-bar-legend`, `.pq-zone-bar-legend-item`, `.pq-zone-bar-dot`, `.pq-zone-bar-legend-code`, `.pq-zone-bar-legend-time` CSS classes to `resources/css/app.css`.
+- Created `app/Livewire/Dashboard/ZoneDistribution.php`: Livewire component returning mock zone data (zones 1-5, realistic percentage split 25/38/22/10/5).
+- Created `resources/views/livewire/dashboard/zone-distribution.blade.php`: `<x-card>` wrapper with eyebrow title and `<x-badge variant=outline>` placeholder label + `<x-zone-bar :data="$zoneData">`.
+- Updated `resources/views/dashboard/index.blade.php`: added `@livewire('dashboard.zone-distribution')` after the sport-distribution chart.
+- Added `zone_distribution_title` and `zone_distribution_mock` translation keys to both `lang/it/messages.php` and `lang/en/messages.php`.
+- Files changed: resources/views/components/zone-bar.blade.php (new), resources/css/app.css, app/Livewire/Dashboard/ZoneDistribution.php (new), resources/views/livewire/dashboard/zone-distribution.blade.php (new), resources/views/dashboard/index.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Zone-bar segment animation: use a CSS custom property `--pct` (set via PHP inline `style` attribute) + Alpine `:style="{ width: animated ? 'var(--pct)' : '0%' }"`. This avoids mixing Blade `{{ }}` interpolation inside JS template literals in Alpine `:style` attributes.
+  - Alpine `:style` with an OBJECT (not a string) only sets the specified CSS properties without clearing other inline styles (like `--pct`). Using `:style` as a string would overwrite the entire `style` attribute.
+  - CSS `[data-zone="N"]` attribute selectors on `.pq-zone-bar-segment` cleanly map zone numbers to colors without needing per-segment inline styles or PHP class generation.
+  - Zone-bar legend dot uses inline `style="background: var(--zone-N)"` (PHP-rendered) — simpler than adding 5 CSS classes for a single-property override.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-010
+- Created `resources/views/components/metric-tile.blade.php`: Blade component with `@props` for `label` (string), `value` (string|number), `unit` (optional), `delta` (optional), `deltaDir` (up|down|flat, default flat), `deltaContext` (optional), `accent` (zone-1..5|brand|info|success|warning|danger, default brand). Uses `<x-card padding="md">` internally. Named `$icon` slot renders inside a `.pq-metric-tile-icon` div with inline styles `color: $accentColor; background: $accentSoft` (resolved via PHP match on accent prop). Value rendered with `.pq-metric` (2rem, Space Grotesk 700). Delta renders ▲/▼/— prefix with `var(--success)` / `var(--danger)` / `var(--text-faint)` color.
+- Added `.pq-metric-tile`, `.pq-metric-tile-icon`, `.pq-metric-tile-label`, `.pq-metric-tile-unit`, `.pq-metric-tile-delta`, `.pq-metric-tile-delta-ctx` CSS classes to `resources/css/app.css`.
+- Refactored `resources/views/livewire/dashboard/overview-stats.blade.php`: removed single outer `<x-card padding="lg">` wrapper; replaced 5 inline stat divs (Tailwind) with 5 `<x-metric-tile>` using Lucide icons (activity/route/mountain-snow/clock/zap) and accents (zone-5/zone-2/zone-3/brand/zone-4). Wrapped entire component in root `<div>` required by Livewire when top-level is a Blade `@if` directive.
+- Files changed: resources/views/components/metric-tile.blade.php (new), resources/css/app.css, resources/views/livewire/dashboard/overview-stats.blade.php
+- **Learnings for future iterations:**
+  - Livewire components must have a single root HTML tag — not a Blade directive like `@if` at the top level. When refactoring a component to use conditional rendering at the root, always wrap in a `<div>`.
+  - Metric-tile icon slot uses Lucide `<i data-lucide="name">` elements; Lucide JS replaces them with SVGs on `DOMContentLoaded`. The SVG inherits `color` CSS from the `.pq-metric-tile-icon` container (Lucide uses `currentColor` for stroke).
+  - Accent color resolution: PHP `match($accent)` against string values like `'zone-1'`, `'zone1'`, `'brand'` etc. returns CSS variable strings; these are safe to use in inline `style` attributes since they come from a PHP literal array, not user input.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-009
+- Created `resources/views/components/switch.blade.php`: Blade component with `@props` for `label` (string), `name` (string), `checked` (bool, default false). Uses Alpine.js `x-data="{ on: @js((bool) $checked) }"` as single source of truth. Renders a hidden input with `:value="on ? '1' : '0'"` for form submission. Track is a `<button role=switch>` (40×22px) with `@click="on = !on"` and `:class="{ 'pq-switch-on': on }"`. Thumb is a white 18px circle that slides via CSS `transform: translateX(18px)` when `pq-switch-on` class is present.
+- Added `.pq-switch`, `.pq-switch-track`, `.pq-switch-track.pq-switch-on`, `.pq-switch-thumb`, `.pq-switch-track.pq-switch-on .pq-switch-thumb`, `.pq-switch-label` CSS classes to `resources/css/app.css`. Track transition uses `var(--dur-base) var(--ease-out)`; thumb transition uses `var(--dur-base) var(--ease-spring)`.
+- Created migration `2026_06_14_200000_add_email_notifications_to_users_table.php`: adds `email_notifications` boolean (default true) to users table.
+- Updated `app/Models/User.php`: added `email_notifications` to `$fillable` and `'email_notifications' => 'boolean'` cast.
+- Updated `app/Http/Controllers/Auth/ProfileController.php`: added `email_notifications` to fill, read via `(bool) $request->input('email_notifications', false)`.
+- Updated `resources/views/profile/show.blade.php`: added `<x-switch name="email_notifications" :label="__('messages.email_notifications_label')" :checked="(bool) old('email_notifications', auth()->user()->email_notifications)" />` inside the profile form.
+- Added `email_notifications_label` translation key to `lang/it/messages.php` and `lang/en/messages.php`.
+- Files changed: resources/views/components/switch.blade.php (new), resources/css/app.css, database/migrations/2026_06_14_200000_add_email_notifications_to_users_table.php (new), app/Models/User.php, app/Http/Controllers/Auth/ProfileController.php, resources/views/profile/show.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - Switch component uses a hidden input (`:value="on ? '1' : '0'"`) rather than `x-model` on a checkbox — this avoids Alpine's checkbox value-as-string quirk and gives a clean boolean `0`/`1` for form submission.
+  - `@js((bool) $checked)` in Alpine `x-data` outputs `true`/`false` JS literals regardless of whether `$checked` is a PHP bool, `"1"`, `"0"`, or null — the cast is essential.
+  - CSS-only animation: `pq-switch-on` class on the track changes background via CSS transition; `pq-switch-on .pq-switch-thumb` changes transform. Alpine just toggles the class — no inline styles needed.
+  - Profile form `email_notifications` submission: when switch is OFF, the hidden input submits `"0"` which `(bool) $request->input(...)` converts to `false`. When ON, submits `"1"` → `true`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-006
+- Created `resources/views/components/tag.blade.php`: Blade component with `@props` for `selected` (bool), `removable` (bool), `interactive` (bool, default: true), `removeHref` (string optional). Renders as `<span>` using `$attributes->class($classes)`. Named `$icon` slot. When `removable=true`, renders a `<a href>` (if removeHref set) or `<button>` × element with class `pq-tag-remove`.
+- Added `.pq-tag`, `.pq-tag-selected`, `.pq-tag-static`, `.pq-tag-label`, `.pq-tag-remove` CSS classes to `resources/css/app.css`. Default state: `var(--surface-2)` bg + `var(--border)` border + `var(--text-muted)` text. Selected: `var(--accent-soft)` bg + `var(--brand)` border + `var(--accent)` text. Remove button: inherits color, hover → `var(--danger)`.
+- Refactored `resources/views/activities/index.blade.php`: replaced single "Reset" button with an active-filter chip strip. When sport/year/month filters are active, each is rendered as `<x-tag selected removable :remove-href="...">` where the href removes only that filter while preserving the others.
+- Added `remove_filter` and `active_filters` translation keys to `lang/it/messages.php` and `lang/en/messages.php`.
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/tag.blade.php (new), resources/css/app.css, resources/views/activities/index.blade.php, lang/it/messages.php, lang/en/messages.php
+- **Learnings for future iterations:**
+  - `<a>` inside another `<a>` is invalid HTML — when a tag needs both a main link and a removable × link, use `<span>` as the container and pass the × href separately via `removeHref` prop.
+  - `array_filter(['year' => $year, 'month' => $month])` removes empty string/null/0 values — safe for URL param building when filters can be empty strings from unfilled selects.
+  - Tag component uses `$attributes->class($classes)` for full Blade attribute pass-through (same pattern as Button/Badge/Card).
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-005
+- Created `resources/views/components/badge.blade.php`: Blade component with `@props` for `variant` (success|warning|danger|info|brand|outline|zone1-5, default: outline), `size` (sm|md, default: sm), `dot` (bool). Uses `$attributes->class($classes)` for pass-through. Dot indicator rendered as a `<span class="pq-badge-dot-indicator">` (8px circle, `background: currentColor`).
+- Added `.pq-badge`, `.pq-badge-{variant}`, `.pq-badge-{size}`, `.pq-badge-dot-indicator` CSS classes to `resources/css/app.css`. Zone variants use `var(--zone-N-soft)` bg + `var(--zone-N)` text; status variants use `var(--{variant}-soft)` bg + `var(--{variant})` text.
+- Refactored `resources/views/activities/index.blade.php`: `$sportColors` Tailwind map → `$sportVariants` DS map; sport badge `<span>` → `<x-badge :variant="$sportVariants[...]">`.
+- Refactored `resources/views/activities/show.blade.php`: same sport badge replacement.
+- Refactored `resources/views/livewire/dashboard/sport-distribution.blade.php`: same sport badge replacement (removes `$badgeClass` local variable).
+- Refactored `resources/views/livewire/strava/connection-status.blade.php`: "Connesso" green span → `<x-badge variant="success" size="md" :dot="true">`; "Sincronizzazione in corso..." disabled button-span → `<x-badge variant="info" size="md">` with inline spinner SVG.
+- Refactored `resources/views/layouts/app.blade.php`: inline-styled `★ Premium` amber span → `<x-badge variant="zone4">`.
+- Refactored `resources/views/profile/show.blade.php`: inline-styled `★ Premium` amber span → `<x-badge variant="zone4" size="md">`.
+- Sport variant mapping: Run/TrailRun/VirtualRun/Hike/Walk → zone3 (green); Ride/GravelRide/MountainBikeRide/VirtualRide → zone2 (blue); Swim → zone1; Workout → outline; unknown → outline.
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/badge.blade.php (new), resources/css/app.css, resources/views/activities/index.blade.php, resources/views/activities/show.blade.php, resources/views/livewire/dashboard/sport-distribution.blade.php, resources/views/livewire/strava/connection-status.blade.php, resources/views/layouts/app.blade.php, resources/views/profile/show.blade.php
+- **Learnings for future iterations:**
+  - Badge dot indicator uses `background: currentColor` — automatically inherits the text color set by the variant class, no per-variant override needed.
+  - Sport badge variant mapping (zone1-5) is defined per-view in a `$sportVariants` PHP array; same mapping should be used wherever sport badges appear for visual consistency.
+  - `<x-badge>` with an inline spinner SVG inside the slot works cleanly — the SVG inherits `currentColor` from the badge variant for consistent tinting.
+  - `size="md"` on badges in non-table contexts (connection status, profile) reads better; `size="sm"` (default) works in dense table rows.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-003
+- Created `resources/views/components/button.blade.php`: Blade component with `@props` for `variant` (primary|secondary|ghost|danger, default: primary), `size` (sm|md|lg, default: md), `href` (renders `<a>` if set, `<button>` otherwise), `disabled` (bool), `fullWidth` (bool). Named slots `$icon` (left) and `$iconRight` (right). Passes all remaining attributes through `$attributes->class($classes)` — enables `wire:click`, `wire:loading.attr`, `@click`, `type`, `target`, `rel` pass-through.
+- Added `.pq-btn`, `.pq-btn-{variant}`, `.pq-btn-{size}`, `.pq-btn-full` CSS classes to `resources/css/app.css`. Hover states via CSS `:hover:not(:disabled):not([aria-disabled="true"])` — no JS needed.
+- Refactored `resources/views/livewire/strava/connection-status.blade.php`: "Sincronizza attività storiche" → `<x-button wire:click wire:loading.attr>`; "Scollega Strava" → `<x-button variant=danger @click>`; "Annulla" → `<x-button variant=secondary @click>`; "Scollega" → `<x-button type=submit variant=danger>`; "Collega/Riconnetti Strava" → `<x-button href=...>`. Confirmation dialog bg updated to DS surface vars.
+- Refactored `resources/views/activities/index.blade.php`: "Filtra" → `<x-button type=submit>`; "Reset" → `<x-button href=... variant=secondary>`.
+- Refactored `resources/views/activities/show.blade.php`: "Vedi su Strava" → `<x-button href=... variant=ghost target=_blank>`.
+- Refactored `resources/views/premium/index.blade.php`: CTA mailto link → `<x-button href=... size=lg>`.
+- Refactored `resources/views/layouts/app.blade.php`: flash message dismiss × buttons → `<x-button variant=ghost size=sm @click>`; "Esci" logout → `<x-button type=submit variant=ghost fullWidth>`.
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/button.blade.php (new), resources/css/app.css, resources/views/layouts/app.blade.php, resources/views/livewire/strava/connection-status.blade.php, resources/views/activities/index.blade.php, resources/views/activities/show.blade.php, resources/views/premium/index.blade.php
+- **Learnings for future iterations:**
+  - Blade component `$attributes->class($classes)` merges custom class string with any extra classes passed by callers, while preserving all other attributes (wire:*, @click, type, etc.) — the correct pattern for reusable DS components.
+  - Named slots in Blade components are available as `$icon` / `$iconRight` variables; use `@isset($icon){{ $icon }}@endisset` to render only when passed.
+  - CSS `:hover:not(:disabled):not([aria-disabled="true"])` is the correct selector to skip hover styles on disabled buttons/links — covers both HTML `disabled` and ARIA `aria-disabled="true"` (used on `<span>` when href + disabled).
+  - `<x-button fullWidth>` renders `pq-btn-full` (width: 100%; justify-content: center) — useful for dropdown full-width items, but the "Esci" logout button needs additional `style="justify-content: flex-start"` to match dropdown-item left-aligned text.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-002
+- Updated `resources/views/layouts/app.blade.php`: replaced old top-nav layout with dark cockpit shell. Body background set to `var(--bg)`. Sticky topbar (60px) with `color-mix(in srgb, var(--bg) 80%, transparent)` + `backdrop-filter: blur(16px)` + `border-bottom: 1px solid var(--border)`. Logo "PEMIQ" in Space Grotesk 700 with `var(--brand)` color. Right area: Premium badge using `--zone-4` amber for premium users, teal `var(--accent)` "Passa a Premium" link for free users, user dropdown with DS styling.
+- Created `resources/views/partials/sidebar-nav.blade.php`: extracted reusable sidebar navigation with `pq-nav-link` class (text-muted default, text-strong hover, accent/accent-soft active). Includes Dashboard, Attività links; conditionally shows Premium section (Trend, Confronta, Anno su Anno) for premium users. Uses Lucide icons (`layout-dashboard`, `activity`, `trending-up`, `git-compare-arrows`, `calendar-range`).
+- Updated `resources/css/app.css`: added `body` base styles (bg + color + font-family), `[x-cloak]` hide rule, `.pq-nav-link` with hover/active states, `.pq-dropdown-item` for topbar dropdown items.
+- Mobile: sidebar hidden on md+ breakpoint; mobile hamburger toggle in topbar opens a fixed-position sidebar drawer via Alpine.js `sidebarOpen` on `<body>` scope.
+- All 80 tests pass. Build succeeds.
+- Files changed: resources/views/layouts/app.blade.php, resources/views/partials/sidebar-nav.blade.php (new), resources/css/app.css
+- **Learnings for future iterations:**
+  - `body x-data="{ sidebarOpen: false }"` + nested `header x-data="{ userOpen: false }"`: Alpine nested x-data MERGES with parent — inner scope can access `sidebarOpen` from body, no conflict. Only sibling scopes with same-named keys would shadow.
+  - Sidebar nav extracted to `resources/views/partials/sidebar-nav.blade.php` and `@include`d in both the desktop `aside` and mobile drawer `aside` — reuse without duplication. `$isPremiumActive` is passed in from the layout via `@php` block before the include.
+  - `color-mix(in srgb, var(--bg) 80%, transparent)` is the standard CSS frosted-glass background (no extra polyfill needed for modern browsers).
+  - `.pq-nav-link.active` pattern: avoids JS-driven hover on server-rendered active states — PHP conditionally adds the `active` class based on `request()->routeIs()`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
 ## 2026-06-14 - US-031
 - Created `app/Http/Controllers/PremiumController.php`: `index()` method checks if user is premium (same logic as EnsurePremium: `is_premium && (!premium_expires_at || premium_expires_at->isFuture())`). Premium users → redirect to `/dashboard` with `success` flash "Il tuo account è già Premium.". Free users → return `premium.index` view.
 - Added route `GET /premium` to `routes/web.php` with `['auth', 'verified']` middleware only (NOT inside the EnsurePremium group), named `premium.index`. Uses `PremiumController@index`.
@@ -901,4 +1147,32 @@
   - Locale is read via `app()->getLocale()` at render time, so the `SetLocale` middleware must run before views are rendered (it does, since it's registered on the web middleware group).
   - `translatedFormat('d M Y')` gives abbreviated month names (giu/Jun); use `'d F Y'` for full names (giugno/June).
   - Adding a file to `autoload.files` in composer.json requires `composer dump-autoload` in the Docker container to take effect.
+---
+
+## 2026-06-14 - US-021
+- Added anti-flash inline `<script>` to `<head>` of `resources/views/layouts/app.blade.php` (before `@vite`): reads `localStorage.getItem('pemiq-theme') || 'dark'` and calls `document.documentElement.setAttribute('data-theme', t)` — prevents any theme flash on page load since the script runs before CSS is rendered.
+- Added theme toggle button to topbar right section (between premium badge and user dropdown): two SVG icons controlled by CSS classes `.theme-toggle-sun` (visible in dark mode, block by default) and `.theme-toggle-moon` (visible in light mode, none by default). Click handler toggles `data-theme` on `document.documentElement` and persists to `localStorage.setItem('pemiq-theme', next)`.
+- Added `.theme-toggle-sun` / `.theme-toggle-moon` CSS to `resources/css/app.css` with `[data-theme="light"]` selector overrides for icon visibility — CSS-driven approach avoids Alpine.js timing dependency.
+- Added light mode shadow overrides to `[data-theme="light"]` block: `--shadow-sm/md/lg` at rgba(0,0,0,0.10–0.15) instead of 0.45–0.65 to suit white card backgrounds. The `[data-theme="light"]` token block was already present from design system setup.
+- All 14 Blade components work in both themes without changes — they all use CSS variables (`var(--token)`), which the light theme overrides correctly.
+- All 80 tests pass. Vite build succeeds. Browser testing not performed (no browser MCP tools available).
+- Files changed: resources/views/layouts/app.blade.php, resources/css/app.css
+- **Learnings for future iterations:**
+  - Anti-flash pattern for theme persistence: inline `<script>` in `<head>` BEFORE CSS links — browser hasn't applied styles yet, so setting `data-theme` here means CSS renders with the correct theme from the very first paint. No Alpine or Livewire dependency needed.
+  - CSS-driven icon visibility (`[data-theme="light"] .icon { display: none/block }`) is more reliable than Alpine `x-show` for theme-dependent icons — works immediately on paint, no JS timing concern.
+  - For light mode, shadows with dark `rgba` values look too heavy — always override `--shadow-*` vars in `[data-theme="light"]` with lower opacity values (0.10–0.15 instead of 0.45–0.65).
+  - Vanilla JS `onclick` for theme toggle (not Alpine) is the correct choice when the action affects `document.documentElement` — Alpine's scope is the component, not the document root.
+---
+
+## 2026-06-14 - US-022
+- Created `docs/design/` directory (new) and `docs/design/components.md`.
+- Document covers all 14 DS Blade components: x-button, x-card, x-badge, x-tag, x-form.input, x-form.select, x-switch, x-metric-tile, x-zone-bar, x-progress-bar, x-tabs, x-segmented-control, x-alert, x-page-header. Each entry has: component name, props table (type, default, notes), and a minimal Blade usage example.
+- Token reference section: 12 semantic aliases with description of when to use each.
+- Anti-pattern section with 3 concrete examples: (1) Tailwind color classes → CSS var() tokens; (2) raw hex/ink tokens → semantic aliases; (3) emoji → Lucide icons + x-badge.
+- Intro links to the Claude Design project URL stored in memory.
+- All 80 tests pass.
+- Files changed: docs/design/components.md (new)
+- **Learnings for future iterations:**
+  - Component docs live in `docs/design/components.md` — update this file when adding new DS components or changing existing prop signatures.
+  - The Claude Design project URL for the PEMIQ DS is stored in the memory system at `reference_design-system.md`.
 ---

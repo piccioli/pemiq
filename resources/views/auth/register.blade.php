@@ -9,42 +9,56 @@
     @csrf
 
     <div class="mb-4">
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-        <input type="text" id="name" name="name" value="{{ old('name') }}" required autofocus
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 {{ $errors->has('name') ? 'border-red-500' : 'border-gray-300' }}">
-        @error('name')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-        @enderror
+        <x-form.input
+            label="Nome"
+            type="text"
+            name="name"
+            id="name"
+            :value="old('name')"
+            required
+            autofocus
+            autocomplete="name"
+            :error="$errors->first('name')"
+        />
     </div>
 
     <div class="mb-4">
-        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input type="email" id="email" name="email" value="{{ old('email') }}" required
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 {{ $errors->has('email') ? 'border-red-500' : 'border-gray-300' }}">
-        @error('email')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-        @enderror
+        <x-form.input
+            label="Email"
+            type="email"
+            name="email"
+            id="email"
+            :value="old('email')"
+            required
+            autocomplete="email"
+            :error="$errors->first('email')"
+        />
     </div>
 
     <div class="mb-4">
-        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-        <input type="password" id="password" name="password" required
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 {{ $errors->has('password') ? 'border-red-500' : 'border-gray-300' }}">
-        @error('password')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-        @enderror
+        <x-form.input
+            label="Password"
+            type="password"
+            name="password"
+            id="password"
+            required
+            autocomplete="new-password"
+            :error="$errors->first('password')"
+        />
     </div>
 
     <div class="mb-6">
-        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Conferma password</label>
-        <input type="password" id="password_confirmation" name="password_confirmation" required
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+        <x-form.input
+            label="Conferma password"
+            type="password"
+            name="password_confirmation"
+            id="password_confirmation"
+            required
+            autocomplete="new-password"
+        />
     </div>
 
-    <button type="submit"
-        class="w-full py-2 px-4 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition">
-        Registrati
-    </button>
+    <x-button type="submit" fullWidth>Registrati</x-button>
 </form>
 
 <p class="mt-4 text-center text-sm text-gray-600">

@@ -32,5 +32,8 @@
 
     {{-- Grafico Distribuzione Sport --}}
     @livewire('dashboard.sport-distribution-chart')
+
+    {{-- Tempo in Zona --}}
+    @livewire('dashboard.zone-distribution')
 </div>
 @endsection
