@@ -1,7 +1,7 @@
 # PEMIQ
 
-Piattaforma di analisi performance per atleti endurance: autenticazione, integrazione Strava, dashboard base, backoffice Filament.
-
+PEMIQ (Performance Metrics Intelligence) è una piattaforma web che consente agli atleti di endurance di importare, analizzare e comprendere in modo avanzato i dati delle proprie attività sportive.  
+  
 **Stack**: Laravel 13 · PHP 8.4 · Filament v4 · Livewire 3 · MariaDB · Redis · Docker
 
 ---
@@ -17,16 +17,17 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
 ```
 
-L'app è disponibile su http://pemiq.local (aggiungi `127.0.0.1 pemiq.local` al tuo `/etc/hosts`).
+L'app è disponibile su [http://pemiq.local](http://pemiq.local) (aggiungi `127.0.0.1 pemiq.local` al tuo `/etc/hosts`).
 
-Admin backoffice: http://pemiq.local/admin  
-Email (Mailpit): http://localhost:8025
+Admin backoffice: [http://pemiq.local/admin](http://pemiq.local/admin)  
+Email (Mailpit): [http://localhost:8025](http://localhost:8025)
 
 ---
 
-## Deploy UAT (https://uat.pemiq.com)
+## Deploy UAT ([https://uat.pemiq.com](https://uat.pemiq.com))
 
 ### Pre-requisiti
+
 - Certificato SSL Let's Encrypt: `certbot certonly --webroot -d uat.pemiq.com`
 - Certs in `/etc/letsencrypt/live/uat.pemiq.com/`
 
@@ -63,9 +64,10 @@ docker compose exec app php artisan up
 
 ---
 
-## Deploy Production (https://pemiq.com)
+## Deploy Production ([https://pemiq.com](https://pemiq.com))
 
 ### Pre-requisiti
+
 - Certificato SSL Let's Encrypt: `certbot certonly --webroot -d pemiq.com -d www.pemiq.com`
 - Certs in `/etc/letsencrypt/live/pemiq.com/`
 - Account Postmark configurato per l'invio email
@@ -105,15 +107,17 @@ docker compose exec app php artisan up
 
 ## Differenze tra ambienti
 
-| Feature           | Local      | UAT           | Production     |
-|-------------------|------------|---------------|----------------|
-| URL               | pemiq.local| uat.pemiq.com | pemiq.com      |
-| SSL               | No         | Let's Encrypt | Let's Encrypt  |
-| Email             | Mailpit    | Mailpit       | Postmark       |
-| APP_ENV           | local      | staging       | production     |
-| APP_DEBUG         | true       | false         | false          |
-| Mailpit UI        | :8025      | :8025         | —              |
-| Scheduler         | No         | Sì            | Sì             |
+
+| Feature    | Local       | UAT           | Production    |
+| ---------- | ----------- | ------------- | ------------- |
+| URL        | pemiq.local | uat.pemiq.com | pemiq.com     |
+| SSL        | No          | Let's Encrypt | Let's Encrypt |
+| Email      | Mailpit     | Mailpit       | Postmark      |
+| APP_ENV    | local       | staging       | production    |
+| APP_DEBUG  | true        | false         | false         |
+| Mailpit UI | :8025       | :8025         | —             |
+| Scheduler  | No          | Sì            | Sì            |
+
 
 ---
 
