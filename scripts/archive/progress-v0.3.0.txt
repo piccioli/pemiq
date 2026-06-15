@@ -1,0 +1,82 @@
+# Ralph Progress Log
+Started: Dom 14 Giu 2026 18:06:14 CEST
+---
+
+## Codebase Patterns
+- Tailwind v4 uses `@theme inline { --color-X: var(--X); }` in app.css — no tailwind.config.js
+- Vite build via `@tailwindcss/vite` plugin; entry: resources/css/app.css + resources/js/app.js
+- Blade layouts: resources/views/layouts/app.blade.php (authenticated), auth.blade.php (auth pages)
+- Alpine.js and ApexCharts loaded via resources/js/app.js
+- Lucide Icons loaded via CDN script in app.blade.php; call lucide.createIcons() on DOMContentLoaded AND livewire:navigated
+- DS token brand color: #16D4B4 (teal-500); secondary chart color: #4F8DF5 (zone-2)
+- Zone sport mapping: Run=zone3 (green), Ride=zone2 (blue), Swim=zone1 (gray)
+- `@if/@endif` directives CANNOT be used inside Blade component tag attribute areas (`<x-card @if(...) attr @endif>` fails) — use an inner element with the conditional attribute instead (e.g. `<span wire:poll.5000ms hidden>` inside the card slot)
+
+---
+
+## 2026-06-14 - US-008
+- Created `resources/views/components/form/select.blade.php`: Blade component with `@props` for `label` (optional string), `size` (sm|md, default: md), `hint` (optional string), `error` (optional string). Renders `.pq-field` wrapper with optional label, `<select>` element using `$attributes->except(['id'])->class([$selectClasses])`, optional hint and error paragraphs. Uses same pq-field structure as x-form.input.
+- Added CSS to `resources/css/app.css`: `.pq-select` (surface-2 bg, border-strong border, text-strong color, radius-md, padding 10px 36px 10px 14px, appearance:none, SVG chevron background-image at right 12px, focus ring identical to pq-input). `.pq-select-sm` (padding 6px 30px 6px 10px, fs-sm, arrow at right 8px). `.pq-select-error` (danger border + focus ring). Custom arrow SVG: chevron-down with stroke `%2394a3b8` (#94a3b8), works in both dark and light themes.
+- Refactored `resources/views/activities/index.blade.php`: 3 filter selects (sport/year/month) + their `<div class="flex flex-col gap-1">` wrappers and `<label>` elements replaced with `<x-form.select :label="__('messages.col_sport'|col_year|col_month)" name="...">`.
+- Refactored `resources/views/profile/show.blade.php`: locale select + surrounding `<div>` and `<label>` replaced with `<x-form.select :label="__('messages.language')" name="locale" id="locale">`.
+- Refactored `resources/views/livewire/dashboard/annual-analysis-chart.blade.php`: year select → `<x-form.select size="sm" wire:model.live="year">`.
+- Refactored `resources/views/livewire/dashboard/monthly-analysis-chart.blade.php`: year + month selects → `<x-form.select size="sm">`.
+- Refactored `resources/views/livewire/dashboard/monthly-analysis.blade.php`: year select + sr-only label div → `<x-form.select size="sm" id="year-select">`.
+- Refactored `resources/views/livewire/premium/trend-chart.blade.php`: range + sport selects → `<x-form.select size="sm">`.
+- Refactored `resources/views/livewire/premium/year-over-year-chart.blade.php`: yearA + yearB + sport selects → `<x-form.select size="sm">`.
+- Refactored `resources/views/livewire/premium/period-comparison.blade.php`: sport select → `<x-form.select :label="__('messages.col_sport')">`.
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/form/select.blade.php (new), resources/css/app.css, resources/views/activities/index.blade.php, resources/views/profile/show.blade.php, resources/views/livewire/dashboard/annual-analysis-chart.blade.php, monthly-analysis-chart.blade.php, monthly-analysis.blade.php, resources/views/livewire/premium/trend-chart.blade.php, year-over-year-chart.blade.php, period-comparison.blade.php
+- **Learnings for future iterations:**
+  - `x-form.select` maps to `resources/views/components/form/select.blade.php` — Blade resolves dots to directory separators.
+  - SVG in CSS `background-image` cannot use CSS variables (different rendering context) — use hardcoded hex. `#94a3b8` is a neutral gray that works as a faint arrow in both dark and light themes.
+  - `appearance: none; -webkit-appearance: none` removes native browser select arrow — required before adding the custom SVG arrow.
+  - For inline Livewire chart selects without labels, `<x-form.select size="sm">` wraps the select in a `pq-field` div, but since there's no label/hint/error, the div is effectively transparent; the select sizes to its content's natural width.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-007
+- Created `resources/views/components/form/input.blade.php`: Blade component with `@props` for `label` (optional string), `type` (default: text), `hint` (optional string), `error` (optional string), `required` (bool). Named slot `$leadingIcon` for an icon overlay on the left. Renders a `.pq-field` wrapper with label, `.pq-field-control` (relative positioning for icon), `.pq-input` element (DS-styled), hint, and error message.
+- Added CSS to `resources/css/app.css`: `.pq-field` (flex-column, gap 6px), `.pq-field-label` (text-label font, text-muted color), `.pq-field-required` (danger color asterisk), `.pq-field-hint` (text-caption, text-faint), `.pq-field-error` (text-caption, danger color), `.pq-field-control` (relative flex), `.pq-field-icon` (absolute left overlay), `.pq-input` (surface-2 bg, border-strong border, text-strong color, radius-md, padding 10px 14px, focus: border-focus + ring-focus), `.pq-input-error` (danger border + focus ring), `.pq-field-icon-pad` (padding-left: 38px when icon present).
+- Refactored `resources/views/auth/login.blade.php`: email + password inputs → `<x-form.input>`.
+- Refactored `resources/views/auth/register.blade.php`: name, email, password, password_confirmation inputs → `<x-form.input>` with error pass-through.
+- Refactored `resources/views/auth/forgot-password.blade.php`: email input → `<x-form.input>`.
+- Refactored `resources/views/auth/reset-password.blade.php`: email, password, password_confirmation → `<x-form.input>`.
+- Refactored `resources/views/profile/show.blade.php`: name + email inputs → `<x-form.input>`; "Cambia password" link → `<x-button variant=secondary>`; "Passa a Premium" link → `<x-button>`. The locale `<select>` was left as-is (will be replaced by x-form.select in US-008).
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/form/input.blade.php (new), resources/css/app.css, resources/views/auth/login.blade.php, resources/views/auth/register.blade.php, resources/views/auth/forgot-password.blade.php, resources/views/auth/reset-password.blade.php, resources/views/profile/show.blade.php
+- **Learnings for future iterations:**
+  - `x-form.input` maps to `resources/views/components/form/input.blade.php` — Blade resolves dots to directory separators for components.
+  - Input `id` is derived from `$attributes->get('id') ?? $attributes->get('name')` — passing `name` is sufficient for single-occurrence fields; pass explicit `id` when the same name appears twice on a page.
+  - `:error="$errors->first('name')"` passes the first validation error string (or empty string) — the component shows the error message when non-empty.
+  - The `leadingIcon` named slot requires `@isset($leadingIcon)` in the component — pass icon HTML as `<x-slot:leadingIcon><svg ...></svg></x-slot:leadingIcon>`.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-004
+- Created `resources/views/components/card.blade.php`: Blade component with `@props` for `eyebrow` (optional string, renders .pq-eyebrow), `title` (optional string, renders .pq-card-title h2), `padding` (none|sm|md|lg, default: md), `interactive` (bool), `accent` (bool). Named slot `$action` for header right side. Uses `$attributes->class($classes)` to pass through extra attributes (Livewire directives, etc.).
+- Added CSS to `resources/css/app.css`: `.pq-card` (surface bg + border + radius-lg + shadow-sm + edge-top), `.pq-card-accent` (border-top: 2px solid var(--brand)), `.pq-card-interactive` (hover: surface-hover + shadow-md + translateY(-1px)), `.pq-card-pad-{sm|md|lg}` (12/16/24px), `.pq-card-header` (flex justify-between + margin-bottom 16px), `.pq-card-title` (fs-lg, weight 600, text-strong).
+- Refactored outer container `<div class="bg-white rounded-lg shadow p*">` → `<x-card padding="*">` in: all 7 `livewire/dashboard/` views, `livewire/strava/connection-status.blade.php`, all 3 `livewire/premium/` views (including 4 KPI cards + chart + detail table in period-comparison), `activities/show.blade.php` (metric cards padding=sm, secondary metrics padding=sm, map section padding=none).
+- For `connection-status.blade.php`: conditional `wire:poll.5000ms` moved to inner `<span wire:poll.5000ms hidden>` inside the card because `@if/@endif` inside component tag attribute areas is unsupported in Blade.
+- All 80 tests pass. Vite build succeeds.
+- Files changed: resources/views/components/card.blade.php (new), resources/css/app.css, resources/views/livewire/dashboard/overview-stats.blade.php, annual-analysis.blade.php, annual-analysis-chart.blade.php, monthly-analysis.blade.php, monthly-analysis-chart.blade.php, sport-distribution.blade.php, sport-distribution-chart.blade.php, resources/views/livewire/strava/connection-status.blade.php, resources/views/livewire/premium/trend-chart.blade.php, year-over-year-chart.blade.php, period-comparison.blade.php, resources/views/activities/show.blade.php
+- **Learnings for future iterations:**
+  - `@if/@endif` inside Blade component tag attribute areas (`<x-card @if(...) wire:poll @endif>`) causes a compile error. Use conditional inner elements instead (e.g. `<span wire:poll.5000ms hidden>` in slot).
+  - `.pq-card-accent` should set `border-top: 2px solid var(--brand)` — the standard border is still on `.pq-card`; accent adds the thicker colored top border as an overlay.
+  - `$attributes->class($classes)` on the card component merges Livewire directives (`wire:poll`, `wire:model`) and Alpine attributes (`x-data`, `@click`) correctly — same pattern as x-button.
+  - Browser testing was not performed (no browser MCP tools available) — manual verification recommended.
+---
+
+## 2026-06-14 - US-001
+- Creato public/css/pemiq-ds.css con token completi: colori (ink-*, teal-*, ember-*, zone-1..5 + soft, status), tipografia (font vars, fs-*, text-* shorthand), spacing (space-1..32), effetti (radius, shadow, edge-top, glow-brand, ring-focus, dur-*, ease-*)
+- Dark theme default in :root + [data-theme=dark]; light theme override in [data-theme=light]
+- Utility classes .pq-eyebrow e .pq-metric aggiunte
+- resources/css/app.css aggiornato: token inline + @theme inline per Tailwind v4 (colori brand, zone-1..5, status, surface, bg, border, accent)
+- resources/views/layouts/app.blade.php aggiornato: data-theme=dark su <html>, Google Fonts link (Space Grotesk/Inter/DM Mono), @vite include resources/css/app.css, Lucide CDN script + createIcons()
+- Files changed: public/css/pemiq-ds.css (new), resources/css/app.css, resources/views/layouts/app.blade.php
+- **Learnings for future iterations:**
+  - Tailwind v4 non usa tailwind.config.js — tutta la configurazione va in app.css via @theme
+  - `@theme inline` permette di usare CSS custom properties come valori dei token Tailwind
+  - In Vite/Tailwind v4, le @font-face e font CDN vanno nel blade layout, non in app.css
+  - Lucide createIcons() va chiamato anche su livewire:navigated per i componenti livewire
+---
